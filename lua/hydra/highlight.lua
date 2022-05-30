@@ -1,0 +1,5 @@
+vim.api.nvim_set_hl(0, 'HydraRed',     { fg = '#f2594b', bold = true, default = true })
+vim.api.nvim_set_hl(0, 'HydraBlue',    { fg = '#0091f7', bold = true, default = true })
+vim.api.nvim_set_hl(0, 'HydraAmarant', { fg = '#FF355E', bold = true, default = true })
+vim.api.nvim_set_hl(0, 'HydraTeal',    { fg = '#009090', bold = true, default = true })
+vim.api.nvim_set_hl(0, 'HydraPink',    { fg = '#f766ad', bold = true, default = true })
