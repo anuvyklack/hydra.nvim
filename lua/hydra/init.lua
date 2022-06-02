@@ -4,13 +4,13 @@
 keymap.set(body..head, table.concat{
    <Plug>(hydra_pre),
    <Plug>(hydra_head),
-   <Plug>(hydra_show_hint),
+   -- <Plug>(hydra_show_hint),
    <Plug>(hydra_wait)
 })
 
 keymap.set(<Plug>(hydra_wait)head, table.concat{
    <Plug>(hydra_head),
-   <Plug>(hydra_show_hint),
+   -- <Plug>(hydra_show_hint),
    <Plug>(hydra_wait)
 })
 
@@ -59,73 +59,73 @@ setmetatable(Hydra, {
 ---@param input table
 ---@return Hydra
 function Hydra:_constructor(input)
-   vim.validate({
-      name = { input.name, 'string' },
-      config = { input.config, 'table', true },
-      mode = { input.mode, 'string' },
-      body = { input.body, 'string' },
-      heads = { input.heads, 'table' },
-      exit = { input.exit, { 'string', 'table' }, true }
-   })
-   vim.validate({
-      pre = { input.config.pre, 'function', true },
-      post = { input.config.post, 'function', true },
-      exit = { input.config.exit, 'boolean', true },
-      timeout = { input.config.timeout, { 'boolean', 'number' }, true }
-   })
-   vim.validate({
-      foreign_keys = { input.config.foreign_keys, function(foreign_keys)
-         if type(foreign_keys) == 'nil'
-            or foreign_keys == 'warn' or foreign_keys == 'run'
-         then
-            return true
-         else
-            return false
-         end
-      end, 'Hydra: config.foreign_keys value could be either "warn" or "run"' }
-   })
-   vim.validate({
-      color = { input.config.color, function (color)
-         local valid_colors = { red = true, blue = true, amaranth = true, teal = true, pink = true }
-         return valid_colors[color] or false
-      end, 'Hydra: color value could be one of: red, blue, amaranth, teal, pink' }
-   })
+   do -- validate parameters
+      vim.validate({
+         name = { input.name, 'string' },
+         config = { input.config, 'table', true },
+         mode = { input.mode, 'string' },
+         body = { input.body, 'string' },
+         heads = { input.heads, 'table' },
+         exit = { input.exit, { 'string', 'table' }, true }
+      })
+      if input.config then
+         vim.validate({
+            pre = { input.config.pre, 'function', true },
+            post = { input.config.post, 'function', true },
+            exit = { input.config.exit, 'boolean', true },
+            timeout = { input.config.timeout, { 'boolean', 'number' }, true }
+         })
+         vim.validate({
+            foreign_keys = { input.config.foreign_keys, function(foreign_keys)
+               if type(foreign_keys) == 'nil'
+                  or foreign_keys == 'warn' or foreign_keys == 'run'
+               then
+                  return true
+               else
+                  return false
+               end
+            end, 'Hydra: config.foreign_keys value could be either "warn" or "run"' }
+         })
+         vim.validate({
+            color = { input.config.color, function (color)
+               local valid_colors = { red = true, blue = true, amaranth = true,
+                                      teal = true, pink = true }
+               return valid_colors[color] or false
+            end, 'Hydra: color value could be one of: red, blue, amaranth, teal, pink' }
+         })
+      end
+      for _, map in ipairs(input.heads) do
+         vim.validate({
+            head = { map, function(kmap)
+               local lhs, rhs, opts = kmap[1], kmap[2], kmap[3]
+               if type(kmap) ~= 'table'
+                  or type(lhs) ~= 'string'
+                  or (type(rhs) ~= 'string' and type(rhs) ~= 'function')
+                  or (opts and type(opts) ~= 'table')
+               then
+                  return false
+               else
+                  return true
+               end
+            end, 'Hydra: wrong head type'}
+         })
+      end
+   end
 
    self.id = utils.generate_id() -- Unique ID for each Hydra.
-   self.name = input.name
-   self.config = vim.tbl_deep_extend('keep', input.config, default_config)
-   self.mode = input.mode
-   self.body = input.body
+   self.name  = input.name
+   self.mode  = input.mode
+   self.body  = input.body
+   self.heads = input.heads
    self.exit = type(input.exit) == "string" and { input.exit } or input.exit or { '<Esc>' }
+   self.config = vim.tbl_deep_extend('keep', input.config, default_config)
 
    -- Bring 'foreign_keys', 'exit' and 'color' options into line.
    local color = utils.get_color_from_config(self.config.foreign_keys, self.config.exit)
    if color ~= 'red' and color ~= self.config.color then
       self.config.color = color
    elseif color ~= self.config.color then
-      self.config.foreign_keys, self.config.exit =
-         utils.get_config_from_color(self.config.color)
-   end
-
-   self.heads = input.heads
-   for head, map in pairs(self.heads) do
-      vim.validate({
-         head = { map, function(mapping)
-            if type(mapping) == 'string' or type(mapping) == 'function' then
-               return true
-            elseif type(mapping) == 'table'
-               and (type(mapping[1]) == 'string' or type(mapping[1]) == 'function')
-               and type(mapping[2]) == 'table'
-            then
-               return true
-            else
-               return false
-            end
-         end, 'Hydra: wrong head type'}
-      })
-      if type(map) == 'string' or type(map) == 'function' then
-         self.heads[head] = { map, {} }
-      end
+      self.config.foreign_keys, self.config.exit = utils.get_config_from_color(self.config.color)
    end
 
    self.original_options = {}
@@ -140,47 +140,46 @@ function Hydra:_constructor(input)
 
    self:set_keymap(self.plug.pre, function() self:_pre() end)
    self:set_keymap(self.plug.post, function() self:_post() end)
-   self:set_keymap(self.plug.show_hint, function() self:_show_hint() end)
 
-   local hint = { ('echon "%s: '):format(self.name) }
-   for head, map in pairs(self.heads) do
-      -- Define <Plug> mappings for hydra heads actions.
-      self:set_keymap(self.plug[head], unpack(map))
-      do
-         local desc = map[2].desc and string.format(': %s, ', map[2].desc) or ', '
-         if map[2].exit then
-            color = utils.get_color_from_config(self.config.foreign_keys, map[2].exit)
-         else
-            color = self.config.color
-         end
-         color = color:gsub("^%l", string.upper) -- amaranth -> Amaranth
-         hint[#hint+1] = ('echohl Hydra%s'):format(color)
-         hint[#hint+1] = ('echon "%s"'):format(head)
-         hint[#hint+1] = 'echohl None'
-         hint[#hint+1] = ('echon "%s"'):format(desc)
-      end
-   end
-   for i, key in ipairs(self.exit) do
-      hint[#hint+1] = 'echohl HydraBlue'
-      hint[#hint+1] = ('echon "%s"'):format(key)
-      hint[#hint+1] = 'echohl None'
-      hint[#hint+1] = ('echon ": exit%s"'):format(i < #self.exit and ', ' or '')
-   end
+   -- local hint = { ('echon "%s: '):format(self.name) }
+   -- for head, map in pairs(self.heads) do
+   --    -- Define <Plug> mappings for hydra heads actions.
+   --    self:set_keymap(self.plug[head], unpack(map))
+   --    do
+   --       local desc = map[2].desc and string.format(': %s, ', map[2].desc) or ', '
+   --       if map[2].exit then
+   --          color = utils.get_color_from_config(self.config.foreign_keys, map[2].exit)
+   --       else
+   --          color = self.config.color
+   --       end
+   --       color = color:gsub("^%l", string.upper) -- amaranth -> Amaranth
+   --       hint[#hint+1] = ('echohl Hydra%s'):format(color)
+   --       hint[#hint+1] = ('echon "%s"'):format(head)
+   --       hint[#hint+1] = 'echohl None'
+   --       hint[#hint+1] = ('echon "%s"'):format(desc)
+   --    end
+   -- end
+   -- for i, key in ipairs(self.exit) do
+   --    hint[#hint+1] = 'echohl HydraBlue'
+   --    hint[#hint+1] = ('echon "%s"'):format(key)
+   --    hint[#hint+1] = 'echohl None'
+   --    hint[#hint+1] = ('echon ": exit%s"'):format(i < #self.exit and ', ' or '')
+   -- end
+   --
+   -- hint = table.concat(hint, ' | ')
+   -- function self:_show_hint()
+   --    vim.cmd(hint)
+   -- end
+   -- self:set_keymap(self.plug.show_hint, function() self:_show_hint() end)
 
-   -- self:set_keymap(self.plug.wait, self.plug.leave)
-
-   hint = table.concat(hint, ' | ')
-   function self:_show_hint()
-      vim.cmd(hint)
-   end
 end
 
 function Hydra:_pre()
    active_hydra = self
-   self.original_options.showcmd  = vim.o.showcmd
-   self.original_options.showmode = vim.o.showmode
-   vim.o.showcmd = true
-   vim.o.showmode = false
+   -- self.original_options.showcmd  = vim.o.showcmd
+   -- self.original_options.showmode = vim.o.showmode
+   -- vim.o.showcmd = true
+   -- vim.o.showmode = false
 
    self.original_options.timeout  = vim.o.timeout
    self.original_options.ttimeout = vim.o.ttimeout
@@ -188,7 +187,7 @@ function Hydra:_pre()
                     or self.original_options.ttimeout
    if self.config.timeout then
       vim.o.timeout = true
-      if type(self.config.timeout) == "number" then
+      if type(self.config.timeout) == 'number' then
          self.original_options.timeoutlen = vim.o.timeoutlen
          vim.o.timeoutlen = self.config.timeout
       end
@@ -198,12 +197,12 @@ function Hydra:_pre()
 
    if self.config.pre then self.config.pre() end
 
-   if vim.fn.exists('HydraRestoreOptions') > 0 then
-      vim.cmd 'HydraRestoreOptions'
-   end
-   -- Make an Ex command to restore options overridden by Hydra if it was
-   -- emergency leaved with <C-c>.
-   vim.api.nvim_create_user_command('HydraRestoreOptions', function() self:_post() end, {})
+   -- if vim.fn.exists('HydraRestoreOptions') > 0 then
+   --    vim.cmd 'HydraRestoreOptions'
+   -- end
+   -- -- Make an Ex command to restore options overridden by Hydra if it was
+   -- -- emergency leaved with <C-c>.
+   -- vim.api.nvim_create_user_command('HydraRestoreOptions', function() self:_post() end, {})
 end
 
 function Hydra:_post()
@@ -265,9 +264,9 @@ local sample_hydra = Hydra({
    mode = 'n',
    body = 'z',
    heads = {
-      l = 'zl',
-      h = { 'zh', { desc = 'description' } },
-      H = { 'zH', { desc = 'description', exit = true } }
+      { 'l', 'zl' },
+      { 'h', 'zh', { desc = 'description' } },
+      { 'H', 'zH', { desc = 'description', exit = true } }
    },
    exit = { '<Esc>', 'q' },
 })
