@@ -210,16 +210,19 @@ function Hydra:_post()
       vim.o[option] = value
    end
    if self.config.post then self.config.post() end
-   vim.api.nvim_del_user_command('HydraRestoreOptions')
+   -- vim.api.nvim_del_user_command('HydraRestoreOptions')
    active_hydra = nil
 end
 
 function Hydra:_leaving()
-   if self.config.color == 'pink' then
-      vim.fn.getchar()
-   elseif self.config.color == 'amaranth' then
-      print 'An Amaranth Hydra can only exit through a blue head'
+   if self.config.color == 'amaranth' then
       if vim.fn.getchar(1) ~= 0 then
+         print 'An Amaranth Hydra can only exit through a blue head'
+         vim.fn.getchar()
+      end
+   elseif self.config.color == 'teal' then
+      if vim.fn.getchar(1) ~= 0 then
+         print 'An Teal Hydra can only exit through one of its head'
          vim.fn.getchar()
       end
    end
@@ -264,11 +267,12 @@ local sample_hydra = Hydra({
    mode = 'n',
    body = 'z',
    heads = {
+      { 'h', 'zh', { desc = 'left' } },
       { 'l', 'zl' },
-      { 'h', 'zh', { desc = 'description' } },
-      { 'H', 'zH', { desc = 'description', exit = true } }
-   },
-   exit = { '<Esc>', 'q' },
+      { 'H', 'zH', { desc = 'half screen left', exit = true } },
+      { '<Esc>', nil, { desc = 'exit', exit = true } },
+      { 'q', nil, { color = 'blue' } }
+   }
 })
 print(sample_hydra)
 -------------------------------------------------------------------------------
