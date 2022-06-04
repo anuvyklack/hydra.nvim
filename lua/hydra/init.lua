@@ -1,21 +1,29 @@
 --[[
 
+head == lhs
+
 -- enter hydra
-keymap.set(body..head, table.concat{
+keymap.set(body..lhs, table.concat{
    <Plug>(hydra_pre),
-   <Plug>(hydra_head),
-   -- <Plug>(hydra_show_hint),
+   <Plug>(hydra_lhs),
    <Plug>(hydra_wait)
 })
 
+-- red head
 keymap.set(<Plug>(hydra_wait)head, table.concat{
    <Plug>(hydra_head),
-   -- <Plug>(hydra_show_hint),
    <Plug>(hydra_wait)
 })
 
-keymap.set(<Plug>(hydra_wait){the first N keys in head}, <Plug>(hydra_leave)))
-keymap.set(<Plug>(hydra_wait), <Plug>(hydra_leave)))
+-- blue head
+keymap.set(<Plug>(hydra_wait)head, table.concat{
+   <Plug>(hydra_head),
+   <Plug>(hydra_post)
+})
+
+keymap.set(<Plug>(hydra_wait){the first N keys in head},
+   <Plug>(hydra_leave)
+)
 
 keymap.set(<Plug>(hydra_wait), <Plug>(hydra_leave))
 
@@ -29,19 +37,28 @@ local default_config = {
    exit = false,
    foreign_keys = nil, -- nil | warn | run
    color = 'red',
+   invoke_on_body = false,
+   doc = {
+      show = true,
+      anchor = 'SW',
+      row = nil, col = nil,
+      border = nil
+   }
 }
-local active_hydra
 
+_G.active_hydra = nil
 
 ---@class Hydra
----@field name string
 ---@field id number
+---@field name string
+---@field doc string[]
 ---@field config table
 ---@field mode string
 ---@field body string
 ---@field heads table<string, string|function|table>
 ---@field plug table<string, string>
----@field _show_hint function
+---@field _show_doc function
+---@field _close_doc function
 local Hydra = {}
 Hydra.__index = Hydra
 setmetatable(Hydra, {
@@ -114,11 +131,13 @@ function Hydra:_constructor(input)
 
    self.id = utils.generate_id() -- Unique ID for each Hydra.
    self.name  = input.name
+   self.config = vim.tbl_deep_extend('keep', input.config, default_config)
    self.mode  = input.mode
    self.body  = input.body
-   self.heads = input.heads
-   self.exit = type(input.exit) == "string" and { input.exit } or input.exit or { '<Esc>' }
-   self.config = vim.tbl_deep_extend('keep', input.config, default_config)
+   -- self.exit = type(input.exit) == "string" and { input.exit } or input.exit or { '<Esc>' }
+
+   self.doc = vim.split(input.doc, '\n')
+   self.doc[#self.doc] = nil -- remove last empty string
 
    -- Bring 'foreign_keys', 'exit' and 'color' options into line.
    local color = utils.get_color_from_config(self.config.foreign_keys, self.config.exit)
@@ -128,8 +147,6 @@ function Hydra:_constructor(input)
       self.config.foreign_keys, self.config.exit = utils.get_config_from_color(self.config.color)
    end
 
-   self.original_options = {}
-
    -- Table with all left hand sides of key mappings of the type `<Plug>...`.
    self.plug = setmetatable({}, {
       __index = function (t, key)
@@ -138,8 +155,194 @@ function Hydra:_constructor(input)
       end
    })
 
-   self:set_keymap(self.plug.pre, function() self:_pre() end)
-   self:set_keymap(self.plug.post, function() self:_post() end)
+   self:_set_keymap(self.plug.pre, function() self:_pre() end)
+   self:_set_keymap(self.plug.post, function() self:_post() end)
+
+   self.heads, self.heads_order = {}, {}
+   for index, head in ipairs(input.heads) do
+      local lhs, rhs, opts = head[1], head[2], head[3] or {}
+      self.heads[lhs] = { rhs, opts }
+      self.heads_order[lhs] = index
+   end
+
+   -- Define entering mapping
+   if self.config.invoke_on_body then
+      self:_set_keymap(self.body, table.concat{ self.plug.pre, self.plug.wait })
+   end
+
+   for head, map in pairs(self.heads) do
+      -- Define entering mappings
+      if not self.config.invoke_on_body
+         and not vim.tbl_get(map, 2, 'private')
+         and not vim.tbl_get(map, 2, 'exit')
+      then
+         self:_set_keymap(self.body..head, table.concat{
+            self.plug.pre,
+            self.plug[head],
+            self.plug.wait
+         })
+      end
+
+      self:_define_hydra_map(head, map)
+   end
+
+   self:_set_keymap(self.plug.wait, function() self:_leave() end)
+
+end
+
+function Hydra:_define_hydra_map(head, map)
+   if vim.tbl_get(map, 2, 'exit') or self.config.color == 'teal' then
+      -- blue head
+      self:_set_keymap(self.plug.wait..head, table.concat{
+         self.plug[head],
+         self.plug.post
+      })
+   else
+      self:_set_keymap(self.plug.wait..head, table.concat{
+         self.plug[head],
+         self.plug.wait
+      })
+   end
+
+   self:_set_keymap(self.plug[head], unpack(map))
+
+   -- Assumption:
+   -- Special keys such as <C-u> are escaped with < and >, i.e.,
+   -- key sequences doesn't directly contain any escape sequences.
+   local keys = vim.fn.split(head, [[\(<[^<>]\+>\|.\)\zs]])
+   for i = #keys - 1, 1, -1 do
+      local first_n_keys = table.concat(vim.list_slice(keys, 1, i))
+      self:_set_keymap(self.plug.wait..first_n_keys, self.plug.leave)
+   end
+end
+
+function Hydra:_pre()
+   if _G.active_hydra then _G.active_hydra:_post() end
+   _G.active_hydra = self
+
+   -- self.original_options.showcmd  = vim.o.showcmd
+   -- self.original_options.showmode = vim.o.showmode
+   -- vim.o.showcmd = true
+   -- vim.o.showmode = false
+
+   self.original_options = {}
+   self.original_options.timeout  = vim.o.timeout
+   self.original_options.ttimeout = vim.o.ttimeout
+   vim.o.ttimeout = not self.original_options.timeout and true
+                    or self.original_options.ttimeout
+   if self.config.timeout then
+      vim.o.timeout = true
+      if type(self.config.timeout) == 'number' then
+         self.original_options.timeoutlen = vim.o.timeoutlen
+         vim.o.timeoutlen = self.config.timeout
+      end
+   else
+      vim.o.timeout = false
+   end
+
+   if self.config.pre then self.config.pre() end
+
+   self:_show_doc()
+end
+
+function Hydra:_post()
+   for option, value in pairs(self.original_options) do
+      vim.o[option] = value
+   end
+   if self._close_doc then self._close_doc() end
+   if self.config.post then self.config.post() end
+   _G.active_hydra = nil
+end
+
+function Hydra:_leave()
+   if self.config.color == 'amaranth' then
+      if vim.fn.getchar(1) ~= 0 then
+         print 'An Amaranth Hydra can only exit through a blue head'
+         vim.fn.getchar()
+         local keys = vim.api.nvim_replace_termcodes(self.plug.wait, true, true, true)
+         vim.api.nvim_feedkeys(keys, '', false)
+         -- vim.api.nvim_feedkeys(self.plug.wait, '', true)
+         -- vim.fn.feedkeys([[\]]..self.plug.wait)
+      end
+   elseif self.config.color == 'teal' then
+      if vim.fn.getchar(1) ~= 0 then
+         print 'An Teal Hydra can only exit through one of its head'
+         vim.fn.getchar()
+         local keys = vim.api.nvim_replace_termcodes(self.plug.wait, true, true, true)
+         vim.api.nvim_feedkeys(keys, '', false)
+      end
+   else
+      self:_post()
+   end
+end
+
+function Hydra:_show_doc()
+
+   local longest_line_nr   -- Index of the longest line
+   local max_line_len = -1 -- The lenght of the longest line
+   for i, line in ipairs(self.doc) do
+      local line_len = vim.fn.strdisplaywidth(line)
+      if line_len > max_line_len then
+         max_line_len = line_len
+         longest_line_nr = i
+      end
+   end
+
+   local bufnr = vim.api.nvim_create_buf(false, true)
+   vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, self.doc)
+   vim.bo[bufnr].filetype = 'hydra_docstring'
+   vim.bo[bufnr].modifiable = false
+   vim.bo[bufnr].readonly = true
+
+   local visible_width = max_line_len
+   local i = 0
+   while(true) do
+      i = self.doc[longest_line_nr]:find('[_^]', i + 1)
+      if i then visible_width = visible_width - 1 else break end
+   end
+
+   local winid = vim.api.nvim_open_win(bufnr, false, {
+      relative = 'editor',
+      anchor = self.config.doc.anchor or 'SW',
+      row = self.config.doc.row or (vim.o.lines - 2),
+      col = self.config.doc.col or math.floor((vim.o.columns - visible_width) / 2),
+      width = visible_width,
+      height = #self.doc,
+      style = 'minimal',
+      border = self.config.doc.border or 'none',
+      focusable = false,
+      noautocmd = true
+   })
+   vim.wo[winid].winhighlight = 'NormalFloat:HydraFloatWindow'
+   vim.wo[winid].conceallevel = 3
+   vim.wo[winid].foldenable = false
+   -- vim.wo[winid].signcolumn = 'no'
+
+   local ns_id = vim.api.nvim_create_namespace('hydra-docstring')
+
+   local start, stop, head
+   for line_nr, line in ipairs(self.doc) do
+      stop = 0
+      repeat
+         start, stop, head = line:find('_(.-)_', stop + 1)
+         if start then
+            local color
+            if not self.heads[head] then
+               error(string.format('Hydra: doc error, head %s does not exists', head))
+            elseif self.config.color == 'teal' then
+               color = 'teal'
+            elseif vim.tbl_get(self.heads, head, 2, 'exit') then
+               color = 'blue'
+            else
+               color = self.config.color
+            end
+            color = color:gsub("^%l", string.upper) -- Capitalize first letter.
+            self.heads_order[head] = nil
+
+            vim.api.nvim_buf_add_highlight(bufnr, ns_id, 'Hydra'..color, line_nr - 1, start, stop)
+         end
+      until not stop
+   end
 
    -- local hint = { ('echon "%s: '):format(self.name) }
    -- for head, map in pairs(self.heads) do
@@ -172,90 +375,30 @@ function Hydra:_constructor(input)
    -- end
    -- self:set_keymap(self.plug.show_hint, function() self:_show_hint() end)
 
-end
-
-function Hydra:_pre()
-   active_hydra = self
-   -- self.original_options.showcmd  = vim.o.showcmd
-   -- self.original_options.showmode = vim.o.showmode
-   -- vim.o.showcmd = true
-   -- vim.o.showmode = false
-
-   self.original_options.timeout  = vim.o.timeout
-   self.original_options.ttimeout = vim.o.ttimeout
-   vim.o.ttimeout = not self.original_options.timeout and true
-                    or self.original_options.ttimeout
-   if self.config.timeout then
-      vim.o.timeout = true
-      if type(self.config.timeout) == 'number' then
-         self.original_options.timeoutlen = vim.o.timeoutlen
-         vim.o.timeoutlen = self.config.timeout
-      end
-   else
-      vim.o.timeout = false
-   end
-
-   if self.config.pre then self.config.pre() end
-
-   -- if vim.fn.exists('HydraRestoreOptions') > 0 then
-   --    vim.cmd 'HydraRestoreOptions'
-   -- end
-   -- -- Make an Ex command to restore options overridden by Hydra if it was
-   -- -- emergency leaved with <C-c>.
-   -- vim.api.nvim_create_user_command('HydraRestoreOptions', function() self:_post() end, {})
-end
-
-function Hydra:_post()
-   for option, value in pairs(self.original_options) do
-      vim.o[option] = value
-   end
-   if self.config.post then self.config.post() end
-   -- vim.api.nvim_del_user_command('HydraRestoreOptions')
-   active_hydra = nil
-end
-
-function Hydra:_leaving()
-   if self.config.color == 'amaranth' then
-      if vim.fn.getchar(1) ~= 0 then
-         print 'An Amaranth Hydra can only exit through a blue head'
-         vim.fn.getchar()
-      end
-   elseif self.config.color == 'teal' then
-      if vim.fn.getchar(1) ~= 0 then
-         print 'An Teal Hydra can only exit through one of its head'
-         vim.fn.getchar()
-      end
+   function self:_close_doc()
+      vim.api.nvim_win_close(winid, false)
+      vim.api.nvim_buf_delete(bufnr, { force = true, unload = false })
    end
 end
 
--- function Hydra:_blue_head()
--- end
-
-function Hydra:set_keymap(...)
-   vim.keymap.set(self.mode, ...)
-end
-
-function Hydra:define_entering_mapping()
-
-   for head, map in pairs(self.heads) do
-      self:set_keymap(self.body..head, table.concat(
-         self.plug.pre,
-         self.plug[head]
-      ))
+function Hydra:_set_keymap(lhs, rhs, opts)
+   local o = opts and vim.deepcopy(opts) or nil
+   if o then
+      o.private = nil
+      o.exit = nil
    end
-
-end
-
----Restore options overridden by Hydra if it was emergency leaved with <C-c>.
-local function restore_original_options()
-   if active_hydra then
-      active_hydra:_post()
-   end
+   vim.keymap.set(self.mode, lhs, rhs, o)
 end
 
 -------------------------------------------------------------------------------
 local sample_hydra = Hydra({
    name = 'Side scroll',
+   docstring =
+[[
+Title
+^-^--------^-^-------
+_h_: left  _l_: right
+]],
    config = {
       pre  = function() end, -- before entering hydra
       post = function() end, -- after leaving hydra
@@ -263,6 +406,11 @@ local sample_hydra = Hydra({
       exit = false,
       foreign_keys = nil, -- nil | 'warn' | 'run'
       color = 'blue',
+      invoke_on_body = false,
+      docstring = {
+         show = true,
+         win_config = nil,
+      }
    },
    mode = 'n',
    body = 'z',
@@ -270,12 +418,12 @@ local sample_hydra = Hydra({
       { 'h', 'zh', { desc = 'left' } },
       { 'l', 'zl' },
       { 'H', 'zH', { desc = 'half screen left', exit = true } },
+      { 'L', 'zL', { desc = 'half screen right', private = true } },
+      { 'q', nil, { exit = true } },
       { '<Esc>', nil, { desc = 'exit', exit = true } },
-      { 'q', nil, { color = 'blue' } }
    }
 })
 print(sample_hydra)
 -------------------------------------------------------------------------------
 
-
-return Hydra, restore_original_options
+return Hydra
