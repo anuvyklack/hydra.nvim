@@ -38,7 +38,7 @@ local default_config = {
    foreign_keys = nil, -- nil | warn | run
    color = 'red',
    invoke_on_body = false,
-   doc = {
+   hint = {
       anchor = 'SW',
       row = nil, col = nil,
       border = nil
@@ -136,9 +136,13 @@ function Hydra:_constructor(input)
    -- self.exit = type(input.exit) == "string" and { input.exit } or input.exit or { '<Esc>' }
    self.original_options = {}
 
-   if self.doc then
-      self.doc = vim.split(input.doc, '\n')
-      self.doc[#self.doc] = nil -- remove last empty string
+   self.hint = { lines = input.hint }
+   if self.hint.lines then
+      self.hint.lines = vim.split(self.hint.lines, '\n')
+      -- Remove last empty string.
+      if self.hint.lines[#self.hint.lines] == '' then
+         self.hint.lines[#self.hint.lines] = nil
+      end
    end
 
    -- Bring 'foreign_keys', 'exit' and 'color' options into line.
@@ -251,7 +255,7 @@ function Hydra:_pre()
 
    if self.config.pre then self.config.pre() end
 
-   self:_show_doc()
+   self:_show_hint()
 end
 
 function Hydra:_post()
@@ -285,171 +289,153 @@ function Hydra:_leave()
    end
 end
 
-function Hydra:_show_doc()
-
-   local longest_line_nr   -- Index of the longest line
-   local max_line_len = -1 -- The lenght of the longest line
-   for i, line in ipairs(self.doc) do
-      local line_len = vim.fn.strdisplaywidth(line)
-      if line_len > max_line_len then
-         max_line_len = line_len
-         longest_line_nr = i
-      end
-   end
-
-   local bufnr = vim.api.nvim_create_buf(false, true)
-   vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, self.doc)
-   vim.bo[bufnr].filetype = 'hydra_docstring'
-   vim.bo[bufnr].modifiable = false
-   vim.bo[bufnr].readonly = true
-
-   local visible_width = max_line_len
-   local i = 0
-   while(true) do
-      i = self.doc[longest_line_nr]:find('[_^]', i + 1)
-      if i then visible_width = visible_width - 1 else break end
-   end
-
-   local winid = vim.api.nvim_open_win(bufnr, false, {
-      relative = 'editor',
-      anchor = self.config.doc.anchor,
-      row = self.config.doc.row or (vim.o.lines - 2),
-      col = self.config.doc.col or math.floor((vim.o.columns - visible_width) / 2),
-      width = visible_width,
-      height = #self.doc,
-      style = 'minimal',
-      border = self.config.doc.border or 'none',
-      focusable = false,
-      noautocmd = true
-   })
-   vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
-   vim.wo[winid].conceallevel = 3
-   vim.wo[winid].foldenable = false
-   -- vim.wo[winid].signcolumn = 'no'
-
+function Hydra:_show_hint()
    local ns_id = vim.api.nvim_create_namespace('hydra-docstring')
+   self.hint.bufnr = vim.api.nvim_create_buf(false, true)
+   vim.bo[self.hint.bufnr].filetype = 'hydra_docstring'
 
-   local start, stop, head
-   for line_nr, line in ipairs(self.doc) do
+   if self.hint.lines then
+      local longest_line_nr   -- Index of the longest line
+      local max_line_len = -1 -- The lenght of the longest line
+      for i, line in ipairs(self.hint.lines) do
+         local line_len = vim.fn.strdisplaywidth(line)
+         if line_len > max_line_len then
+            max_line_len = line_len
+            longest_line_nr = i
+         end
+      end
+
+      local visible_width = max_line_len
+      local i = 0
+      while(true) do
+         i = self.hint.lines[longest_line_nr]:find('[_^]', i + 1)
+         if i then visible_width = visible_width - 1 else break end
+      end
+      self.hint.win_height = #self.hint.lines
+
+      vim.api.nvim_buf_set_lines(self.hint.bufnr, 0, 1, false, self.hint.lines)
+
+      for line_nr, line in ipairs(self.hint.lines) do
+         local start, stop, head
+         stop = 0
+         repeat
+            start, stop, head = line:find('_(.-)_', stop + 1)
+            if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
+            if start then
+               if not self.heads[head] then
+                  error(string.format('Hydra: docsting error, head %s does not exist', head))
+               end
+               local color = self.heads[head][2].color
+               self.heads_order[head] = nil
+
+               vim.api.nvim_buf_add_highlight(
+                  self.hint.bufnr, ns_id, 'Hydra'..color, line_nr-1, start, stop)
+            end
+         until not stop
+      end
+
+      -- If there are remain hydra heads, that not present in manually created hint.
+      if not vim.tbl_isempty(self.heads_order) then
+         local heads = vim.tbl_keys(self.heads_order)
+         table.sort(heads, function (a, b)
+            return self.heads_order[a] < self.heads_order[b]
+         end)
+
+         local line, len = {}, 0
+         for _, head in pairs(heads) do
+            line[#line+1] = string.format('_%s_', head)
+            -- line[#line+1] = string.format('[_%s_]', head)
+            local desc = vim.tbl_get(self.heads, head, 2, 'desc')
+            if desc then
+               desc = string.format(': %s, ', desc)
+            else
+               desc = ', '
+            end
+            line[#line+1] = desc
+            len = len + #head + #desc
+         end
+         line = table.concat(line):gsub(', $', '')
+         len = len - 2
+         if len > visible_width then visible_width = len end
+
+         vim.api.nvim_buf_set_lines(self.hint.bufnr, -1, -1, false, { '', line })
+         self.hint.win_height = self.hint.win_height + 2
+
+         local start, stop, head
+         stop = 0
+         repeat
+            start, stop, head = line:find('_(.-)_', stop + 1)
+            if start then
+               local color = self.heads[head][2].color
+               vim.api.nvim_buf_add_highlight(
+                  self.hint.bufnr, ns_id, 'Hydra'..color, self.hint.win_height - 1, start, stop)
+            end
+         until not stop
+
+      end
+
+      self.hint.win_width = visible_width
+   else
+      self.heads_order = utils.reverse_tbl(self.heads_order)
+      local line = { ' ', self.name, ': ' }
+      for _, head in pairs(self.heads_order) do
+         line[#line+1] = string.format('_%s_', head)
+         -- hint[#hint+1] = string.format('[_%s_]', head)
+         local desc = self.heads[head][2].desc
+         if desc then
+            desc = string.format(': %s, ', desc)
+         else
+            desc = ', '
+         end
+         line[#line+1] = desc
+      end
+      line = table.concat(line)
+      vim.api.nvim_buf_set_lines(self.hint.bufnr, 0, 1, false, { line })
+
+      local start, stop, head
       stop = 0
       repeat
          start, stop, head = line:find('_(.-)_', stop + 1)
          if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
          if start then
-            if not self.heads[head] then
-               error(string.format('Hydra: docsting error, head %s does not exist', head))
-            end
             local color = self.heads[head][2].color
-            self.heads_order[head] = nil
-
             vim.api.nvim_buf_add_highlight(
-               bufnr, ns_id, 'Hydra'..color, line_nr-1, start, stop)
+               self.hint.bufnr, ns_id, 'Hydra'..color, 0, start, stop)
          end
       until not stop
+
+      self.config.hint.row = vim.o.lines
+      self.config.hint.col = 1
+      self.hint.win_height = 1
+      self.hint.win_width = vim.o.columns
    end
 
-   self.heads_order = utils.reverse_tbl(self.heads_order)
+   self.hint.winid = vim.api.nvim_open_win(self.hint.bufnr, false, {
+      relative = 'editor',
+      anchor = self.config.hint.anchor,
+      row = self.config.hint.row or (vim.o.lines - 2),
+      col = self.config.hint.col or
+            math.floor((vim.o.columns - self.hint.win_width) / 2),
+      width  = self.hint.win_width,
+      height = self.hint.win_height,
+      style = 'minimal',
+      border = self.config.hint.border or 'none',
+      focusable = false,
+      noautocmd = true
+   })
+   vim.wo[self.hint.winid].winhighlight = 'NormalFloat:HydraHint'
+   vim.wo[self.hint.winid].conceallevel = 3
+   vim.wo[self.hint.winid].foldenable = false
 
-   -- self.statusline = { ' ', self.name, ': ' }
-   -- for _, head in pairs(self.heads_order) do
-   --
-   -- end
+   vim.bo[self.hint.bufnr].modifiable = false
+   vim.bo[self.hint.bufnr].readonly = true
 
-   -- local hint = { ('echon "%s: '):format(self.name) }
-   -- for head, map in pairs(self.heads) do
-   --    -- Define <Plug> mappings for hydra heads actions.
-   --    self:set_keymap(self.plug[head], unpack(map))
-   --    do
-   --       local desc = map[2].desc and string.format(': %s, ', map[2].desc) or ', '
-   --       if map[2].exit then
-   --          color = utils.get_color_from_config(self.config.foreign_keys, map[2].exit)
-   --       else
-   --          color = self.config.color
-   --       end
-   --       color = color:gsub("^%l", string.upper) -- amaranth -> Amaranth
-   --       hint[#hint+1] = ('echohl Hydra%s'):format(color)
-   --       hint[#hint+1] = ('echon "%s"'):format(head)
-   --       hint[#hint+1] = 'echohl None'
-   --       hint[#hint+1] = ('echon "%s"'):format(desc)
-   --    end
-   -- end
-   -- for i, key in ipairs(self.exit) do
-   --    hint[#hint+1] = 'echohl HydraBlue'
-   --    hint[#hint+1] = ('echon "%s"'):format(key)
-   --    hint[#hint+1] = 'echohl None'
-   --    hint[#hint+1] = ('echon ": exit%s"'):format(i < #self.exit and ', ' or '')
-   -- end
-   --
-   -- hint = table.concat(hint, ' | ')
-   -- function self:_show_hint()
-   --    vim.cmd(hint)
-   -- end
-   -- self:set_keymap(self.plug.show_hint, function() self:_show_hint() end)
-
-   self.original_options.statusline = vim.o.statusline
+   -- self.original_options.statusline = vim.o.statusline
 
    function self:_close_doc()
-      vim.api.nvim_win_close(winid, false)
-      vim.api.nvim_buf_delete(bufnr, { force = true, unload = false })
+      vim.api.nvim_win_close(self.hint.winid, false)
+      vim.api.nvim_buf_delete(self.hint.bufnr, { force = true, unload = false })
    end
-end
-
-function Hydra:_show_hint()
-
-   self.heads_order = utils.reverse_tbl(self.heads_order)
-   local hint = { ' ', self.name, ': ' }
-   for _, head in pairs(self.heads_order) do
-      hint[#hint+1] = string.format('_%s_', head)
-      -- hint[#hint+1] = string.format('[_%s_]', head)
-      local desc = self.heads[head][2].desc
-      if desc then
-         desc = string.format(': %s, ', desc)
-      else
-         desc = ', '
-      end
-      hint[#hint+1] = desc
-   end
-
-   hint = { table.concat(hint) }
-
-   local bufnr = vim.api.nvim_create_buf(false, true)
-   vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, hint)
-   vim.bo[bufnr].filetype = 'hydra_docstring'
-   vim.bo[bufnr].modifiable = false
-   vim.bo[bufnr].readonly = true
-
-   local winid = vim.api.nvim_open_win(bufnr, false, {
-      relative = 'editor',
-      anchor = self.config.doc.anchor,
-      row = vim.o.lines,
-      col = 1,
-      width = vim.o.columns,
-      height = 1,
-      style = 'minimal',
-      border = 'none',
-      focusable = false,
-      noautocmd = true
-   })
-   vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
-   vim.wo[winid].conceallevel = 3
-   vim.wo[winid].foldenable = false
-
-   local ns_id = vim.api.nvim_create_namespace('hydra-docstring')
-
-   local start, stop, head
-   for line_nr, line in ipairs(hint) do
-      stop = 0
-      repeat
-         start, stop, head = line:find('_(.-)_', stop + 1)
-         if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
-         if start then
-            local color = self.heads[head][2].color
-            vim.api.nvim_buf_add_highlight(
-               bufnr, ns_id, 'Hydra'..color, line_nr-1, start, stop)
-         end
-      until not stop
-   end
-
 end
 
 function Hydra:_set_keymap(lhs, rhs, opts)
@@ -465,15 +451,14 @@ end
 -------------------------------------------------------------------------------
 local doc_hydra = Hydra({
    name = 'Test docstring',
---    doc =
--- [[
---  ^^Mark^            ^^Unmark^           ^Actions^          ^Search
--- ^^^^^^^^^^------------------------------------------------------------------
---  ^_m_: mark         ^_u_: unmark        _x_: execute       _R_: re-isearch
---  ^_s_: save         ^_U_: unmark up     _b_: bury          _I_: isearch
---  ^_d_: delete       ^^ ^                _g_: refresh       _O_: multi-occur
---  ^_D_: delete up    ^^ ^                _T_: files only
--- ]],
+   hint = [[
+ ^Mark^            ^Unmark^           ^Actions^          ^Search
+^^^^^^^^------------------------------------------------------------------
+ _m_: mark         _u_: unmark        _x_: execute       _R_: re-isearch
+ _s_: save         _U_: unmark up     _b_: bury          _I_: isearch
+ _d_: delete       ^ ^                _g_: refresh       _O_: multi-occur
+ _D_: delete up    ^ ^                _T_: files only
+]],
    mode = 'n',
    body = '<leader>o',
    heads = {
@@ -491,8 +476,8 @@ local doc_hydra = Hydra({
       { 'I', 'I', { desc = 'isearch' } },
       { 'O', 'O', { desc = 'multi-occur' } },
 
-      { 'w', 'w' },
-      { 'W', 'W', { desc = 'word' } },
+      { 'w', 'w', { desc = 'word' } },
+      { 'W', 'W', { desc = 'Word' } },
       { 'A', 'A', { desc = 'ammend' } },
       { 'q', 'q', { desc = 'exit' } }
    }
