@@ -36,4 +36,18 @@ function utils.get_config_from_color(color)
    end
 end
 
+---Return table where all key, value pairs are reversed.
+---```
+---    table[key] = value  =>  table[value] = key
+---```
+---@param tbl table
+---@return table
+function utils.reverse_tbl(tbl)
+   local r = {}
+   for key, value in pairs(tbl) do
+      r[value] = key
+   end
+   return r
+end
+
 return utils

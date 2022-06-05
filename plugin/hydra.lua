@@ -1,3 +1,16 @@
+local function hl(name, val)
+   vim.api.nvim_set_hl(0, name, val)
+end
+
+hl('HydraRed',     { fg = '#f2594b', bold = true, default = true })
+hl('HydraBlue',    { fg = '#0091f7', bold = true, default = true })
+hl('HydraAmarant', { fg = '#FF355E', bold = true, default = true })
+hl('HydraTeal',    { fg = '#009090', bold = true, default = true })
+hl('HydraPink',    { fg = '#f766ad', bold = true, default = true })
+
+hl('HydraHint', { link = 'NormalFloat' })
+
+
 -- TODO: find out how to global clear namespace.
 
 -- Restore options overridden by Hydra if it was emergency leaved with <C-c>.

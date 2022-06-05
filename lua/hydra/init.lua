@@ -39,7 +39,6 @@ local default_config = {
    color = 'red',
    invoke_on_body = false,
    doc = {
-      show = true,
       anchor = 'SW',
       row = nil, col = nil,
       border = nil
@@ -131,13 +130,16 @@ function Hydra:_constructor(input)
 
    self.id = utils.generate_id() -- Unique ID for each Hydra.
    self.name  = input.name
-   self.config = vim.tbl_deep_extend('keep', input.config, default_config)
+   self.config = vim.tbl_deep_extend('force', default_config, input.config or {})
    self.mode  = input.mode
    self.body  = input.body
    -- self.exit = type(input.exit) == "string" and { input.exit } or input.exit or { '<Esc>' }
+   self.original_options = {}
 
-   self.doc = vim.split(input.doc, '\n')
-   self.doc[#self.doc] = nil -- remove last empty string
+   if self.doc then
+      self.doc = vim.split(input.doc, '\n')
+      self.doc[#self.doc] = nil -- remove last empty string
+   end
 
    -- Bring 'foreign_keys', 'exit' and 'color' options into line.
    local color = utils.get_color_from_config(self.config.foreign_keys, self.config.exit)
@@ -233,7 +235,6 @@ function Hydra:_pre()
    -- vim.o.showcmd = true
    -- vim.o.showmode = false
 
-   self.original_options = {}
    self.original_options.timeout  = vim.o.timeout
    self.original_options.ttimeout = vim.o.ttimeout
    vim.o.ttimeout = not self.original_options.timeout and true
@@ -311,7 +312,7 @@ function Hydra:_show_doc()
 
    local winid = vim.api.nvim_open_win(bufnr, false, {
       relative = 'editor',
-      anchor = self.config.doc.anchor or 'SW',
+      anchor = self.config.doc.anchor,
       row = self.config.doc.row or (vim.o.lines - 2),
       col = self.config.doc.col or math.floor((vim.o.columns - visible_width) / 2),
       width = visible_width,
@@ -321,7 +322,7 @@ function Hydra:_show_doc()
       focusable = false,
       noautocmd = true
    })
-   vim.wo[winid].winhighlight = 'NormalFloat:HydraFloatWindow'
+   vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
    vim.wo[winid].conceallevel = 3
    vim.wo[winid].foldenable = false
    -- vim.wo[winid].signcolumn = 'no'
@@ -333,9 +334,10 @@ function Hydra:_show_doc()
       stop = 0
       repeat
          start, stop, head = line:find('_(.-)_', stop + 1)
+         if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
          if start then
             if not self.heads[head] then
-               error(string.format('Hydra: docsting error, head %s does not exists', head))
+               error(string.format('Hydra: docsting error, head %s does not exist', head))
             end
             local color = self.heads[head][2].color
             self.heads_order[head] = nil
@@ -345,6 +347,13 @@ function Hydra:_show_doc()
          end
       until not stop
    end
+
+   self.heads_order = utils.reverse_tbl(self.heads_order)
+
+   -- self.statusline = { ' ', self.name, ': ' }
+   -- for _, head in pairs(self.heads_order) do
+   --
+   -- end
 
    -- local hint = { ('echon "%s: '):format(self.name) }
    -- for head, map in pairs(self.heads) do
@@ -379,25 +388,68 @@ function Hydra:_show_doc()
 
    self.original_options.statusline = vim.o.statusline
 
-   self.heads_order = utils.reverse_tbl(self.heads_order)
-   self.statusline = { ' ', self.name, ': ' }
-   for _, head in pairs(self.heads_order) do
-      local color
-      if self.config.color == 'teal' then
-         color = 'teal'
-      elseif vim.tbl_get(self.heads, head, 2, 'exit') then
-         color = 'blue'
-      else
-         color = self.config.color
-      end
-      color = color:gsub("^%l", string.upper) -- Capitalize first letter.
-
-   end
-
    function self:_close_doc()
       vim.api.nvim_win_close(winid, false)
       vim.api.nvim_buf_delete(bufnr, { force = true, unload = false })
    end
+end
+
+function Hydra:_show_hint()
+
+   self.heads_order = utils.reverse_tbl(self.heads_order)
+   local hint = { ' ', self.name, ': ' }
+   for _, head in pairs(self.heads_order) do
+      hint[#hint+1] = string.format('_%s_', head)
+      -- hint[#hint+1] = string.format('[_%s_]', head)
+      local desc = self.heads[head][2].desc
+      if desc then
+         desc = string.format(': %s, ', desc)
+      else
+         desc = ', '
+      end
+      hint[#hint+1] = desc
+   end
+
+   hint = { table.concat(hint) }
+
+   local bufnr = vim.api.nvim_create_buf(false, true)
+   vim.api.nvim_buf_set_lines(bufnr, 0, 1, false, hint)
+   vim.bo[bufnr].filetype = 'hydra_docstring'
+   vim.bo[bufnr].modifiable = false
+   vim.bo[bufnr].readonly = true
+
+   local winid = vim.api.nvim_open_win(bufnr, false, {
+      relative = 'editor',
+      anchor = self.config.doc.anchor,
+      row = vim.o.lines,
+      col = 1,
+      width = vim.o.columns,
+      height = 1,
+      style = 'minimal',
+      border = 'none',
+      focusable = false,
+      noautocmd = true
+   })
+   vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
+   vim.wo[winid].conceallevel = 3
+   vim.wo[winid].foldenable = false
+
+   local ns_id = vim.api.nvim_create_namespace('hydra-docstring')
+
+   local start, stop, head
+   for line_nr, line in ipairs(hint) do
+      stop = 0
+      repeat
+         start, stop, head = line:find('_(.-)_', stop + 1)
+         if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
+         if start then
+            local color = self.heads[head][2].color
+            vim.api.nvim_buf_add_highlight(
+               bufnr, ns_id, 'Hydra'..color, line_nr-1, start, stop)
+         end
+      until not stop
+   end
+
 end
 
 function Hydra:_set_keymap(lhs, rhs, opts)
@@ -411,39 +463,79 @@ function Hydra:_set_keymap(lhs, rhs, opts)
 end
 
 -------------------------------------------------------------------------------
-local sample_hydra = Hydra({
-   name = 'Side scroll',
-   docstring =
-[[
-Title
-^-^--------^-^-------
-_h_: left  _l_: right
-]],
-   config = {
-      pre  = function() end, -- before entering hydra
-      post = function() end, -- after leaving hydra
-      timeout = false, -- false or num in milliseconds
-      exit = false,
-      foreign_keys = nil, -- nil | 'warn' | 'run'
-      color = 'blue',
-      invoke_on_body = false,
-      docstring = {
-         show = true,
-         win_config = nil,
-      }
-   },
+local doc_hydra = Hydra({
+   name = 'Test docstring',
+--    doc =
+-- [[
+--  ^^Mark^            ^^Unmark^           ^Actions^          ^Search
+-- ^^^^^^^^^^------------------------------------------------------------------
+--  ^_m_: mark         ^_u_: unmark        _x_: execute       _R_: re-isearch
+--  ^_s_: save         ^_U_: unmark up     _b_: bury          _I_: isearch
+--  ^_d_: delete       ^^ ^                _g_: refresh       _O_: multi-occur
+--  ^_D_: delete up    ^^ ^                _T_: files only
+-- ]],
    mode = 'n',
-   body = 'z',
+   body = '<leader>o',
    heads = {
-      { 'h', 'zh', { desc = 'left' } },
-      { 'l', 'zl' },
-      { 'H', 'zH', { desc = 'half screen left', exit = true } },
-      { 'L', 'zL', { desc = 'half screen right', private = true } },
-      { 'q', nil, { exit = true } },
-      { '<Esc>', nil, { desc = 'exit', exit = true } },
+      { 'm', 'm', { desc = 'mark' } },
+      { 's', 's' },
+      { 'd', 'd', { desc = 'delete' } },
+      { 'D', 'D', { desc = 'delete up' } },
+      { 'u', 'u', { desc = 'unmark' } },
+      { 'U', 'U', { desc = 'unmark up' } },
+      { 'x', 'x', { desc = 'execute' } },
+      { 'b', 'b', { desc = 'bury' } },
+      { 'g', 'g', { desc = 'refresh' } },
+      { 'T', 'T', { desc = 'files only' } },
+      { 'R', 'R', { desc = 're-isearch' } },
+      { 'I', 'I', { desc = 'isearch' } },
+      { 'O', 'O', { desc = 'multi-occur' } },
+
+      { 'w', 'w' },
+      { 'W', 'W', { desc = 'word' } },
+      { 'A', 'A', { desc = 'ammend' } },
+      { 'q', 'q', { desc = 'exit' } }
    }
 })
-print(sample_hydra)
+
+-- doc_hydra:_show_doc()
+doc_hydra:_show_hint()
+
+-- print(vim.inspect(doc_hydra))
+
+-- local sample_hydra = Hydra({
+--    name = 'Side scroll',
+--    docstring =
+-- [[
+-- Title
+-- ^-^--------^-^-------
+-- _h_: left  _l_: right
+-- ]],
+--    config = {
+--       pre  = function() end, -- before entering hydra
+--       post = function() end, -- after leaving hydra
+--       timeout = false, -- false or num in milliseconds
+--       exit = false,
+--       foreign_keys = nil, -- nil | 'warn' | 'run'
+--       color = 'blue',
+--       invoke_on_body = false,
+--       docstring = {
+--          show = true,
+--          win_config = nil,
+--       }
+--    },
+--    mode = 'n',
+--    body = 'z',
+--    heads = {
+--       { 'h', 'zh', { desc = 'left' } },
+--       { 'l', 'zl' },
+--       { 'H', 'zH', { desc = 'half screen left', exit = true } },
+--       { 'L', 'zL', { desc = 'half screen right', private = true } },
+--       { 'q', nil, { exit = true } },
+--       { '<Esc>', nil, { desc = 'exit', exit = true } },
+--    }
+-- })
+-- print(sample_hydra)
 -------------------------------------------------------------------------------
 
 return Hydra
