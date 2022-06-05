@@ -161,6 +161,14 @@ function Hydra:_constructor(input)
    self.heads, self.heads_order = {}, {}
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
+
+      if opts.exit ~= nil then -- User explicitly passed 'exit' option inside the head.
+         color = utils.get_color_from_config(self.config.foreign_keys, opts.exit)
+      else
+         color = self.config.color
+      end
+      opts.color = color:gsub("^%l", string.upper) -- Capitalize first letter.
+
       self.heads[lhs] = { rhs, opts }
       self.heads_order[lhs] = index
    end
@@ -326,20 +334,14 @@ function Hydra:_show_doc()
       repeat
          start, stop, head = line:find('_(.-)_', stop + 1)
          if start then
-            local color
             if not self.heads[head] then
-               error(string.format('Hydra: doc error, head %s does not exists', head))
-            elseif self.config.color == 'teal' then
-               color = 'teal'
-            elseif vim.tbl_get(self.heads, head, 2, 'exit') then
-               color = 'blue'
-            else
-               color = self.config.color
+               error(string.format('Hydra: docsting error, head %s does not exists', head))
             end
-            color = color:gsub("^%l", string.upper) -- Capitalize first letter.
+            local color = self.heads[head][2].color
             self.heads_order[head] = nil
 
-            vim.api.nvim_buf_add_highlight(bufnr, ns_id, 'Hydra'..color, line_nr - 1, start, stop)
+            vim.api.nvim_buf_add_highlight(
+               bufnr, ns_id, 'Hydra'..color, line_nr-1, start, stop)
          end
       until not stop
    end
@@ -375,6 +377,23 @@ function Hydra:_show_doc()
    -- end
    -- self:set_keymap(self.plug.show_hint, function() self:_show_hint() end)
 
+   self.original_options.statusline = vim.o.statusline
+
+   self.heads_order = utils.reverse_tbl(self.heads_order)
+   self.statusline = { ' ', self.name, ': ' }
+   for _, head in pairs(self.heads_order) do
+      local color
+      if self.config.color == 'teal' then
+         color = 'teal'
+      elseif vim.tbl_get(self.heads, head, 2, 'exit') then
+         color = 'blue'
+      else
+         color = self.config.color
+      end
+      color = color:gsub("^%l", string.upper) -- Capitalize first letter.
+
+   end
+
    function self:_close_doc()
       vim.api.nvim_win_close(winid, false)
       vim.api.nvim_buf_delete(bufnr, { force = true, unload = false })
@@ -384,6 +403,7 @@ end
 function Hydra:_set_keymap(lhs, rhs, opts)
    local o = opts and vim.deepcopy(opts) or nil
    if o then
+      o.color = nil
       o.private = nil
       o.exit = nil
    end
