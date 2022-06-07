@@ -134,7 +134,7 @@ function Hydra:_constructor(input)
    self.id = utils.generate_id() -- Unique ID for each Hydra.
    self.name  = input.name
    self.config = vim.tbl_deep_extend('force', default_config, input.config or {})
-   self.mode  = input.mode
+   self.mode  = input.mode or 'n'
    self.body  = input.body
    self.original_options = {}
 
@@ -171,11 +171,16 @@ function Hydra:_constructor(input)
    self:_set_keymap(self.plug.wait, function() self:_leave() end)
 
    self.heads, self.heads_order = {}, {}
+   local has_exit_head = self.config.exit and true or nil
+   local num_of_heads = #input.heads
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
 
       if opts.exit ~= nil then -- User explicitly passed 'exit' option inside the head.
          color = utils.get_color_from_config(self.config.foreign_keys, opts.exit)
+         if opts.exit and has_exit_head == nil then
+            has_exit_head = true
+         end
       else
          opts.exit = self.config.exit
          color = self.config.color
@@ -184,6 +189,15 @@ function Hydra:_constructor(input)
 
       self.heads[lhs] = { rhs, opts }
       self.heads_order[lhs] = index
+   end
+   if not has_exit_head then
+      self.heads['<Esc>'] = { nil, {
+         exit = true,
+         desc = 'exit',
+         color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue'
+      }}
+      num_of_heads = num_of_heads + 1
+      self.heads_order['<Esc>'] = num_of_heads
    end
 
    -- Define entering keymap if Hydra is called only on body keymap.
@@ -475,74 +489,5 @@ function Hydra:_set_keymap(lhs, rhs, opts)
    end
    vim.keymap.set(self.mode, lhs, rhs, o)
 end
-
--------------------------------------------------------------------------------
-local sample_hydra = Hydra({
-   name = 'Side scroll',
---    hint = [[
--- Title
--- ^-^--------^-^-------
--- _h_: left  _l_: right
--- ]],
-   config = {
-      pre  = function() end, -- before entering hydra
-      post = function() end, -- after leaving hydra
-      timeout = false, -- false or num in milliseconds
-      exit = false,
-      foreign_keys = nil, -- nil | 'warn' | 'run'
-      -- color = 'amaranth',
-      invoke_on_body = false,
-   },
-   mode = 'n',
-   body = 'z',
-   heads = {
-      { 'h', 'zh', { desc = 'left' } },
-      { 'l', 'zl' },
-      { 'H', 'zH', { desc = 'half screen left' } },
-      { 'L', 'zL', { desc = 'half screen right' } },
-      { 'q', nil, { exit = true } },
-      { '<Esc>', nil, { desc = 'exit', exit = true } },
-   }
-})
-
--- print(sample_hydra)
--- local doc_hydra = Hydra({
---    name = 'Test docstring',
---    hint = [[
---  ^Mark^            ^Unmark^           ^Actions^          ^Search
--- ^^^^^^^^------------------------------------------------------------------
---  _m_: mark         _u_: unmark        _x_: execute       _R_: re-isearch
---  _s_: save         _U_: unmark up     _b_: bury          _I_: isearch
---  _d_: delete       ^ ^                _g_: refresh       _O_: multi-occur
---  _D_: delete up    ^ ^                _T_: files only
--- ]],
---    mode = 'n',
---    body = '<leader>o',
---    heads = {
---       { 'm', 'm', { desc = 'mark' } },
---       { 's', 's' },
---       { 'd', 'd', { desc = 'delete' } },
---       { 'D', 'D', { desc = 'delete up' } },
---       { 'u', 'u', { desc = 'unmark' } },
---       { 'U', 'U', { desc = 'unmark up' } },
---       { 'x', 'x', { desc = 'execute' } },
---       { 'b', 'b', { desc = 'bury' } },
---       { 'g', 'g', { desc = 'refresh' } },
---       { 'T', 'T', { desc = 'files only' } },
---       { 'R', 'R', { desc = 're-isearch' } },
---       { 'I', 'I', { desc = 'isearch' } },
---       { 'O', 'O', { desc = 'multi-occur' } },
---
---       { 'w', 'w', { desc = 'word' } },
---       { 'W', 'W', { desc = 'Word' } },
---       { 'A', 'A', { desc = 'ammend' } },
---       { 'q', 'q', { desc = 'exit', exit = true } }
---    }
--- })
-
--- doc_hydra:_show_hint()
--- print(vim.inspect(doc_hydra))
-
--------------------------------------------------------------------------------
 
 return Hydra
