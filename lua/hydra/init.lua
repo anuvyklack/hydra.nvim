@@ -120,7 +120,7 @@ function Hydra:_constructor(input)
                if type(kmap) ~= 'table'
                   or type(lhs) ~= 'string'
                   or (rhs and type(rhs) ~= 'string' and type(rhs) ~= 'function')
-                  or (opts and type(opts) ~= 'table')
+                  or (opts and (type(opts) ~= 'table' or opts.desc == true))
                then
                   return false
                else
@@ -409,16 +409,18 @@ function Hydra:_prepare_hint_buffer()
 
          local line, len = {}, 0
          for _, head in pairs(heads) do
-            line[#line+1] = string.format('_%s_', head)
-            -- line[#line+1] = string.format('[_%s_]', head)
-            local desc = vim.tbl_get(self.heads, head, 2, 'desc')
-            if desc then
-               desc = string.format(': %s, ', desc)
-            else
-               desc = ', '
+            if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
+               line[#line+1] = string.format('_%s_', head)
+               -- line[#line+1] = string.format('[_%s_]', head)
+               local desc = vim.tbl_get(self.heads, head, 2, 'desc')
+               if desc then
+                  desc = string.format(': %s, ', desc)
+               else
+                  desc = ', '
+               end
+               line[#line+1] = desc
+               len = len + #head + #desc
             end
-            line[#line+1] = desc
-            len = len + #head + #desc
          end
          line = table.concat(line):gsub(', $', '')
          len = len - 2
@@ -445,15 +447,17 @@ function Hydra:_prepare_hint_buffer()
       self.heads_order = utils.reverse_tbl(self.heads_order)
       local line = { ' ', self.name, ': ' }
       for _, head in pairs(self.heads_order) do
-         line[#line+1] = string.format('_%s_', head)
-         -- line[#line+1] = string.format('[_%s_]', head)
-         local desc = self.heads[head][2].desc
-         if desc then
-            desc = string.format(': %s, ', desc)
-         else
-            desc = ', '
+         if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
+            line[#line+1] = string.format('_%s_', head)
+            -- line[#line+1] = string.format('[_%s_]', head)
+            local desc = self.heads[head][2].desc
+            if desc then
+               desc = string.format(': %s, ', desc)
+            else
+               desc = ', '
+            end
+            line[#line+1] = desc
          end
-         line[#line+1] = desc
       end
       line = table.concat(line):gsub(', $', '')
       vim.api.nvim_buf_set_lines(self.hint.bufnr, 0, 1, false, { line })
@@ -486,6 +490,7 @@ function Hydra:_set_keymap(lhs, rhs, opts)
       o.color = nil
       o.private = nil
       o.exit = nil
+      if type(o.desc) == 'boolean' then o.desc = nil end
    end
    vim.keymap.set(self.mode, lhs, rhs, o)
 end
