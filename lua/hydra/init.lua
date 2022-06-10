@@ -208,9 +208,10 @@ function Hydra:_constructor(input)
 end
 
 function Hydra:_setup_hydra_keymaps()
-   self:_set_keymap(self.plug.pre,  function() self:_pre() end)
-   self:_set_keymap(self.plug.post, function() self:_post() end)
-   self:_set_keymap(self.plug.wait, function() self:_leave() end)
+   self:_set_keymap(self.plug.pre,   function() self:_pre() end)
+   self:_set_keymap(self.plug.post,  function() self:_post() end)
+   self:_set_keymap(self.plug.leave, function() self:_leave() end)
+   self:_set_keymap(self.plug.wait, self.plug.leave)
 
    -- Define entering keymap if Hydra is called only on body keymap.
    if self.config.invoke_on_body then
