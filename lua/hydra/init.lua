@@ -31,6 +31,10 @@ keymap.set(<Plug>(hydra_wait), <Plug>(hydra_leave))
 --]]
 
 local utils = require('hydra/utils')
+
+---@type function
+local termcodes = utils.termcodes
+
 local default_config = {
    pre  = nil, -- before entering hydra
    post = nil, -- after leaving hydra
@@ -78,9 +82,9 @@ setmetatable(Hydra, {
 function Hydra:_constructor(input)
    do -- validate parameters
       vim.validate({
-         name = { input.name, 'string' },
+         name = { input.name, 'string', true },
          config = { input.config, 'table', true },
-         mode = { input.mode, 'string' },
+         mode = { input.mode, 'string', true },
          body = { input.body, 'string' },
          heads = { input.heads, 'table' },
          exit = { input.exit, { 'string', 'table' }, true }
@@ -166,17 +170,13 @@ function Hydra:_constructor(input)
       end
    })
 
-   self:_set_keymap(self.plug.pre,  function() self:_pre() end)
-   self:_set_keymap(self.plug.post, function() self:_post() end)
-   self:_set_keymap(self.plug.wait, function() self:_leave() end)
-
-   self.heads, self.heads_order = {}, {}
+   self.heads = {}; self.heads_order = {}
    local has_exit_head = self.config.exit and true or nil
    local num_of_heads = #input.heads
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
 
-      if opts.exit ~= nil then -- User explicitly passed 'exit' option inside the head.
+      if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
          color = utils.get_color_from_config(self.config.foreign_keys, opts.exit)
          if opts.exit and has_exit_head == nil then
             has_exit_head = true
@@ -200,6 +200,18 @@ function Hydra:_constructor(input)
       self.heads_order['<Esc>'] = num_of_heads
    end
 
+   if self.config.color == 'pink' then
+      self:_setup_pink_hydra()
+   else
+      self:_setup_hydra_keymaps()
+   end
+end
+
+function Hydra:_setup_hydra_keymaps()
+   self:_set_keymap(self.plug.pre,  function() self:_pre() end)
+   self:_set_keymap(self.plug.post, function() self:_post() end)
+   self:_set_keymap(self.plug.wait, function() self:_leave() end)
+
    -- Define entering keymap if Hydra is called only on body keymap.
    if self.config.invoke_on_body then
       self:_set_keymap(self.body, table.concat{ self.plug.pre, self.plug.wait })
@@ -216,7 +228,7 @@ function Hydra:_constructor(input)
       end
 
       -- Define entering mappings
-      if not self.config.invoke_on_body and not opts.private and not opts.exit then
+      if not self.config.invoke_on_body and not opts.exit and not opts.private then
          self:_set_keymap(self.body..head, table.concat{
             self.plug.pre,
             self.plug[head],
@@ -245,11 +257,135 @@ function Hydra:_constructor(input)
          self:_set_keymap(self.plug.wait..first_n_keys, self.plug.leave)
       end
    end
+end
 
+function Hydra:_setup_pink_hydra()
+   local available, KeyLayer = pcall(require, 'keymap-layer')
+   if not available then
+      vim.schedule(function() vim.notify_once(
+         '[hyda.nvim] For pink hydra you need https://github.com/anuvyklack/keymap-layer.nvim package',
+         vim.log.levels.ERROR)
+      end)
+      return false
+   end
+
+   local function create_layer_input_in_internal_form()
+
+      local layer = setmetatable({}, {
+         __index = function(self, mappings_type)
+            self[mappings_type] = setmetatable({}, {
+               __index = function(self, mode)
+                  self[mode] = setmetatable({}, {
+                     __index = function(self, lhs)
+                        self[lhs] = {}
+                        return self[lhs]
+                     end
+                  })
+                  return self[mode]
+               end
+            })
+            return self[mappings_type]
+         end
+      })
+
+      layer.config = {
+         on_enter = function()
+            if self.config.pre then self.config.pre() end
+            self:_show_hint()
+         end,
+         on_exit = function()
+            vim.api.nvim_win_close(self.hint.winid, false)
+            if self.config.post then self.config.post() end
+         end,
+         timeout = self.config.timeout
+      }
+
+      local modes = type(self.mode) == 'table' and self.mode or { self.mode }
+      for _, mode in ipairs(modes) do
+         self.body = termcodes(self.body)
+
+         if self.config.invoke_on_body then
+            layer.enter_keymaps[mode][self.body] = {'<Nop>', {}}
+         end
+
+         for head, map in pairs(self.heads) do
+            head = termcodes(head)
+            local rhs, opts = map[1], map[2] and vim.deepcopy(map[2]) or {}
+            if not rhs then rhs = '<Nop>' end
+            local exit, private = opts.exit, opts.private
+            opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
+
+            if not self.config.invoke_on_body and not exit and not private then
+               layer.enter_keymaps[mode][self.body..head] = { rhs, opts }
+            end
+
+            if exit then
+               layer.exit_keymaps[mode][head] = { rhs, opts }
+            else
+               layer.layer_keymaps[mode][head] = { rhs, opts }
+            end
+         end
+      end
+
+      utils.deep_unsetmetatable(layer)
+
+      return layer
+   end
+
+   local function create_layer_input_in_public_form()
+      local layer = {
+         enter = {}, layer = {}, exit = {},
+         config = {
+            on_enter = function()
+               if self.config.pre then self.config.pre() end
+               self:_show_hint()
+            end,
+            on_exit = function()
+               vim.api.nvim_win_close(self.hint.winid, false)
+               if self.config.post then self.config.post() end
+            end,
+            timeout = self.config.timeout
+         }
+      }
+
+      if self.config.invoke_on_body then
+         layer.enter[1] = { self.mode, self.body }
+      end
+
+      for head, map in pairs(self.heads) do
+         local rhs, opts = map[1], map[2]
+         if not rhs then rhs = '<Nop>' end
+         local exit, private = opts.exit, opts.private
+         opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
+
+         if not self.config.invoke_on_body and not exit and not private then
+            table.insert(layer.enter, { self.mode, self.body..head, rhs, opts })
+         end
+
+         if exit then
+            table.insert(layer.exit, { self.mode, head, rhs, opts })
+         else
+            table.insert(layer.layer, { self.mode, head, rhs, opts })
+         end
+      end
+
+      return layer
+   end
+
+   local layer = create_layer_input_in_internal_form()
+   -- local layer = create_layer_input_in_public_form()
+
+   self.layer = KeyLayer(layer)
 end
 
 function Hydra:_pre()
-   if _G.active_hydra then _G.active_hydra:_post() end
+   if _G.active_hydra then
+      if _G.active_hydra.layer then
+         _G.active_hydra.layer.exit()
+      else
+         _G.active_hydra:_post()
+      end
+   end
    _G.active_hydra = self
 
    self.original_options.showcmd  = vim.o.showcmd
@@ -445,7 +581,7 @@ function Hydra:_prepare_hint_buffer()
       self.hint.win_width = visible_width
    else
       self.heads_order = utils.reverse_tbl(self.heads_order)
-      local line = { ' ', self.name, ': ' }
+      local line = { ' ', self.name or 'HYDRA', ': ' }
       for _, head in pairs(self.heads_order) do
          if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
             line[#line+1] = string.format('_%s_', head)

@@ -8,9 +8,21 @@ function utils.generate_id()
    return id
 end
 
+---Shortcut to `vim.api.nvim_replace_termcodes`
+---@param keys string
+---@return string
+function utils.termcodes(keys)
+   return vim.api.nvim_replace_termcodes(keys, true, true, true)
+end
+
+
 function utils.get_color_from_config(foreign_keys, exit)
    if foreign_keys == 'run' then
-      return 'pink'
+      if exit then
+         return 'blue'
+      else
+         return 'pink'
+      end
    elseif foreign_keys == 'warn' and exit then
       return 'teal'
    elseif foreign_keys == 'warn' then
@@ -33,6 +45,17 @@ function utils.get_config_from_color(color)
       return nil, true
    elseif color == 'red' then
       return nil, false
+   end
+end
+
+---Deep unset metatables for input table all nested tables.
+---@param tbl table
+function utils.deep_unsetmetatable(tbl)
+   for _, subtbl in pairs(tbl) do
+      setmetatable(tbl, nil)
+      if type(subtbl) == 'table' then
+         utils.deep_unsetmetatable(subtbl)
+      end
    end
 end
 
