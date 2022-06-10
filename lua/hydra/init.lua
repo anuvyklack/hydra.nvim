@@ -172,7 +172,6 @@ function Hydra:_constructor(input)
 
    self.heads = {}; self.heads_order = {}
    local has_exit_head = self.config.exit and true or nil
-   local num_of_heads = #input.heads
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
 
@@ -196,8 +195,7 @@ function Hydra:_constructor(input)
          desc = 'exit',
          color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue'
       }}
-      num_of_heads = num_of_heads + 1
-      self.heads_order['<Esc>'] = num_of_heads
+      self.heads_order['<Esc>'] = vim.tbl_count(self.heads)
    end
 
    if self.config.color == 'pink' then
