@@ -79,6 +79,7 @@ setmetatable(Hydra, {
 ---Constructor
 ---@param input table
 ---@return Hydra
+
 function Hydra:_constructor(input)
    do -- validate parameters
       vim.validate({
@@ -289,12 +290,14 @@ function Hydra:_setup_pink_hydra()
 
       layer.config = {
          on_enter = function()
+            _G.active_hydra = self
             if self.config.pre then self.config.pre() end
             self:_show_hint()
          end,
          on_exit = function()
             vim.api.nvim_win_close(self.hint.winid, false)
             if self.config.post then self.config.post() end
+            _G.active_hydra = nil
          end,
          timeout = self.config.timeout
       }
@@ -309,10 +312,11 @@ function Hydra:_setup_pink_hydra()
 
          for head, map in pairs(self.heads) do
             head = termcodes(head)
-            local rhs, opts = map[1], map[2] and vim.deepcopy(map[2]) or {}
-            if not rhs then rhs = '<Nop>' end
+            local rhs = map[1] or '<Nop>'
+            local opts = map[2] and vim.deepcopy(map[2]) or {}
             local exit, private = opts.exit, opts.private
             opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
+            if exit == 'after' then opts.after_exit = true end
 
             if not self.config.invoke_on_body and not exit and not private then
                layer.enter_keymaps[mode][self.body..head] = { rhs, opts }
@@ -352,10 +356,12 @@ function Hydra:_setup_pink_hydra()
       end
 
       for head, map in pairs(self.heads) do
-         local rhs, opts = map[1], map[2]
-         if not rhs then rhs = '<Nop>' end
+         head = termcodes(head)
+         local rhs  = map[1] or '<Nop>'
+         local opts = map[2] and vim.deepcopy(map[2]) or {}
          local exit, private = opts.exit, opts.private
          opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
+         if exit == 'after' then opts.after_exit = true end
 
          if not self.config.invoke_on_body and not exit and not private then
             table.insert(layer.enter, { self.mode, self.body..head, rhs, opts })
