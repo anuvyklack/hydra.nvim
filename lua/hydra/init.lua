@@ -47,8 +47,7 @@ local default_config = {
    foreign_keys = nil, -- nil | warn | run
    invoke_on_body = false,
    hint = {
-      anchor = 'SW',
-      row = nil, col = nil,
+      position = 'bottom',
       border = nil
    }
 }
@@ -512,19 +511,47 @@ end
 function Hydra:_show_hint()
    if not self.hint.bufnr then self:_prepare_hint_buffer() end
 
-   self.hint.winid = vim.api.nvim_open_win(self.hint.bufnr, false, {
-      relative = 'editor',
-      anchor = self.config.hint.anchor,
-      row = self.config.hint.row or (vim.o.lines - 2),
-      col = self.config.hint.col or
-            math.floor((vim.o.columns - self.hint.win_width) / 2),
-      width  = self.hint.win_width,
-      height = self.hint.win_height,
-      style = 'minimal',
-      border = self.config.hint.border or 'none',
-      focusable = false,
-      noautocmd = true
-   })
+   if not self.hint.win_config then
+
+      --   top-left   |   top   |  top-right
+      -- -------------+---------+--------------
+      --  middle-left | middle  | middle-right
+      -- -------------+---------+--------------
+      --  bottom-left | bottome | bottom-right
+
+      -- self.config.hint.position = vim.split(self.config.hint.position, '-')
+      local pos = vim.split(self.config.hint.position, '-')
+
+      self.hint.win_config = {
+         relative = 'editor',
+         anchor = 'SW',
+         width  = self.hint.win_width,
+         height = self.hint.win_height,
+         style = 'minimal',
+         border = self.config.hint.border or 'none',
+         focusable = false,
+         noautocmd = true,
+      }
+
+      if pos[1] == 'top' then
+         self.hint.win_config.row = 2
+      elseif pos[1] == 'middle' then
+         self.hint.win_config.row = math.floor((vim.o.lines + self.hint.win_height) / 2)
+      elseif pos[1] == 'bottom' then
+         self.hint.win_config.row = vim.o.lines - 2
+      end
+
+      if pos[2] == 'left' then
+         self.hint.win_config.col = 0
+      elseif pos[2] == 'right' then
+         self.hint.win_config.col = vim.o.columns - self.hint.win_width
+      else -- center
+         self.hint.win_config.col = math.floor((vim.o.columns - self.hint.win_width) / 2)
+      end
+   end
+
+   self.hint.winid = vim.api.nvim_open_win(self.hint.bufnr, false, self.hint.win_config)
+
    vim.wo[self.hint.winid].winhighlight = 'NormalFloat:HydraHint'
    vim.wo[self.hint.winid].conceallevel = 3
    vim.wo[self.hint.winid].foldenable = false
@@ -533,6 +560,7 @@ function Hydra:_show_hint()
 end
 
 function Hydra:_prepare_hint_buffer()
+   -- Namespace ID
    local ns_id = vim.api.nvim_create_namespace('hydra.plugin')
    self.hint.bufnr = vim.api.nvim_create_buf(false, true)
    vim.bo[self.hint.bufnr].filetype = 'hydra_hint'
