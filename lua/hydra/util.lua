@@ -72,12 +72,46 @@ function util.reverse_tbl(tbl)
    return r
 end
 
-function util.recursive_subtables(tbl, subtbl)
-   tbl[subtbl] = setmetatable({}, {
-      __index = util.recursive_subtables
+-- function util.recursive_subtables(tbl, subtbl)
+--    tbl[subtbl] = setmetatable({}, {
+--       __index = util.recursive_subtables
+--    })
+--    return tbl[subtbl]
+-- end
+
+-- Recursive subtables
+local mt = {}
+function mt.__index(self, subtbl)
+   self[subtbl] = setmetatable({}, {
+      __index = mt.__index
    })
-   return tbl[subtbl]
+   return self[subtbl]
 end
 
+function util.unlimited_depth_table()
+   return setmetatable({}, mt)
+end
+
+function util.make_meta_accessor(get, set)
+   return setmetatable({}, {
+      __index = not get and nil or function(_, k) return get(k) end,
+      __newindex = not set and nil or function(_, k, v) return set(k, v) end
+   })
+end
+
+function util.disable_meta_accessor(accessor)
+   local function disable()
+      util.warn(string.format(
+         '"vim.%s" meta-accessor is disabled inside config.pre() function',
+         accessor))
+   end
+   return util.make_meta_accessor(disable, disable)
+end
+
+function util.warn(msg)
+   vim.schedule(function()
+      vim.notify_once('[Hydra] '..msg, vim.log.levels.WARN)
+   end)
+end
 
 return util
