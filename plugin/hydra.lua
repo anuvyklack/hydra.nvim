@@ -2,12 +2,11 @@ local function hl(name, val)
    vim.api.nvim_set_hl(0, name, val)
 end
 
-hl('HydraRed',      { fg = '#f2594b', bold = true, default = true })
-hl('HydraBlue',     { fg = '#0091f7', bold = true, default = true })
-hl('HydraAmaranth', { fg = '#FF355E', bold = true, default = true })
-hl('HydraTeal',     { fg = '#009090', bold = true, default = true })
-hl('HydraPink',     { fg = '#f766ad', bold = true, default = true })
-
+hl('HydraRed',      { fg = '#FF5733', bold = true, default = true })
+hl('HydraBlue',     { fg = '#5EBCF6', bold = true, default = true })
+hl('HydraAmaranth', { fg = '#ff1757', bold = true, default = true })
+hl('HydraTeal',     { fg = '#00a1a1', bold = true, default = true })
+hl('HydraPink',     { fg = '#ff55de', bold = true, default = true })
 hl('HydraHint', { link = 'NormalFloat' })
 
 
