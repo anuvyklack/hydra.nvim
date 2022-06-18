@@ -1,9 +1,9 @@
-local utils = {}
+local util = {}
 local id = 0
 
 ---Generate ID
 ---@return integer
-function utils.generate_id()
+function util.generate_id()
    id = id + 1
    return id
 end
@@ -11,12 +11,11 @@ end
 ---Shortcut to `vim.api.nvim_replace_termcodes`
 ---@param keys string
 ---@return string
-function utils.termcodes(keys)
+function util.termcodes(keys)
    return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
-
-function utils.get_color_from_config(foreign_keys, exit)
+function util.get_color_from_config(foreign_keys, exit)
    if foreign_keys == 'run' then
       if exit then
          return 'blue'
@@ -34,7 +33,7 @@ function utils.get_color_from_config(foreign_keys, exit)
    end
 end
 
-function utils.get_config_from_color(color)
+function util.get_config_from_color(color)
    if color == 'pink' then
       return 'run', false
    elseif color == 'teal' then
@@ -50,22 +49,22 @@ end
 
 ---Deep unset metatables for input table all nested tables.
 ---@param tbl table
-function utils.deep_unsetmetatable(tbl)
+function util.deep_unsetmetatable(tbl)
    for _, subtbl in pairs(tbl) do
       setmetatable(tbl, nil)
       if type(subtbl) == 'table' then
-         utils.deep_unsetmetatable(subtbl)
+         util.deep_unsetmetatable(subtbl)
       end
    end
 end
 
----Return table where all key, value pairs are reversed.
+---Return table where all `key`, `value` pairs are reversed.
 ---```
 ---    table[key] = value  =>  table[value] = key
 ---```
 ---@param tbl table
 ---@return table
-function utils.reverse_tbl(tbl)
+function util.reverse_tbl(tbl)
    local r = {}
    for key, value in pairs(tbl) do
       r[value] = key
@@ -73,4 +72,12 @@ function utils.reverse_tbl(tbl)
    return r
 end
 
-return utils
+function util.recursive_subtables(tbl, subtbl)
+   tbl[subtbl] = setmetatable({}, {
+      __index = util.recursive_subtables
+   })
+   return tbl[subtbl]
+end
+
+
+return util

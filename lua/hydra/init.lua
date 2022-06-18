@@ -30,10 +30,10 @@ keymap.set(<Plug>(hydra_wait), <Plug>(hydra_leave))
 
 --]]
 
-local utils = require('hydra/utils')
+local util = require('hydra/util')
 
 ---@type function
-local termcodes = utils.termcodes
+local termcodes = util.termcodes
 
 local default_config = {
    pre  = nil, -- before entering hydra
@@ -136,7 +136,7 @@ function Hydra:_constructor(input)
       end
    end
 
-   self.id = utils.generate_id() -- Unique ID for each Hydra.
+   self.id = util.generate_id() -- Unique ID for each Hydra.
    self.name  = input.name
    self.config = vim.tbl_deep_extend('force', default_config, input.config or {})
    self.mode  = input.mode or 'n'
@@ -153,11 +153,11 @@ function Hydra:_constructor(input)
    end
 
    -- Bring 'foreign_keys', 'exit' and 'color' options into line.
-   local color = utils.get_color_from_config(self.config.foreign_keys, self.config.exit)
+   local color = util.get_color_from_config(self.config.foreign_keys, self.config.exit)
    if color ~= 'red' and color ~= self.config.color then
       self.config.color = color
    elseif color ~= self.config.color then
-      self.config.foreign_keys, self.config.exit = utils.get_config_from_color(self.config.color)
+      self.config.foreign_keys, self.config.exit = util.get_config_from_color(self.config.color)
    end
    if self.config.exit then
       self.config.invoke_on_body = true
@@ -177,7 +177,7 @@ function Hydra:_constructor(input)
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
 
       if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
-         color = utils.get_color_from_config(self.config.foreign_keys, opts.exit)
+         color = util.get_color_from_config(self.config.foreign_keys, opts.exit)
          if opts.exit and has_exit_head == nil then
             has_exit_head = true
          end
@@ -330,7 +330,7 @@ function Hydra:_setup_pink_hydra()
          end
       end
 
-      utils.deep_unsetmetatable(layer)
+      util.deep_unsetmetatable(layer)
 
       return layer
    end
@@ -585,7 +585,7 @@ function Hydra:_prepare_hint_buffer()
 
       self.hint.win_width = visible_width
    else
-      self.heads_order = utils.reverse_tbl(self.heads_order)
+      self.heads_order = util.reverse_tbl(self.heads_order)
       local line = { ' ', self.name or 'HYDRA', ': ' }
       for _, head in pairs(self.heads_order) do
          if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
