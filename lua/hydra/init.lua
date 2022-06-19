@@ -624,7 +624,7 @@ function Hydra:_prepare_hint_buffer()
                len = len + #head + #desc
             end
          end
-         line = table.concat(line):gsub(', $', '')
+         line = ' '..table.concat(line):gsub(', $', '')
          len = len - 2
          if len > visible_width then visible_width = len end
 
