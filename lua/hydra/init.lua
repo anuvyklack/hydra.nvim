@@ -260,7 +260,12 @@ function Hydra:_setup_hydra_keymaps()
          })
       end
 
-      if opts.exit then -- blue head
+      if opts.exit and opts.exit == 'after' then -- blue head
+         self:_set_keymap(self.plug.wait..head, table.concat{
+            self.plug.post,
+            self.plug[head]
+         })
+      elseif opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, table.concat{
             self.plug[head],
             self.plug.post
