@@ -90,7 +90,6 @@ function Hydra:_constructor(input)
          mode = { input.mode, { 'string', 'table' }, true },
          body = { input.body, 'string' },
          heads = { input.heads, 'table' },
-         exit = { input.exit, { 'string', 'table' }, true }
       })
       if input.config then
          vim.validate({
@@ -260,15 +259,10 @@ function Hydra:_setup_hydra_keymaps()
          })
       end
 
-      if opts.exit and opts.exit == 'after' then -- blue head
+      if opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, table.concat{
             self.plug.post,
             self.plug[head]
-         })
-      elseif opts.exit then -- blue head
-         self:_set_keymap(self.plug.wait..head, table.concat{
-            self.plug[head],
-            self.plug.post
          })
       else
          self:_set_keymap(self.plug.wait..head, table.concat{
@@ -332,7 +326,6 @@ function Hydra:_setup_pink_hydra()
             local opts = map[2] and vim.deepcopy(map[2]) or {}
             local exit, private = opts.exit, opts.private
             opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
-            if exit == 'after' then opts.after_exit = true end
 
             if not self.config.invoke_on_body and not exit and not private then
                layer.enter_keymaps[mode][self.body..head] = { rhs, opts }
@@ -381,7 +374,6 @@ function Hydra:_setup_pink_hydra()
          local opts = map[2] and vim.deepcopy(map[2]) or {}
          local exit, private = opts.exit, opts.private
          opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
-         if exit == 'after' then opts.after_exit = true end
 
          if not self.config.invoke_on_body and not exit and not private then
             table.insert(layer.enter, { self.mode, self.body..head, rhs, opts })
