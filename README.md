@@ -115,7 +115,10 @@ A full fledged git "submode":
 
 ![](https://user-images.githubusercontent.com/13056013/174571437-4445dd84-c5f1-4dc8-b22a-3fbf71ac69a2.png)
 
-The code is huge but, simple.
+The code is huge but, simple. For this hydra you need next plugins:
+
+- [Gitsigns](https://github.com/lewis6991/gitsigns.nvim)
+- [Neogit](https://github.com/TimUntersberger/neogit)
 
 ```lua
 local Hydra = require('hydra')

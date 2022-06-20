@@ -102,7 +102,7 @@ end
 function util.disable_meta_accessor(accessor)
    local function disable()
       util.warn(string.format(
-         '"vim.%s" meta-accessor is disabled inside config.pre() function',
+         '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
          accessor))
    end
    return util.make_meta_accessor(disable, disable)
