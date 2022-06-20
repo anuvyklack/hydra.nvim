@@ -531,22 +531,14 @@ function Hydra:_prepare_hint_buffer()
    vim.bo[self.hint.bufnr].filetype = 'hydra_hint'
 
    if self.hint.lines then
-      local longest_line_nr   -- Index of the longest line
-      local max_line_len = -1 -- The lenght of the longest line
-      for i, line in ipairs(self.hint.lines) do
-         local line_len = vim.fn.strdisplaywidth(line)
-         if line_len > max_line_len then
-            max_line_len = line_len
-            longest_line_nr = i
+      local visible_width = -1  -- The width of the window
+      for _, line in ipairs(self.hint.lines) do
+         local visible_line_len = #line:gsub('[_^]', '')
+         if visible_line_len > visible_width then
+            visible_width = visible_line_len
          end
       end
-
-      local visible_width = max_line_len
-      local i = 0
-      while(true) do
-         i = self.hint.lines[longest_line_nr]:find('[_^]', i + 1)
-         if i then visible_width = visible_width - 1 else break end
-      end
+      self.hint.win_width = visible_width
       self.hint.win_height = #self.hint.lines
 
       vim.api.nvim_buf_set_lines(self.hint.bufnr, 0, 1, false, self.hint.lines)
@@ -609,10 +601,7 @@ function Hydra:_prepare_hint_buffer()
                   self.hint.bufnr, ns_id, 'Hydra'..color, self.hint.win_height - 1, start, stop)
             end
          until not stop
-
       end
-
-      self.hint.win_width = visible_width
    else
       self.heads_order = util.reverse_tbl(self.heads_order)
       local line = { ' ', self.name or 'HYDRA', ': ' }
