@@ -46,6 +46,7 @@ If you want to quickly understand the concept, you can watch
 * [Sample Hydras](#sample-hydras)
     * [Side scroll](#side-scroll)
     * [Git](#git)
+    * [Community wiki](#community-wiki)
 * [Instalation](#instalation)
 * [How to create hydra](#how-to-create-hydra)
     * [`name`](#name)
@@ -77,6 +78,7 @@ If you want to quickly understand the concept, you can watch
             * [`nowait`](#nowait)
     * [`hint`](#hint-1)
 * [Highlight](#highlight)
+* [Drawbacks](#drawbacks)
 * [How it works under the hood](#how-it-works-under-the-hood)
 
 <!-- vim-markdown-toc -->
@@ -174,6 +176,11 @@ Hydra({
    }
 })
 ```
+
+### Community wiki
+
+You can find more hydras the project's [community wiki](https://github.com/anuvyklack/hydra.nvim/wiki/Community-hydras).
+Feel free to add your own or edit the existing ones.
 
 ## Instalation
 
@@ -521,6 +528,11 @@ HydraHint  link  NormalFloat
 ```
 
 `HydraHint` defines the fore- and background of the hint window.
+
+## Drawbacks
+
+`[count]` is not supported in a red, amaranth and teal hydras (see `:help count`).
+But supported in pink hydra since it is a [layer](https://github.com/anuvyklack/keymap-layer.nvim).
 
 ## How it works under the hood
 
