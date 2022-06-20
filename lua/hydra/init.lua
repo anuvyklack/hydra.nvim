@@ -1,35 +1,3 @@
---[[
-
-Hydras "head" is a "lhs" (left hand side), i.e keys you have to type to invoke
-mapping.
-
--- enter hydra
-keymap.set(body..lhs, table.concat{
-   <Plug>(hydra_pre),
-   <Plug>(hydra_lhs),
-   <Plug>(hydra_wait)
-})
-
--- red head
-keymap.set(<Plug>(hydra_wait)head, table.concat{
-   <Plug>(hydra_head),
-   <Plug>(hydra_wait)
-})
-
--- blue head
-keymap.set(<Plug>(hydra_wait)head, table.concat{
-   <Plug>(hydra_head),
-   <Plug>(hydra_post)
-})
-
-keymap.set(<Plug>(hydra_wait){the first N keys in head},
-   <Plug>(hydra_leave)
-)
-
-keymap.set(<Plug>(hydra_wait), <Plug>(hydra_leave))
-
---]]
-
 local util = require('hydra/util')
 
 ---@type function
@@ -39,8 +7,8 @@ local augroup_name = 'Hydra'
 local augroup_id = vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
 local default_config = {
-   pre  = nil, -- before entering hydra
-   post = nil, -- after leaving hydra
+   on_enter  = nil, -- before entering hydra
+   on_exit = nil, -- after leaving hydra
    timeout = false, -- true, false or number in milliseconds
    color = 'red',
    exit = false,
@@ -93,8 +61,8 @@ function Hydra:_constructor(input)
       })
       if input.config then
          vim.validate({
-            pre = { input.config.pre, 'function', true },
-            post = { input.config.post, 'function', true },
+            on_enter = { input.config.on_enter, 'function', true },
+            on_exit = { input.config.on_exit, 'function', true },
             exit = { input.config.exit, 'boolean', true },
             timeout = { input.config.timeout, { 'boolean', 'number' }, true }
          })
@@ -203,7 +171,7 @@ function Hydra:_constructor(input)
    if self.config.color == 'pink' then
       self:_setup_pink_hydra()
    else
-      if self.config.pre then
+      if self.config.on_enter then
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
          })
@@ -212,9 +180,9 @@ function Hydra:_constructor(input)
          env.vim.bo = self:_get_meta_accessor('bo')
          env.vim.wo = self:_get_meta_accessor('wo')
 
-         setfenv(self.config.pre, env)
+         setfenv(self.config.on_enter, env)
       end
-      if self.config.post then
+      if self.config.on_exit then
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
          })
@@ -223,21 +191,21 @@ function Hydra:_constructor(input)
          env.vim.bo = util.disable_meta_accessor('bo')
          env.vim.wo = util.disable_meta_accessor('wo')
 
-         setfenv(self.config.post, env)
+         setfenv(self.config.on_exit, env)
       end
       self:_setup_hydra_keymaps()
    end
 end
 
 function Hydra:_setup_hydra_keymaps()
-   self:_set_keymap(self.plug.pre,   function() self:_enter() end)
-   self:_set_keymap(self.plug.post,  function() self:_exit() end)
+   self:_set_keymap(self.plug.on_enter,   function() self:_enter() end)
+   self:_set_keymap(self.plug.on_exit,  function() self:_exit() end)
    self:_set_keymap(self.plug.leave, function() self:_leave() end)
    self:_set_keymap(self.plug.wait, self.plug.leave)
 
    -- Define entering keymap if Hydra is called only on body keymap.
    if self.config.invoke_on_body then
-      self:_set_keymap(self.body, table.concat{ self.plug.pre, self.plug.wait })
+      self:_set_keymap(self.body, table.concat{ self.plug.on_enter, self.plug.wait })
    end
 
    -- Define Hydra kyebindings.
@@ -253,7 +221,7 @@ function Hydra:_setup_hydra_keymaps()
       -- Define entering mappings
       if not self.config.invoke_on_body and not opts.exit and not opts.private then
          self:_set_keymap(self.body..head, table.concat{
-            self.plug.pre,
+            self.plug.on_enter,
             self.plug[head],
             self.plug.wait
          })
@@ -261,7 +229,7 @@ function Hydra:_setup_hydra_keymaps()
 
       if opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, table.concat{
-            self.plug.post,
+            self.plug.on_exit,
             self.plug[head]
          })
       else
@@ -300,10 +268,10 @@ function Hydra:_setup_pink_hydra()
                _G.active_hydra = self
                self:_show_hint()
             end,
-            self.config.pre
+            self.config.on_enter
          },
          on_exit = {
-            self.config.post,
+            self.config.on_exit,
             function()
                vim.api.nvim_win_close(self.hint.winid, false)
                _G.active_hydra = nil
@@ -352,10 +320,10 @@ function Hydra:_setup_pink_hydra()
                _G.active_hydra = self
                self:_show_hint()
             end,
-            self.config.pre
+            self.config.on_enter
          },
          on_exit = {
-            self.config.post,
+            self.config.on_exit,
             function()
                vim.api.nvim_win_close(self.hint.winid, false)
                _G.active_hydra = nil
@@ -439,7 +407,7 @@ function Hydra:_enter()
    -- vim.o.ttimeout = not self.original.timeout and true
    --                  or self.original.ttimeout
 
-   if self.config.pre then self.config.pre() end
+   if self.config.on_enter then self.config.on_enter() end
 
    self:_show_hint()
 end
@@ -458,7 +426,7 @@ function Hydra:_exit()
    vim.api.nvim_win_close(self.hint.winid, false)
    -- vim.api.nvim_buf_delete(self.hint.bufnr, { force = true, unload = false })
 
-   if self.config.post then self.config.post() end
+   if self.config.on_exit then self.config.on_exit() end
    _G.active_hydra = nil
    vim.cmd 'echo'
 end
