@@ -198,14 +198,14 @@ function Hydra:_constructor(input)
 end
 
 function Hydra:_setup_hydra_keymaps()
-   self:_set_keymap(self.plug.on_enter,   function() self:_enter() end)
-   self:_set_keymap(self.plug.on_exit,  function() self:_exit() end)
+   self:_set_keymap(self.plug.enter, function() self:_enter() end)
+   self:_set_keymap(self.plug.exit,  function() self:_exit()  end)
    self:_set_keymap(self.plug.leave, function() self:_leave() end)
    self:_set_keymap(self.plug.wait, self.plug.leave)
 
    -- Define entering keymap if Hydra is called only on body keymap.
    if self.config.invoke_on_body then
-      self:_set_keymap(self.body, table.concat{ self.plug.on_enter, self.plug.wait })
+      self:_set_keymap(self.body, table.concat{ self.plug.enter, self.plug.wait })
    end
 
    -- Define Hydra kyebindings.
@@ -221,7 +221,7 @@ function Hydra:_setup_hydra_keymaps()
       -- Define enter mappings
       if not self.config.invoke_on_body and not opts.exit and not opts.private then
          self:_set_keymap(self.body..head, table.concat{
-            self.plug.on_enter,
+            self.plug.enter,
             self.plug[head],
             self.plug.wait
          })
@@ -230,7 +230,7 @@ function Hydra:_setup_hydra_keymaps()
       -- Define exit mappings
       if opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, table.concat{
-            self.plug.on_exit,
+            self.plug.exit,
             self.plug[head]
          })
       else
