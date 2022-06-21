@@ -218,7 +218,7 @@ function Hydra:_setup_hydra_keymaps()
          self:_set_keymap(self.plug[head], rhs, opts)
       end
 
-      -- Define entering mappings
+      -- Define enter mappings
       if not self.config.invoke_on_body and not opts.exit and not opts.private then
          self:_set_keymap(self.body..head, table.concat{
             self.plug.on_enter,
@@ -227,6 +227,7 @@ function Hydra:_setup_hydra_keymaps()
          })
       end
 
+      -- Define exit mappings
       if opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, table.concat{
             self.plug.on_exit,

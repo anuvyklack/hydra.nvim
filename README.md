@@ -182,7 +182,7 @@ Hydra({
 
 ### Community wiki
 
-You can find more hydras the project's [community wiki](https://github.com/anuvyklack/hydra.nvim/wiki/Community-hydras).
+You can find more hydras in the project's [community wiki](https://github.com/anuvyklack/hydra.nvim/wiki/Community-hydras).
 Feel free to add your own or edit the existing ones.
 
 ## Instalation
@@ -197,7 +197,7 @@ use { 'anuvyklack/hydra.nvim',
 
 ## How to create hydra
 
-To create hydra You need to call Hydra's constructor with input parameters table of the
+To create hydra you need to call Hydra's constructor with input parameters table of the
 next form:
 
 ```lua
@@ -212,7 +212,7 @@ Hydra({
 })
 ```
 
-Each of the fields of this table is described in detail below.
+Each of the fields of this table is described in details below.
 
 ### `name`
 `string`
@@ -237,7 +237,7 @@ the `za`, `zb`, `zc` keybindings.
 `table`
 
 With this table, you can set the behavior of the whole hydra, which later can be 
-customized for each head particularly.  Below is a list of each option.
+customized for each head particularly.  Below is a list of all options.
 
 ---
 
@@ -297,7 +297,7 @@ they are underneath.
 
 Overall, the hydra body can have one of five variants of the basic colors: amaranth, teal,
 pink, red, blue.  They (according to basic color) determines the default behavior of
-all the heads; and (2) determines what happens when a key that is not associated to a
+all the heads; and determines what happens when a key that is not associated to a
 head is pressed. The following table summarizes the effects of the different colors.
 
 | Body Color | Basic color | Executing NON-HEAD    | Executing HEAD |
@@ -330,7 +330,7 @@ heads, what can be useful.
 ##### Pink color
 
 Pink hydra is of a different nature. It is a [key-layer](https://github.com/anuvyklack/keymap-layer.nvim)
-inside, so all keys except overwritten are work as usual. Even count prefixes.
+inside, so all keys except overwritten are work as usual. Even `[count]` prefixes.
 
 #### `invoke_on_body`
 
@@ -433,9 +433,7 @@ want to pass `opts` table, you need to pass `nil` explicitly.
 #### `opts`
 `table`
 
-`opts` table accepts all options that `vim.keymap.set()` accept (though I'm not properly
-test them, because I hardly can imagine which of them, besides `<expr>` can be required).
-Also there are additional options that can be passed into this table which are listed below.
+A table with head options to tune its behavior.
 
 ##### `private`
 `boolean`
