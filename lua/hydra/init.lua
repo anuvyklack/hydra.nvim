@@ -375,13 +375,7 @@ function Hydra:_enter()
    _G.active_hydra = self
 
    local o = self:_get_meta_accessor('o')
-
-   -- self.original.showcmd  = vim.o.showcmd
-   -- vim.o.showcmd = false
    o.showcmd = false
-
-   -- self.original.showmode = vim.o.showmode
-   -- vim.o.showmode = false
 
    if self.config.timeout then
       o.timeout = true
@@ -393,20 +387,6 @@ function Hydra:_enter()
    end
    o.ttimeout = not self.original.timeout and true
                 or self.original.ttimeout
-
-   -- self.original.timeout  = vim.o.timeout
-   -- self.original.ttimeout = vim.o.ttimeout
-   -- if self.config.timeout then
-   --    vim.o.timeout = true
-   --    if type(self.config.timeout) == 'number' then
-   --       self.original.timeoutlen = vim.o.timeoutlen
-   --       vim.o.timeoutlen = self.config.timeout
-   --    end
-   -- else
-   --    vim.o.timeout = false
-   -- end
-   -- vim.o.ttimeout = not self.original.timeout and true
-   --                  or self.original.ttimeout
 
    if self.config.on_enter then self.config.on_enter() end
 
