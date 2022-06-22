@@ -77,6 +77,7 @@ If you want to quickly understand the concept, you can watch
             * [`expr`, `silent`](#expr-silent)
             * [`nowait`](#nowait)
     * [`hint`](#hint-1)
+* [Public methods](#public-methods)
 * [Highlight](#highlight)
 * [Drawbacks](#drawbacks)
 * [How it works under the hood](#how-it-works-under-the-hood)
@@ -514,6 +515,10 @@ Heads with `desc = false` in `opts` table will be skipped.
 
 Every head that won't be found in the manually created hint, will be automatically added
 at the bottom of the hint window according to rules of auto generated hint.
+
+## Public methods
+
+- `Hydra:activate()` — a public method, which serves to activate hydra programmatically.
 
 ## Highlight
 

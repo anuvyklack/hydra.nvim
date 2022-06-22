@@ -49,7 +49,6 @@ setmetatable(Hydra, {
 ---Constructor
 ---@param input table
 ---@return Hydra
-
 function Hydra:_constructor(input)
    do -- validate parameters
       vim.validate({
@@ -713,6 +712,20 @@ function Hydra:_get_meta_accessor(accessor)
    }
 
    return ma[accessor]
+end
+
+---Programmatically activate hydra
+function Hydra:activate()
+   if self.layer then
+      self.layer:enter()
+   else
+      local keys = { self.plug.enter, self.plug.wait }
+      for i, k in ipairs(keys) do
+         keys[i] = vim.api.nvim_replace_termcodes(k, true, true, true)
+      end
+      keys = table.concat(keys)
+      vim.api.nvim_feedkeys(keys, '', false)
+   end
 end
 
 return Hydra
