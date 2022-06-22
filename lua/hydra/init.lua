@@ -500,6 +500,7 @@ function Hydra:_show_hint()
    vim.wo[self.hint.winid].winhighlight = 'NormalFloat:HydraHint'
    vim.wo[self.hint.winid].conceallevel = 3
    vim.wo[self.hint.winid].foldenable = false
+   vim.wo[self.hint.winid].wrap = false
 
    -- self.original_options.statusline = vim.o.statusline
 end
