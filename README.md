@@ -60,6 +60,7 @@ If you want to quickly understand the concept, you can watch
             * [Amaranth color](#amaranth-color)
             * [Blue and teal colors](#blue-and-teal-colors)
             * [Pink color](#pink-color)
+        * [`buffer`](#buffer)
         * [`invoke_on_body`](#invoke_on_body)
         * [`on_enter` and `on_exit`](#on_enter-and-on_exit)
             * [meta-accessors](#meta-accessors)
@@ -333,6 +334,11 @@ heads, what can be useful.
 
 Pink hydra is of a different nature. It is a [key-layer](https://github.com/anuvyklack/keymap-layer.nvim)
 inside, so all keys except overwritten are work as usual. Even `[count]` prefixes.
+
+#### `buffer`
+`true | number`
+
+Define hydra only for particular buffer. If `true` — the current buffer will be used.
 
 #### `invoke_on_body`
 

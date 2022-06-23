@@ -20,6 +20,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
             Amaranth color........................................|hydra-amaranth|
             Blue and teal colors......................................|hydra-blue|
             Pink color................................................|hydra-pink|
+	`buffer`...............................................|hydra-config.buffer|
         `invoke_on_body`...............................|hydra-config.invoke_on_body|
         `on_enter` and `on_exit`...............................|hydra-config.on_enter|
             meta-accessors..................................|hydra-meta-accessors|
@@ -335,6 +336,12 @@ config
 		(https://github.com/anuvyklack/keymap-layer.nvim) inside, so
 		all keys except overwritten are work as usual. Even `[count]`
 		prefixes.
+
+							*hydra-config.buffer*
+	buffer
+				true | number
+		Define hydra only for particular buffer.  If `true` — the current
+		buffer will be used.
 
 						*hydra-config.invoke_on_body*
 	invoke_on_body

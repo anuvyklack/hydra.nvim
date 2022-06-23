@@ -7,13 +7,14 @@ local augroup_name = 'Hydra'
 local augroup_id = vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
 local default_config = {
+   exit = false,
+   foreign_keys = nil, -- nil | warn | run
+   color = 'red',
    on_enter  = nil, -- before entering hydra
    on_exit = nil, -- after leaving hydra
    timeout = false, -- true, false or number in milliseconds
-   color = 'red',
-   exit = false,
-   foreign_keys = nil, -- nil | warn | run
    invoke_on_body = false,
+   buffer = nil,
    hint = {
       position = 'bottom',
       border = nil
@@ -63,7 +64,8 @@ function Hydra:_constructor(input)
             on_enter = { input.config.on_enter, 'function', true },
             on_exit = { input.config.on_exit, 'function', true },
             exit = { input.config.exit, 'boolean', true },
-            timeout = { input.config.timeout, { 'boolean', 'number' }, true }
+            timeout = { input.config.timeout, { 'boolean', 'number' }, true },
+            buffer = { input.config.buffer, { 'boolean', 'number' }, true }
          })
          vim.validate({
             foreign_keys = { input.config.foreign_keys, function(foreign_keys)
@@ -110,6 +112,13 @@ function Hydra:_constructor(input)
    self.mode  = input.mode or 'n'
    self.body  = input.body
    self.original = { o  = {}, go = {}, bo = {}, wo = {} }
+
+   -- make Hydra buffer local
+   if input.config.buffer and type(input.config.buffer) == 'number' then
+      self.config.buffer = input.config.buffer
+   elseif input.config.buffer then
+      self.config.buffer = vim.api.nvim_get_current_buf()
+   end
 
    self.hint = { lines = input.hint }
    if self.hint.lines then
@@ -263,6 +272,7 @@ function Hydra:_setup_pink_hydra()
    local function create_layer_input_in_internal_form()
       local layer = util.unlimited_depth_table()
       layer.config = {
+         buffer = self.config.buffer,
          on_enter = {
             function()
                _G.active_hydra = self
@@ -322,6 +332,7 @@ function Hydra:_setup_pink_hydra()
    local function create_layer_input_in_public_form()
       local layer = { enter = {}, layer = {}, exit = {} }
       layer.config = {
+         buffer = self.config.buffer,
          on_enter = {
             function()
                _G.active_hydra = self
@@ -637,8 +648,8 @@ function Hydra:_prepare_hint_buffer()
 end
 
 function Hydra:_set_keymap(lhs, rhs, opts)
-   local o = opts and vim.deepcopy(opts) or nil
-   if o then
+   local o = opts and vim.deepcopy(opts) or {}
+   if not vim.tbl_isempty(o) then
       o.color = nil
       o.private = nil
       o.exit = nil
@@ -646,6 +657,7 @@ function Hydra:_set_keymap(lhs, rhs, opts)
       o.nowait = nil
       o.mode = nil
    end
+   o.buffer = self.config.buffer
    vim.keymap.set(self.mode, lhs, rhs, o)
 end
 
