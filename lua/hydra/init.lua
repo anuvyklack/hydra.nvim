@@ -378,7 +378,7 @@ end
 function Hydra:_enter()
    if _G.active_hydra then
       if _G.active_hydra.layer then
-         _G.active_hydra.layer.exit()
+         _G.active_hydra.layer:exit()
       else
          _G.active_hydra:_exit()
       end
