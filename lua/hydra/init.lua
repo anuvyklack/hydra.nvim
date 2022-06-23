@@ -114,9 +114,7 @@ function Hydra:_constructor(input)
    self.original = { o  = {}, go = {}, bo = {}, wo = {} }
 
    -- make Hydra buffer local
-   if input.config.buffer and type(input.config.buffer) == 'number' then
-      self.config.buffer = input.config.buffer
-   elseif input.config.buffer then
+   if self.config.buffer and type(self.config.buffer) ~= 'number' then
       self.config.buffer = vim.api.nvim_get_current_buf()
    end
 
