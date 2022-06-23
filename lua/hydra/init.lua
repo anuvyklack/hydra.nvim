@@ -281,20 +281,27 @@ function Hydra:_setup_pink_hydra()
       }
 
       local modes = type(self.mode) == 'table' and self.mode or { self.mode }
-      for _, mode in ipairs(modes) do
-         self.body = termcodes(self.body)
+      self.body = termcodes(self.body)
 
-         if self.config.invoke_on_body then
+      if self.config.invoke_on_body then
+         for _, mode in ipairs(modes) do
             layer.enter_keymaps[mode][self.body] = {'<Nop>', {}}
          end
+      end
 
-         for head, map in pairs(self.heads) do
-            head = termcodes(head)
-            local rhs = map[1] or '<Nop>'
-            local opts = map[2] and vim.deepcopy(map[2]) or {}
-            local exit, private = opts.exit, opts.private
-            opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
+      for head, map in pairs(self.heads) do
+         head = termcodes(head)
+         local rhs = map[1] or '<Nop>'
+         local opts = map[2] and vim.deepcopy(map[2]) or {}
+         local exit, private, head_modes = opts.exit, opts.private, opts.mode
+         opts.color, opts.private, opts.exit, opts.modes = nil, nil, nil, nil
+         if type(opts.desc) == 'boolean' then opts.desc = nil end
 
+         if head_modes then
+            modes = type(head_modes) == 'table' and head_modes or { head_modes }
+         end
+
+         for _, mode in ipairs(modes) do
             if not self.config.invoke_on_body and not exit and not private then
                layer.enter_keymaps[mode][self.body..head] = { rhs, opts }
             end
@@ -340,17 +347,22 @@ function Hydra:_setup_pink_hydra()
          head = termcodes(head)
          local rhs  = map[1] or '<Nop>'
          local opts = map[2] and vim.deepcopy(map[2]) or {}
-         local exit, private = opts.exit, opts.private
-         opts.color, opts.private, opts.exit, opts.hint = nil, nil, nil, nil
+         local exit, private, head_modes = opts.exit, opts.private, opts.mode
+         opts.color, opts.private, opts.exit, opts.mode = nil, nil, nil, nil
+
+         local mode = self.mode
+         if head_modes then
+            mode = type(head_modes) == 'table' and head_modes or { head_modes }
+         end
 
          if not self.config.invoke_on_body and not exit and not private then
-            table.insert(layer.enter, { self.mode, self.body..head, rhs, opts })
+            table.insert(layer.enter, { mode, self.body..head, rhs, opts })
          end
 
          if exit then
-            table.insert(layer.exit, { self.mode, head, rhs, opts })
+            table.insert(layer.exit, { mode, head, rhs, opts })
          else
-            table.insert(layer.layer, { self.mode, head, rhs, opts })
+            table.insert(layer.layer, { mode, head, rhs, opts })
          end
       end
 
@@ -631,6 +643,8 @@ function Hydra:_set_keymap(lhs, rhs, opts)
       o.private = nil
       o.exit = nil
       if type(o.desc) == 'boolean' then o.desc = nil end
+      o.nowait = nil
+      o.mode = nil
    end
    vim.keymap.set(self.mode, lhs, rhs, o)
 end

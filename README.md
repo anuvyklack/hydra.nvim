@@ -76,6 +76,7 @@ If you want to quickly understand the concept, you can watch
             * [`desc`](#desc)
             * [`expr`, `silent`](#expr-silent)
             * [`nowait`](#nowait)
+            * [`mode`](#mode-1)
     * [`hint`](#hint-1)
 * [Public methods](#public-methods)
 * [Highlight](#highlight)
@@ -492,6 +493,12 @@ heads = {
 ```
 
 which will exit layer, without waiting `&timeoutlen` milliseconds for possible continuation.
+
+##### `mode`
+`string | string[]`
+
+Overwrite `mode` field for this particular head.
+Only relevant for `pink` hydra, for all others will be ignored.
 
 ### `hint`
 `multiline string`
