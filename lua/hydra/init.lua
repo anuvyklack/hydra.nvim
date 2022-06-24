@@ -536,11 +536,12 @@ function Hydra:_prepare_hint_buffer()
    if self.hint.lines then
       local visible_width = -1  -- The width of the window
       for _, line in ipairs(self.hint.lines) do
-         local visible_line_len = #line:gsub('[_^]', '')
+         local visible_line_len = vim.fn.strdisplaywidth(line:gsub('[_^]', ''))
          if visible_line_len > visible_width then
             visible_width = visible_line_len
          end
       end
+
       self.hint.win_width = visible_width
       self.hint.win_height = #self.hint.lines
 
