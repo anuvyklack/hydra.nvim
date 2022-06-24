@@ -307,10 +307,10 @@ function Hydra:_setup_pink_hydra()
          if type(opts.desc) == 'boolean' then opts.desc = nil end
 
          if head_modes then
-            modes = type(head_modes) == 'table' and head_modes or { head_modes }
+            head_modes = type(head_modes) == 'table' and head_modes or { head_modes }
          end
 
-         for _, mode in ipairs(modes) do
+         for _, mode in ipairs(head_modes or modes) do
             if not self.config.invoke_on_body and not exit and not private then
                layer.enter_keymaps[mode][self.body..head] = { rhs, opts }
             end
