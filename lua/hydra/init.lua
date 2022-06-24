@@ -18,7 +18,8 @@ local default_config = {
    hint = {
       position = 'bottom',
       border = nil
-   }
+   },
+   debug = false
 }
 
 _G.active_hydra = nil
@@ -737,6 +738,12 @@ function Hydra:_get_meta_accessor(accessor)
    }
 
    return ma[accessor]
+end
+
+function Hydra:_debug(...)
+   if self.config.debug then
+      vim.pretty_print(...)
+   end
 end
 
 ---Programmatically activate hydra
