@@ -416,9 +416,23 @@ end
 
 function Hydra:_exit()
    -- Restore original options
-   for _, otype in ipairs({'o', 'go', 'bo', 'wo'}) do
+   for _, otype in ipairs({'o', 'go'}) do
       for opt, val in pairs(self.original[otype]) do
          vim[otype][opt] = val
+      end
+   end
+   for bufnr, opts in pairs(self.original.bo) do
+      if vim.fn.buflisted(bufnr) then
+         for opt, val in pairs(opts) do
+            vim.bo[bufnr][opt] = val
+         end
+      end
+   end
+   for winnr, opts in pairs(self.original.wo) do
+      if vim.api.nvim_win_is_valid(winnr) then
+         for opt, val in pairs(opts) do
+            vim.wo[winnr][opt] = val
+         end
       end
    end
    self.original = { o  = {}, go = {}, bo = {}, wo = {} }
