@@ -445,41 +445,32 @@ function Hydra:_exit()
 
    if self.config.on_exit then self.config.on_exit() end
    _G.Hydra = nil
-   vim.cmd 'echo'
+   vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
 end
 
 function Hydra:_leave()
    if self.config.color == 'amaranth' then
       if vim.fn.getchar(1) ~= 0 then
-         -- print 'An Amaranth Hydra can only exit through a blue head'
-         local msg = {
-            'echon "An "',
-            'echohl HydraAmaranth',
-            'echon "Amaranth "',
-            'echohl None',
-            'echon "Hydra can only exit through a blue head"',
-         }
-         msg = table.concat(msg, ' | ')
-         vim.cmd(msg)
+         -- 'An Amaranth Hydra can only exit through a blue head'
+         vim.api.nvim_echo({
+            {'An '},
+            {'Amaranth', 'HydraAmaranth'},
+            {' Hydra can only exit through a blue head'}
+         }, false, {})
 
          vim.fn.getchar()
          local keys = vim.api.nvim_replace_termcodes(self.plug.wait, true, true, true)
          vim.api.nvim_feedkeys(keys, '', false)
-         -- vim.api.nvim_feedkeys(self.plug.wait, '', true)
          -- vim.fn.feedkeys([[\]]..self.plug.wait)
       end
    elseif self.config.color == 'teal' then
       if vim.fn.getchar(1) ~= 0 then
-         -- print 'A Teal Hydra can only exit through one of its heads'
-         local msg = {
-            'echon "A "',
-            'echohl HydraTeal',
-            'echon "Teal "',
-            'echohl None',
-            'echon "Hydra can only exit through one of its heads"',
-         }
-         msg = table.concat(msg, ' | ')
-         vim.cmd(msg)
+         -- 'A Teal Hydra can only exit through one of its heads'
+         vim.api.nvim_echo({
+            {'A '},
+            {'Teal', 'HydraTeal'},
+            {' Hydra can only exit through one of its heads'}
+         }, false, {})
 
          vim.fn.getchar()
          local keys = vim.api.nvim_replace_termcodes(self.plug.wait, true, true, true)
