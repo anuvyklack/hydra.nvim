@@ -482,7 +482,7 @@ function Hydra:_leave()
 end
 
 function Hydra:_show_hint()
-   if not self.hint.bufnr then self:_prepare_hint_buffer() end
+   if not self.hint.bufnr then self:_make_hint_buffer() end
 
    if not self.hint.win_config then
 
@@ -539,9 +539,8 @@ function Hydra:_close_hint()
    self.hint.winid = nil
 end
 
-function Hydra:_prepare_hint_buffer()
-   -- Namespace ID
-   local ns_id = vim.api.nvim_create_namespace('hydra.plugin')
+function Hydra:_make_hint_buffer()
+   local ns_id = vim.api.nvim_create_namespace('hydra.plugin') -- Namespace ID
    self.hint.bufnr = vim.api.nvim_create_buf(false, true)
    vim.bo[self.hint.bufnr].filetype = 'hydra_hint'
 
