@@ -283,7 +283,7 @@ function Hydra:_setup_pink_hydra()
          on_exit = {
             self.config.on_exit,
             function()
-               vim.api.nvim_win_close(self.hint.winid, false)
+               self:_close_hint()
                _G.Hydra = nil
             end
          },
@@ -343,7 +343,7 @@ function Hydra:_setup_pink_hydra()
          on_exit = {
             self.config.on_exit,
             function()
-               vim.api.nvim_win_close(self.hint.winid, false)
+               self:_close_hint()
                _G.Hydra = nil
             end
          },
@@ -440,7 +440,7 @@ function Hydra:_exit()
 
    vim.api.nvim_clear_autocmds({ group = augroup_id })
 
-   vim.api.nvim_win_close(self.hint.winid, false)
+   self:_close_hint()
    -- vim.api.nvim_buf_delete(self.hint.bufnr, { force = true, unload = false })
 
    if self.config.on_exit then self.config.on_exit() end
@@ -523,14 +523,20 @@ function Hydra:_show_hint()
       end
    end
 
-   self.hint.winid = vim.api.nvim_open_win(self.hint.bufnr, false, self.hint.win_config)
+   local winid = vim.api.nvim_open_win(self.hint.bufnr, false, self.hint.win_config)
+   self.hint.winid = winid
+   vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
+   vim.wo[winid].conceallevel = 3
+   vim.wo[winid].foldenable = false
+   vim.wo[winid].wrap = false
+end
 
-   vim.wo[self.hint.winid].winhighlight = 'NormalFloat:HydraHint'
-   vim.wo[self.hint.winid].conceallevel = 3
-   vim.wo[self.hint.winid].foldenable = false
-   vim.wo[self.hint.winid].wrap = false
-
-   -- self.original_options.statusline = vim.o.statusline
+function Hydra:_close_hint()
+   local winid = self.hint.winid
+   if winid and vim.api.nvim_win_is_valid(winid) then
+      vim.api.nvim_win_close(winid, false)
+   end
+   self.hint.winid = nil
 end
 
 function Hydra:_prepare_hint_buffer()
