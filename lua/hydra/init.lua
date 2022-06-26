@@ -22,7 +22,8 @@ local default_config = {
    debug = false
 }
 
-_G.active_hydra = nil
+---Currently active hydra
+_G.Hydra = nil
 
 ---@class Hydra
 ---@field id number
@@ -274,7 +275,7 @@ function Hydra:_setup_pink_hydra()
          buffer = self.config.buffer,
          on_enter = {
             function()
-               _G.active_hydra = self
+               _G.Hydra = self
                self:_show_hint()
             end,
             self.config.on_enter
@@ -283,7 +284,7 @@ function Hydra:_setup_pink_hydra()
             self.config.on_exit,
             function()
                vim.api.nvim_win_close(self.hint.winid, false)
-               _G.active_hydra = nil
+               _G.Hydra = nil
             end
          },
          timeout = self.config.timeout
@@ -334,7 +335,7 @@ function Hydra:_setup_pink_hydra()
          buffer = self.config.buffer,
          on_enter = {
             function()
-               _G.active_hydra = self
+               _G.Hydra = self
                self:_show_hint()
             end,
             self.config.on_enter
@@ -343,7 +344,7 @@ function Hydra:_setup_pink_hydra()
             self.config.on_exit,
             function()
                vim.api.nvim_win_close(self.hint.winid, false)
-               _G.active_hydra = nil
+               _G.Hydra = nil
             end
          },
          timeout = self.config.timeout
@@ -386,14 +387,14 @@ function Hydra:_setup_pink_hydra()
 end
 
 function Hydra:_enter()
-   if _G.active_hydra then
-      if _G.active_hydra.layer then
-         _G.active_hydra.layer:exit()
+   if _G.Hydra then
+      if _G.Hydra.layer then
+         _G.Hydra.layer:exit()
       else
-         _G.active_hydra:_exit()
+         _G.Hydra:_exit()
       end
    end
-   _G.active_hydra = self
+   _G.Hydra = self
 
    local o = self:_get_meta_accessor('o')
    o.showcmd = false
@@ -443,7 +444,7 @@ function Hydra:_exit()
    -- vim.api.nvim_buf_delete(self.hint.bufnr, { force = true, unload = false })
 
    if self.config.on_exit then self.config.on_exit() end
-   _G.active_hydra = nil
+   _G.Hydra = nil
    vim.cmd 'echo'
 end
 
