@@ -80,6 +80,7 @@ If you want to quickly understand the concept, you can watch
     * [`hint`](#hint-1)
 * [Public methods](#public-methods)
 * [Highlight](#highlight)
+* [Statusline](#statusline)
 * [Drawbacks](#drawbacks)
 * [How it works under the hood](#how-it-works-under-the-hood)
 
@@ -603,6 +604,16 @@ HydraHint  link  NormalFloat
 ```
 
 `HydraHint` defines the fore- and background of the hint window.
+
+## Statusline
+
+In the statusline module `require('hydra.statusline')` there are functions that can help
+you to integrate Hydra in your statusline:
+
+- `is_active()` — returns `true` if there is an active hydra;
+- `get_name()` — get the name of an active hydra if it has it;
+- `get_color()` — get the color of an active hydra;
+- `get_hint()` — get an active hydra's statusline hint if it provides it.
 
 ## Drawbacks
 

@@ -52,6 +52,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
     `hint`..............................................................|hydra-hint|
 Public methods.....................................................|hydra-methods|
 Highlight........................................................|hydra-highlight|
+Statusline......................................................|hydra-statusline|
 Drawbacks........................................................|hydra-drawbacks|
 
 ================================================================================
@@ -427,7 +428,7 @@ config
 			A table with settings for the manually created hint.
 			Read about hint below. Accepts following keys:
 
-			position	string    (default: `"bottom"`)
+			• position	string    (default: `"bottom"`)
 				Set the position of the hint. Should be one from
 				the next table:
 >
@@ -437,7 +438,7 @@ config
 				    -------------+----------+--------------
 				     bottom-left |  bottom  | bottom-right
 <
-			border		string    (default: `'none'`)
+			• border		string    (default: `'none'`)
 				The border of the hint window. See |nvim_open_win()|
 
 								*hydra-heads*
@@ -578,6 +579,20 @@ Hydra defines next highlight groups with their defaults:
 
 `HydraHint`	link NormalFloat
 		Defines the fore- and background of the hint window.
+
+--------------------------------------------------------------------------------
+STATUSLINE							*hydra-statusline*
+
+In the statusline module `require('hydra.statusline')` there are functions that
+can help you to integrate Hydra in your statusline:
+
+is_active()	returns `true` if there is an active hydra;
+
+get_name()	get the name of an active hydra if it has it;
+
+get_color()	get the color of an active hydra;
+
+get_hint()	get an active hydra's statusline hint if it provides it.
 
 --------------------------------------------------------------------------------
 DRAWBACKS							*hydra-drawbacks*
