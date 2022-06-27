@@ -45,7 +45,8 @@ If you want to quickly understand the concept, you can watch
 
 * [Sample Hydras](#sample-hydras)
     * [Side scroll](#side-scroll)
-    * [Git](#git)
+    * [Git submode](#git-submode)
+    * [Telescope menu](#telescope-menu)
     * [Community wiki](#community-wiki)
 * [Instalation](#instalation)
 * [How to create hydra](#how-to-create-hydra)
@@ -107,13 +108,16 @@ Hydra({
 })
 ```
 
-### Git
+### Git submode
 
-A full fledged git "submode":
+A full fledged git "submode".
 
 <!-- Finally, you can even create your custom submode, for example for git: -->
 
-![](https://user-images.githubusercontent.com/13056013/174571437-4445dd84-c5f1-4dc8-b22a-3fbf71ac69a2.png)
+![](https://user-images.githubusercontent.com/13056013/175947218-d1b70266-9964-48c9-aaae-75195501ef7e.png)
+
+<details> 
+  <summary>Click this spoiler to see the code </summary>
 
 The code is huge but, simple. For this hydra you need next plugins:
 
@@ -179,6 +183,64 @@ Hydra({
    }
 })
 ```
+</details>
+
+### Telescope menu
+
+You can also create a fancy menu to easy recall seldom used mappings.
+
+![](https://user-images.githubusercontent.com/13056013/175949898-29c88460-1661-43f0-9c2d-61eb0cc7d663.png)
+
+<details> 
+  <summary>Click this spoiler to see the code </summary>
+```lua
+local Hydra = require('hydra')
+
+local hint = [[
+                 _f_: files       _m_: marks
+   🭇🬭🬭🬭🬭🬭🬭🬭🬭🬼    _o_: old files   _g_: live grep
+  🭉🭁🭠🭘    🭣🭕🭌🬾   _p_: projects    _/_: search in file
+  🭅█ ▁     █🭐
+  ██🬿      🭊██   _h_: vim help    _c_: execute command
+ 🭋█🬝🮄🮄🮄🮄🮄🮄🮄🮄🬆█🭀  _k_: keymap      _;_: commands history
+ 🭤🭒🬺🬹🬱🬭🬭🬭🬭🬵🬹🬹🭝🭙  _r_: registers   _?_: search history
+
+                 _<Enter>_: Telescope           _<Esc>_ 
+]]
+
+Hydra({
+   name = 'Telescope',
+   hint = hint,
+   config = {
+      color = 'teal',
+      invoke_on_body = true,
+      hint = {
+         position = 'middle',
+         border = 'rounded',
+      },
+   },
+   mode = 'n',
+   body = '<Leader>f',
+   heads = {
+      { 'f', cmd 'Telescope find_files' },
+      { 'g', cmd 'Telescope live_grep' },
+      { 'h', cmd 'Telescope help_tags', { desc = 'Vim help' } },
+      { 'o', cmd 'Telescope oldfiles', { desc = 'Recently opened files' } },
+      { 'm', cmd 'MarksListBuf', { desc = 'Marks' } },
+      { 'k', cmd 'Telescope keymaps' },
+      { 'r', cmd 'Telescope registers' },
+      { 'p', cmd 'Telescope projects', { desc = 'Projects' } },
+      { '/', cmd 'Telescope current_buffer_fuzzy_find', { desc = 'Search in file' } },
+      { '?', cmd 'Telescope search_history',  { desc = 'Search history' } },
+      { ';', cmd 'Telescope command_history', { desc = 'Command-line history' } },
+      { 'c', cmd 'Telescope commands', { desc = 'Execute command' } },
+      { '<Enter>', cmd 'Telescope', { exit = true, desc = 'List all pickers' } },
+      { '<Esc>', nil, { exit = true, nowait = true } },
+   }
+})
+```
+</details>
+
 
 ### Community wiki
 
