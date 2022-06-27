@@ -114,4 +114,16 @@ function util.warn(msg)
    end)
 end
 
+---Create once callback
+---@param callback function
+---@return function
+function util.once(callback)
+   local done = false
+   return function(...)
+      if done then return end
+      done = true
+      callback(...)
+   end
+end
+
 return util

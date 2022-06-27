@@ -7,6 +7,7 @@ local augroup_name = 'Hydra'
 local augroup_id = vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
 local default_config = {
+   debug = false,
    exit = false,
    foreign_keys = nil, -- nil | warn | run
    color = 'red',
@@ -15,11 +16,10 @@ local default_config = {
    timeout = false, -- true, false or number in milliseconds
    invoke_on_body = false,
    buffer = nil,
-   hint = {
+   hint = { -- table | 'statusline' | false
       position = 'bottom',
-      border = nil
-   },
-   debug = false
+      border = nil,
+   }
 }
 
 ---Currently active hydra
@@ -67,7 +67,8 @@ function Hydra:_constructor(input)
             on_exit = { input.config.on_exit, 'function', true },
             exit = { input.config.exit, 'boolean', true },
             timeout = { input.config.timeout, { 'boolean', 'number' }, true },
-            buffer = { input.config.buffer, { 'boolean', 'number' }, true }
+            buffer = { input.config.buffer, { 'boolean', 'number' }, true },
+            hint = { input.config.hint, { 'boolean', 'string', 'table' }, true }
          })
          vim.validate({
             foreign_keys = { input.config.foreign_keys, function(foreign_keys)
@@ -113,7 +114,7 @@ function Hydra:_constructor(input)
    self.config = vim.tbl_deep_extend('force', default_config, input.config or {})
    self.mode  = input.mode or 'n'
    self.body  = input.body
-   self.original = { o  = {}, go = {}, bo = {}, wo = {} }
+   self.original = {}
 
    -- make Hydra buffer local
    if self.config.buffer and type(self.config.buffer) ~= 'number' then
@@ -174,6 +175,9 @@ function Hydra:_constructor(input)
          color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue'
       }}
       self.heads_order['<Esc>'] = vim.tbl_count(self.heads)
+   end
+   if not self.hint.lines then
+      self.heads_order = util.reverse_tbl(self.heads_order)
    end
 
    if self.config.color == 'pink' then
@@ -284,6 +288,7 @@ function Hydra:_setup_pink_hydra()
             self.config.on_exit,
             function()
                self:_close_hint()
+               self:_restore_original_options()
                _G.Hydra = nil
             end
          },
@@ -416,27 +421,7 @@ function Hydra:_enter()
 end
 
 function Hydra:_exit()
-   -- Restore original options
-   for _, otype in ipairs({'o', 'go'}) do
-      for opt, val in pairs(self.original[otype]) do
-         vim[otype][opt] = val
-      end
-   end
-   for bufnr, opts in pairs(self.original.bo) do
-      if vim.fn.buflisted(bufnr) then
-         for opt, val in pairs(opts) do
-            vim.bo[bufnr][opt] = val
-         end
-      end
-   end
-   for winnr, opts in pairs(self.original.wo) do
-      if vim.api.nvim_win_is_valid(winnr) then
-         for opt, val in pairs(opts) do
-            vim.wo[winnr][opt] = val
-         end
-      end
-   end
-   self.original = { o  = {}, go = {}, bo = {}, wo = {} }
+   self:_restore_original_options()
 
    vim.api.nvim_clear_autocmds({ group = augroup_id })
 
@@ -482,53 +467,62 @@ function Hydra:_leave()
 end
 
 function Hydra:_show_hint()
-   if not self.hint.bufnr then self:_make_hint_buffer() end
-
-   if not self.hint.win_config then
-
-      --   top-left   |   top   |  top-right
-      -- -------------+---------+--------------
-      --  middle-left | middle  | middle-right
-      -- -------------+---------+--------------
-      --  bottom-left | bottome | bottom-right
-
-      -- self.config.hint.position = vim.split(self.config.hint.position, '-')
-      local pos = vim.split(self.config.hint.position, '-')
-
-      self.hint.win_config = {
-         relative = 'editor',
-         anchor = 'SW',
-         width  = self.hint.win_width,
-         height = self.hint.win_height,
-         style = 'minimal',
-         border = self.config.hint.border or 'none',
-         focusable = false,
-         noautocmd = true,
+   if self.config.hint == 'statusline' then -- Show hint in statusline.
+      local statusline = table.concat{
+         ' ', self.name or 'HYDRA', ': ',
+         self:_get_statusline_hint()
       }
+      local wo = self:_get_meta_accessor('wo')
+      wo.statusline = statusline
+   elseif self.config.hint then -- Show hint in float window.
+      if not self.hint.bufnr then self:_make_hint_buffer() end
 
-      if pos[1] == 'top' then
-         self.hint.win_config.row = 2
-      elseif pos[1] == 'middle' then
-         self.hint.win_config.row = math.floor((vim.o.lines + self.hint.win_height) / 2)
-      elseif pos[1] == 'bottom' then
-         self.hint.win_config.row = vim.o.lines - 2
+      if not self.hint.win_config then
+
+         --   top-left   |   top   |  top-right
+         -- -------------+---------+--------------
+         --  middle-left | middle  | middle-right
+         -- -------------+---------+--------------
+         --  bottom-left | bottome | bottom-right
+
+         -- self.config.hint.position = vim.split(self.config.hint.position, '-')
+         local pos = vim.split(self.config.hint.position, '-')
+
+         self.hint.win_config = {
+            relative = 'editor',
+            anchor = 'SW',
+            width  = self.hint.win_width,
+            height = self.hint.win_height,
+            style = 'minimal',
+            border = self.config.hint.border or 'none',
+            focusable = false,
+            noautocmd = true,
+         }
+
+         if pos[1] == 'top' then
+            self.hint.win_config.row = 2
+         elseif pos[1] == 'middle' then
+            self.hint.win_config.row = math.floor((vim.o.lines + self.hint.win_height) / 2)
+         elseif pos[1] == 'bottom' then
+            self.hint.win_config.row = vim.o.lines - vim.o.cmdheight - 1
+         end
+
+         if pos[2] == 'left' then
+            self.hint.win_config.col = 0
+         elseif pos[2] == 'right' then
+            self.hint.win_config.col = vim.o.columns - self.hint.win_width
+         else -- center
+            self.hint.win_config.col = math.floor((vim.o.columns - self.hint.win_width) / 2)
+         end
       end
 
-      if pos[2] == 'left' then
-         self.hint.win_config.col = 0
-      elseif pos[2] == 'right' then
-         self.hint.win_config.col = vim.o.columns - self.hint.win_width
-      else -- center
-         self.hint.win_config.col = math.floor((vim.o.columns - self.hint.win_width) / 2)
-      end
+      local winid = vim.api.nvim_open_win(self.hint.bufnr, false, self.hint.win_config)
+      self.hint.winid = winid
+      vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
+      vim.wo[winid].conceallevel = 3
+      vim.wo[winid].foldenable = false
+      vim.wo[winid].wrap = false
    end
-
-   local winid = vim.api.nvim_open_win(self.hint.bufnr, false, self.hint.win_config)
-   self.hint.winid = winid
-   vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
-   vim.wo[winid].conceallevel = 3
-   vim.wo[winid].foldenable = false
-   vim.wo[winid].wrap = false
 end
 
 function Hydra:_close_hint()
@@ -617,8 +611,8 @@ function Hydra:_make_hint_buffer()
             end
          until not stop
       end
+
    else
-      self.heads_order = util.reverse_tbl(self.heads_order)
       local line = { ' ', self.name or 'HYDRA', ': ' }
       for _, head in pairs(self.heads_order) do
          if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
@@ -658,6 +652,35 @@ function Hydra:_make_hint_buffer()
    vim.bo[self.hint.bufnr].readonly = true
 end
 
+function Hydra:_get_statusline_hint()
+   if self.hint.lines then
+      return
+   elseif self.hint.statusline then
+      return self.hint.statusline
+   end
+
+   require('hydra/highlight').create_statusline_hl_groups()
+
+   local statusline = {}
+   local insert = table.insert
+   for _, head in ipairs(self.heads_order) do
+      if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
+         insert(statusline, string.format('%%#HydraStatusLine%s#', self.heads[head][2].color))
+         insert(statusline, head)
+         insert(statusline, '%#StatusLine#')
+         local desc = self.heads[head][2].desc
+         if desc then
+            desc = string.format(': %s, ', desc)
+         else
+            desc = ', '
+         end
+         insert(statusline, desc)
+      end
+   end
+   self.hint.statusline = table.concat(statusline):gsub(', $', '')
+   return self.hint.statusline
+end
+
 function Hydra:_set_keymap(lhs, rhs, opts)
    local o = opts and vim.deepcopy(opts) or {}
    if not vim.tbl_isempty(o) then
@@ -678,6 +701,7 @@ end
 function Hydra:_get_meta_accessor(accessor)
    local function set_buf_option(opt, val)
       local bufnr = vim.api.nvim_get_current_buf()
+      self.original.bo = self.original.bo or {}
       self.original.bo[bufnr] = self.original.bo[bufnr] or {}
       if self.original.bo[bufnr][opt] then return end
       self.original.bo[bufnr][opt] = vim.api.nvim_buf_get_option(bufnr, opt)
@@ -686,6 +710,7 @@ function Hydra:_get_meta_accessor(accessor)
 
    local function set_win_option(opt, val)
       local winnr = vim.api.nvim_get_current_win()
+      self.original.wo = self.original.wo or {}
       self.original.wo[winnr] = self.original.wo[winnr] or {}
       if self.original.wo[winnr][opt] then return end
       self.original.wo[winnr][opt] = vim.api.nvim_win_get_option(winnr, opt)
@@ -734,6 +759,7 @@ function Hydra:_get_meta_accessor(accessor)
             return vim.api.nvim_get_option_value(opt, { scope = 'global' })
          end,
          function(opt, val)
+            self.original.go = self.original.go or {}
             self.original.go[opt] = vim.api.nvim_get_option_value(opt, { scope = 'global' })
             vim.api.nvim_set_option_value(opt, val, { scope = 'global' })
          end
@@ -743,6 +769,7 @@ function Hydra:_get_meta_accessor(accessor)
             return vim.api.nvim_get_option_value(opt, {})
          end,
          function(opt, val)
+            self.original.o = self.original.o or {}
             self.original.o[opt] = vim.api.nvim_get_option_value(opt, {})
             vim.api.nvim_set_option_value(opt, val, {})
          end
@@ -750,6 +777,38 @@ function Hydra:_get_meta_accessor(accessor)
    }
 
    return ma[accessor]
+end
+
+function Hydra:_restore_original_options()
+   for _, otype in ipairs({'o', 'go'}) do
+      if self.original[otype] then
+         for opt, val in pairs(self.original[otype]) do
+            vim[otype][opt] = val
+         end
+      end
+   end
+
+   if self.original.bo then
+      for bufnr, opts in pairs(self.original.bo) do
+         if vim.fn.buflisted(bufnr) then
+            for opt, val in pairs(opts) do
+               vim.bo[bufnr][opt] = val
+            end
+         end
+      end
+   end
+
+   if self.original.wo then
+      for winnr, opts in pairs(self.original.wo) do
+         if vim.api.nvim_win_is_valid(winnr) then
+            for opt, val in pairs(opts) do
+               vim.wo[winnr][opt] = val
+            end
+         end
+      end
+   end
+
+   self.original = {}
 end
 
 function Hydra:_debug(...)

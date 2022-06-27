@@ -66,8 +66,6 @@ If you want to quickly understand the concept, you can watch
             * [meta-accessors](#meta-accessors)
         * [`timeout`](#timeout)
         * [`hint`](#hint)
-            * [`position`](#position)
-            * [`border`](#border)
     * [Hydra's heads](#hydras-heads)
         * [`head`](#head)
         * [`rhs`](#rhs)
@@ -85,7 +83,6 @@ If you want to quickly understand the concept, you can watch
 * [How it works under the hood](#how-it-works-under-the-hood)
 
 <!-- vim-markdown-toc -->
-
 ## Sample Hydras
 
 ### Side scroll
@@ -387,35 +384,30 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
 - `timeout = 5000` — set timer to desired amount of milliseconds.
 
 #### `hint`
-`table`
+`table | 'window' | 'statusline' | false`
 
-Table with settings for the hint window. Read about hint below.
+Configure the manually- or auto-generated hint.
 
-Defaults:
-```lua
-hint = {
-    position = 'bottom',
-    border = 'none'
-}
-```
+- `'statusline'` — By default auto-generated hint is shown in a floating
+  window above statusline.  When this option set, it will be shown in the statusline.;
+- `false` — disable auto-generating hint;
+- `{...}` — a table with settings for the manually created hint. Read about hint below.
+   Accepts following keys:
+  - **position**     `string`    (default: `"bottom"`)
 
-##### `position`
-`string`    (default: `"bottom"`)
+    Set the position of the hint. Should be one from the next table:
 
-Set the position of the hint. Should be one from the next table:
+    ```
+      top-left   |   top    |  top-right
+    -------------+----------+--------------
+     middle-left |  middle  | middle-right
+    -------------+----------+--------------
+     bottom-left |  bottom  | bottom-right
+    ```
 
-```
-  top-left   |   top    |  top-right
--------------+----------+--------------
- middle-left |  middle  | middle-right
--------------+----------+--------------
- bottom-left |  bottom  | bottom-right
-```
+  - **border**   `string`    (default: `'none'`)
 
-##### `border`
-`string`    (default: `'none'`)
-
-The border of the hint window. See `:help nvim_open_win()`
+    The border of the hint window. See `:help nvim_open_win()`
 
 ### Hydra's heads
 

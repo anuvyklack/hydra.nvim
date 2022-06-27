@@ -39,8 +39,6 @@ How to create hydra....................................|hydra-how_to_create_hydr
             meta-accessors..................................|hydra-meta-accessors|
         `timeout`.............................................|hydra-config.timeout|
         `hint`...................................................|hydra-config.hint|
-            `position`..................................|hydra-config.hint.position|
-            `border`......................................|hydra-config.hint.border|
     Hydra's heads....................................................|hydra-heads|
         {lhs}..........................................................|hydra-lhs|
         {rhs}..........................................................|hydra-rhs|
@@ -414,27 +412,33 @@ config
 
 								*hydra-config.hint*
 	hint
-				table
-		Table with settings for the hint window. Read about hint below.
+				table | `'window'` | `'statusline'` | false
+		Configure hint display.
 
-							*hydra-config.hint.position*
-		position
-				string    (default: `"bottom"`)
-			Set the position of the hint. Should be one from the
-			next table:
+		`hint = 'statusline'`
+			By default auto-generated hint is shown in a floating
+			window above statusline.  When this option set, it will
+			be shown in the statusline.;
+
+		`hint = false`
+			disable auto-generating hint;
+
+		`hint = {...}`
+			A table with settings for the manually created hint.
+			Read about hint below. Accepts following keys:
+
+			position	string    (default: `"bottom"`)
+				Set the position of the hint. Should be one from
+				the next table:
 >
-			      top-left   |   top    |  top-right
-			    -------------+----------+--------------
-			     middle-left |  middle  | middle-right
-			    -------------+----------+--------------
-			     bottom-left |  bottom  | bottom-right
+				      top-left   |   top    |  top-right
+				    -------------+----------+--------------
+				     middle-left |  middle  | middle-right
+				    -------------+----------+--------------
+				     bottom-left |  bottom  | bottom-right
 <
-
-							*hydra-config.hint.border*
-		border
-				string    (default: `'none'`)
-
-			The border of the hint window. See |nvim_open_win()|
+			border		string    (default: `'none'`)
+				The border of the hint window. See |nvim_open_win()|
 
 								*hydra-heads*
 heads
