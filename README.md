@@ -183,6 +183,7 @@ Hydra({
    }
 })
 ```
+
 </details>
 
 ### Telescope menu
@@ -193,6 +194,7 @@ You can also create a fancy menu to easy recall seldom used mappings.
 
 <details> 
   <summary>Click this spoiler to see the code </summary>
+
 ```lua
 local Hydra = require('hydra')
 
