@@ -571,6 +571,13 @@ function Hydra:_make_hint_buffer()
          until not stop
       end
 
+      -- Remove heads with `desc = false`.
+      for head, _ in pairs(self.heads_order) do
+         if vim.tbl_get(self.heads, head, 2, 'desc') == false then
+            self.heads_order[head] = nil
+         end
+      end
+
       -- If there are remain hydra heads, that not present in manually created hint.
       if not vim.tbl_isempty(self.heads_order) then
          local heads = vim.tbl_keys(self.heads_order)
@@ -580,18 +587,16 @@ function Hydra:_make_hint_buffer()
 
          local line, len = {}, 0
          for _, head in pairs(heads) do
-            if vim.tbl_get(self.heads, head, 2, 'desc') ~= false then
-               line[#line+1] = string.format('_%s_', head)
-               -- line[#line+1] = string.format('[_%s_]', head)
-               local desc = vim.tbl_get(self.heads, head, 2, 'desc')
-               if desc then
-                  desc = string.format(': %s, ', desc)
-               else
-                  desc = ', '
-               end
-               line[#line+1] = desc
-               len = len + #head + #desc
+            line[#line+1] = string.format('_%s_', head)
+            -- line[#line+1] = string.format('[_%s_]', head)
+            local desc = vim.tbl_get(self.heads, head, 2, 'desc')
+            if desc then
+               desc = string.format(': %s, ', desc)
+            else
+               desc = ', '
             end
+            line[#line+1] = desc
+            len = len + #head + #desc
          end
          line = ' '..table.concat(line):gsub(', $', '')
          len = len - 2
