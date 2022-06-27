@@ -790,7 +790,7 @@ function Hydra:_restore_original_options()
 
    if self.original.bo then
       for bufnr, opts in pairs(self.original.bo) do
-         if vim.fn.buflisted(bufnr) then
+         if vim.api.nvim_buf_is_valid(bufnr) then
             for opt, val in pairs(opts) do
                vim.bo[bufnr][opt] = val
             end
