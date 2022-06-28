@@ -56,7 +56,7 @@ function Hydra:_constructor(input)
          name = { input.name, 'string', true },
          config = { input.config, 'table', true },
          mode = { input.mode, { 'string', 'table' }, true },
-         body = { input.body, 'string' },
+         body = { input.body, 'string', true },
          heads = { input.heads, 'table' },
       })
       if input.config then
@@ -135,7 +135,8 @@ function Hydra:_constructor(input)
    elseif color ~= self.config.color then
       self.config.foreign_keys, self.config.exit = util.get_config_from_color(self.config.color)
    end
-   if self.config.exit then
+
+   if not self.body or self.config.exit then
       self.config.invoke_on_body = true
    end
 
@@ -214,7 +215,7 @@ function Hydra:_setup_hydra_keymaps()
    self:_set_keymap(self.plug.wait, self.plug.leave)
 
    -- Define entering keymap if Hydra is called only on body keymap.
-   if self.config.invoke_on_body then
+   if self.config.invoke_on_body and self.body then
       self:_set_keymap(self.body, table.concat{ self.plug.enter, self.plug.wait })
    end
 

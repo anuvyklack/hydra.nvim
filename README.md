@@ -289,12 +289,13 @@ The name of the hydra. Not necessary, used only in auto-generated hint.
 Mode or modes in which this hydra will exist. Same format as `vim.keymap.set()` accepts.
 
 ### `body`
-`string`
+`string | nil`
 
 To summon the hydra you need to press in sequence keys corresponds to `body` + any `head`.
-
 For example, if body is `z` and heads are: `a`, `b`, `c`, you can invoke hydra with any of
 the `za`, `zb`, `zc` keybindings.
+
+Can be `nil`. Hydra without body can only be summoned through `Hydra:activate()` method.
 
 ### `config`
 
