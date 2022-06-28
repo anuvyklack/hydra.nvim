@@ -34,8 +34,6 @@ _G.Hydra = nil
 ---@field body string
 ---@field heads table<string, string|function|table>
 ---@field plug table<string, string>
----@field _show_doc function
----@field _close_doc function
 local Hydra = {}
 Hydra.__index = Hydra
 setmetatable(Hydra, {
@@ -289,6 +287,7 @@ function Hydra:_setup_pink_hydra()
             function()
                self:_close_hint()
                self:_restore_original_options()
+               vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
                _G.Hydra = nil
             end
          },

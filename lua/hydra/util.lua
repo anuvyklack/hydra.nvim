@@ -72,13 +72,6 @@ function util.reverse_tbl(tbl)
    return r
 end
 
--- function util.recursive_subtables(tbl, subtbl)
---    tbl[subtbl] = setmetatable({}, {
---       __index = util.recursive_subtables
---    })
---    return tbl[subtbl]
--- end
-
 -- Recursive subtables
 local mt = {}
 function mt.__index(self, subtbl)

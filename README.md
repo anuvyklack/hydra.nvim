@@ -155,7 +155,6 @@ Hydra({
          gitsigns.toggle_signs(false)
          gitsigns.toggle_linehl(false)
          gitsigns.toggle_deleted(false)
-         vim.cmd 'echo' -- clear the echo area
       end
    },
    mode = {'n','x'},
@@ -449,7 +448,7 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
 - `timeout = 5000` — set timer to desired amount of milliseconds.
 
 #### `hint`
-`table | 'window' | 'statusline' | false`
+`table | 'statusline' | false`
 
 Configure the manually- or auto-generated hint.
 

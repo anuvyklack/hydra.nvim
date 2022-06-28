@@ -23,36 +23,4 @@ end
 
 M.create_statusline_hl_groups = once(create_statusline_hl_groups)
 
--- local source = 'HydraRed'
--- print(vim.fn.hlID(source))
--- -- vim.fn.synIDattr(vim.fn.hlID(source), key)
--- print(vim.fn.synIDattr(vim.fn.hlID(source), 'fg'))
-
--- function util.hl_inherit(name, source, settings)
---    local keys = {
---       'fg',
---       'bg',
---       'bold',
---       'italic',
---       'reverse',
---       'standout',
---       'underline',
---       'undercurl',
---       'strikethrough',
---    }
---    for _, key in ipairs(keys) do
---       if not settings[key] then
---          local v = vim.fn.synIDattr(vim.fn.hlID(source), key)
---          if key == 'fg' or key == 'bg' then
---             local n = tonumber(v, 10)
---             v = type(n) == 'number' and n or v
---          else
---             v = v == 1
---          end
---          settings[key] = v == '' and 'NONE' or v
---       end
---    end
---    vim.api.nvim_set_hl(0, name, settings)
--- end
-
 return M
