@@ -275,6 +275,7 @@ function Hydra:_setup_pink_hydra()
    local function create_layer_input_in_internal_form()
       local layer = util.unlimited_depth_table()
       layer.config = {
+         debug = self.config.debug,
          buffer = self.config.buffer,
          on_enter = {
             function()
@@ -337,6 +338,7 @@ function Hydra:_setup_pink_hydra()
    local function create_layer_input_in_public_form()
       local layer = { enter = {}, layer = {}, exit = {} }
       layer.config = {
+         debug = self.config.debug,
          buffer = self.config.buffer,
          on_enter = {
             function()
@@ -349,6 +351,8 @@ function Hydra:_setup_pink_hydra()
             self.config.on_exit,
             function()
                self:_close_hint()
+               self:_restore_original_options()
+               vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
                _G.Hydra = nil
             end
          },
