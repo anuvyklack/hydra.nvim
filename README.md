@@ -198,6 +198,10 @@ You can also create a fancy menu to easy recall seldom used mappings.
 ```lua
 local Hydra = require('hydra')
 
+local function cmd(command)
+   return table.concat({ '<Cmd>', command, '<CR>' })
+end
+
 local hint = [[
                  _f_: files       _m_: marks
    🭇🬭🬭🬭🬭🬭🬭🬭🬭🬼    _o_: old files   _g_: live grep
@@ -279,7 +283,7 @@ Hydra({
 Each of the fields of this table is described in details below.
 
 ### `name`
-`string`
+`string` (optional)
 
 The name of the hydra. Not necessary, used only in auto-generated hint.
 
@@ -289,13 +293,13 @@ The name of the hydra. Not necessary, used only in auto-generated hint.
 Mode or modes in which this hydra will exist. Same format as `vim.keymap.set()` accepts.
 
 ### `body`
-`string | nil`
+`string` (optional)
 
 To summon the hydra you need to press in sequence keys corresponds to `body` + any `head`.
 For example, if body is `z` and heads are: `a`, `b`, `c`, you can invoke hydra with any of
 the `za`, `zb`, `zc` keybindings.
 
-Can be `nil`. Hydra without body can only be summoned through `Hydra:activate()` method.
+Hydra without body can only be summoned through `Hydra:activate()` method.
 
 ### `config`
 

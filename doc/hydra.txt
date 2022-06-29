@@ -207,33 +207,29 @@ next form:
 Each of the fields of this table is described in details below.
 
 								*hydra-name*
-name
-			string
+name			string (optional)
 	The name of the hydra. Not necessary, used only in auto-generated hint.
 
 								*hydra-mode*
-mode
-			string | string[]	(default: `'n'`)
+mode			string | string[]	
+			default: `'n'`
 	Mode or modes in which this hydra will exist. Same format as
 	`vim.keymap.set()` accepts.
 								*hydra-body*
-body
-			string
+body			string (optional)
 	To summon the hydra you need to press in sequence keys corresponds to
-	`body` + any `head`.
-	    For example, if body is `z` and heads are: `a`, `b`, `c`, you can invoke
-	hydra with any of the `za`, `zb`, `zc` keybindings.
+	`body` + any `head`.  For example, if body is `z` and heads are: `a`, `b`, `c`, you 
+	can invoke hydra with any of the `za`, `zb`, `zc` keybindings.
+	Hydra without body can only be summoned through `Hydra:activate()` method.
 
 								*hydra-config*
-config
-			table
+config			table
 	With this table, you can set the behavior of the whole hydra, which
 	later can be customized for each head particularly.  Below is a list of
 	all options.
 
 							*hydra-config.exit*
-	exit
-				boolean
+	exit			boolean
 		The `exit` option (heads can override it) defines what will
 		happen after executing head's command:
 
@@ -264,8 +260,7 @@ config
 			foreign key.
 
 							*hydra-config.color*
-	color
-				string
+	color			string
 		The `color` option is a shortcut for both `exit` and `foreign_keys`
 		options and aggregates them in the following way:
 >
@@ -350,8 +345,7 @@ config
 		prefixes.
 
 							*hydra-config.buffer*
-	buffer
-				true | number
+	buffer			true | number
 		Define hydra only for particular buffer.  If `true` — the current
 		buffer will be used.
 
@@ -442,8 +436,7 @@ config
 				The border of the hint window. See |nvim_open_win()|
 
 								*hydra-heads*
-heads
-			table
+heads			table
 	Each hydra's head has the form:
 >
 	    { lhs, rhs, opts }
@@ -452,21 +445,18 @@ heads
 	|vim.keymap.set()| function.
 
 								*hydra-head.lhs*
-	{lhs}
-				string
+	{lhs}			string
 		The {lhs} (left-hand-side) of the mapping, i.e the keys you
 		press to call an action.
 
 								*hydra-head.rhs*
-	{rhs}
-				string | function | nil
+	{rhs}			string | function | nil
 		Right-hand-side of the mapping.  Can be `nil` which means just
 		do nothing, but if you also want to pass {opts} table, you
 		need to pass `nil` explicitly.
 
 								*hydra-head.opts*
-	{opts}
-				table
+	{opts}			table
 		A table with head options to tune its behavior.
 
 								*hydra-head.private*
@@ -477,8 +467,7 @@ heads
 			unreachable outside of the hydra state.
 
 								*hydra-head.exit*
-		exit
-				boolean
+		exit		boolean
 			Stop the hydra state after executing a command
 			corresponds to such head.
 
@@ -494,23 +483,20 @@ heads
 <
 
 								*hydra-head.desc*
-		desc
-				string | false
+		desc		string | false
 			The description that will be shown in the
 			auto-generated part of the hint.  If `false` won't be
 			show in the hint window
 
 						*hydra-head.expr* *hydra-head.silent*
 		expr
-		silent
-				boolean
+		silent		boolean
 			Built-in map arguments. See:
 			- |:map-<expr>|
 			- |:map-<silent>|
 
 								*hydra-head.nowait*
-		nowait
-				boolean
+		nowait		boolean
 			Only relevant for `pink` hydra. For all others will be
 			skipped. The `pink` hydra is a layer
 			https://github.com/anuvyklack/keymap-layer.nvim
@@ -532,14 +518,12 @@ heads
 			milliseconds for possible continuation.
 
 								*hydra-head.mode*
-		mode
-				string | string[]
+		mode		string | string[]
 			Overwrite `mode` field for this particular head.  Only
 			relevant for `pink` hydra, for all others will be ignored.
 
 								*hydra-hint*
-hint
-			multiline string
+hint			multiline string
 	You can create any hint you wish.
 
 	To highlight a key, just wrap it in underscores. Note that the key
