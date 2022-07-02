@@ -48,7 +48,7 @@ If you want to quickly understand the concept, you can watch
     * [Git submode](#git-submode)
     * [Telescope menu](#telescope-menu)
     * [Community wiki](#community-wiki)
-* [Instalation](#instalation)
+* [Installation](#installation)
 * [How to create hydra](#how-to-create-hydra)
     * [`name`](#name)
     * [`mode`](#mode)
@@ -253,7 +253,7 @@ Hydra({
 You can find more hydras in the project's [community wiki](https://github.com/anuvyklack/hydra.nvim/wiki/Community-hydras).
 Feel free to add your own or edit the existing ones.
 
-## Instalation
+## Installation
 
 To install with [packer](https://github.com/wbthomason/packer.nvim) use:
 
