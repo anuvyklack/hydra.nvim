@@ -15,7 +15,9 @@ end
 ---Get an active Hydra's statusline hint if it provides it
 ---@return string | nil
 function statusline.get_hint()
-   return _G.Hydra and _G.Hydra:_get_statusline_hint()
+   if _G.Hydra and _G.Hydra.hint.get_statusline then
+      return _G.Hydra.hint:get_statusline()
+   end
 end
 
 ---Get the color of an active Hydra

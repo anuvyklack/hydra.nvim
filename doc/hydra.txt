@@ -585,5 +585,5 @@ DRAWBACKS							*hydra-drawbacks*
 But supported in pink hydra since it is a layer:
 	https://github.com/anuvyklack/keymap-layer.nvim
 
-------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
  vim:tw=80:isk=!-~,^*,^\|,^\":ts=8:noet:ft=help:norl:
