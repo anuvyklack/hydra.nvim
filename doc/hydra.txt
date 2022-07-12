@@ -27,7 +27,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
     `body`..............................................................|hydra-body|
     `config`..........................................................|hydra-config|
         `exit`...................................................|hydra-config.exit|
-        `foreign-keys`...................................|hydra-config.foreign_keys|
+        `foreign_keys`...................................|hydra-config.foreign_keys|
         `color`.................................................|hydra-config.color|
             More about colors concept...............................|hydra-colors|
             Amaranth color........................................|hydra-amaranth|
@@ -211,14 +211,14 @@ name			string (optional)
 	The name of the hydra. Not necessary, used only in auto-generated hint.
 
 								*hydra-mode*
-mode			string | string[]	
+mode			string | string[]
 			default: `'n'`
 	Mode or modes in which this hydra will exist. Same format as
 	`vim.keymap.set()` accepts.
 								*hydra-body*
 body			string (optional)
 	To summon the hydra you need to press in sequence keys corresponds to
-	`body` + any `head`.  For example, if body is `z` and heads are: `a`, `b`, `c`, you 
+	`body` + any `head`.  For example, if body is `z` and heads are: `a`, `b`, `c`, you
 	can invoke hydra with any of the `za`, `zb`, `zc` keybindings.
 	Hydra without body can only be summoned through `Hydra:activate()` method.
 
@@ -268,9 +268,9 @@ config			table
 		    |----------+------------------------------------|
 		    | red      |                                    |
 		    | blue     | exit = true                        |
-		    | amaranth | foreign-keys = 'warn'              |
-		    | teal     | foreign-keys = 'warn', exit = true |
-		    | pink     | foreign-keys = 'run'               |
+		    | amaranth | foreign_keys = 'warn'              |
+		    | teal     | foreign_keys = 'warn', exit = true |
+		    | pink     | foreign_keys = 'run'               |
 <
 		It's also a trick to make you instantly aware of the current
 		hydra keys that you're about to press: the keys will be

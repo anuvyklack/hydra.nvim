@@ -55,7 +55,7 @@ If you want to quickly understand the concept, you can watch
     * [`body`](#body)
     * [`config`](#config)
         * [`exit`](#exit)
-        * [`foreign-keys`](#foreign-keys)
+        * [`foreign_keys`](#foreign_keys)
         * [`color`](#color)
             * [More about colors concept](#more-about-colors-concept)
             * [Amaranth color](#amaranth-color)
@@ -320,30 +320,30 @@ command:
   the hint and be able to use hydra bindings;
 - `exit = true` means that the hydra state will stop.
 
-#### `foreign-keys`
+#### `foreign_keys`
 
-The `foreign-keys` option belongs to the body and decides what to do when a key is pressed
+The `foreign_keys` option belongs to the body and decides what to do when a key is pressed
 that doesn't belong to any head:
 
-- `foreign-keys = nil` (the default) means that the hydra state will stop and the foreign
+- `foreign_keys = nil` (the default) means that the hydra state will stop and the foreign
   key will do whatever it was supposed to do if there was no hydra state.
-- `foreign-keys = "warn"` will not stop the hydra state, but instead will issue a warning
+- `foreign_keys = "warn"` will not stop the hydra state, but instead will issue a warning
   without running the foreign key.
-- `foreign-keys = "run"` will not stop the hydra state, and try to run the foreign key.
+- `foreign_keys = "run"` will not stop the hydra state, and try to run the foreign key.
 
 #### `color`
 `string`
 
-The `color` option is a shortcut for both `exit` and `foreign-keys` options and aggregates
+The `color` option is a shortcut for both `exit` and `foreign_keys` options and aggregates
 them in the following way:
 
     | color    | toggle                             |
     |----------+------------------------------------|
     | red      |                                    |
     | blue     | exit = true                        |
-    | amaranth | foreign-keys = 'warn'              |
-    | teal     | foreign-keys = 'warn', exit = true |
-    | pink     | foreign-keys = 'run'               |
+    | amaranth | foreign_keys = 'warn'              |
+    | teal     | foreign_keys = 'warn', exit = true |
+    | pink     | foreign_keys = 'run'               |
 
 It's also a trick to make you instantly aware of the current hydra keys that you're about
 to press: the keys will be highlighted with the appropriate color.
