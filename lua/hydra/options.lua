@@ -1,7 +1,7 @@
 local Class = require('hydra.class')
 local util = require('hydra.util')
 
----@class HydraOptions
+---@class hydra.Options
 ---@field augroup_id integer
 ---@field o MetaAccessor
 ---@field go MetaAccessor

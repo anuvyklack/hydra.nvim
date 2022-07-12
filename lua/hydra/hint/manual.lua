@@ -1,8 +1,8 @@
 local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
 
----@class HydraHintManualWindow : HydraHint
----@field config table
+---@class hydra.hint.ManualWindow : hydra.Hint
+---@field config hydra.hint.Config
 ---@field hint string[]
 ---@field bufnr integer | nil
 ---@field winid integer | nil
@@ -34,13 +34,15 @@ end
 function HintManualWindow:_make_buffer()
    self.bufnr = self.bufnr or vim.api.nvim_create_buf(false, true)
 
+   ---@type string[]
    local hint = vim.deepcopy(self.hint)
+
+   ---@type table<string, hydra.HeadSpec>
    local heads = vim.deepcopy(self.heads)
 
    local visible_width = 0  -- The width of the window
    for _, line in ipairs(self.hint) do
-      ---@type integer
-      local visible_line_len = vim.fn.strdisplaywidth(line:gsub('[_^]', ''))
+      local visible_line_len = vim.fn.strdisplaywidth(line:gsub('[_^]', '')) --[[@as integer]]
       if visible_line_len > visible_width then
          visible_width = visible_line_len
       end
@@ -67,6 +69,7 @@ function HintManualWindow:_make_buffer()
          end
       end
 
+      ---@type string
       local head
       start, stop = 0, 0
       while start do
@@ -95,6 +98,7 @@ function HintManualWindow:_make_buffer()
 
    -- If there are remain hydra heads, that not present in manually created hint.
    if not vim.tbl_isempty(heads) then
+      ---@type string[]
       local heads_lhs = vim.tbl_keys(heads)
       table.sort(heads_lhs, function (a, b)
          return heads[a].index < heads[b].index

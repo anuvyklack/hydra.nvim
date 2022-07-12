@@ -1,11 +1,11 @@
 local Class = require('hydra.class')
 
----@class HydraHint
----@field hydra_name string
--- @field config table | string | false
----@field hint string[] | nil
+---@class hydra.Hint
+---@field hydra_name? string
+---@field config hydra.hint.Config | "statusline" | false
+---@field hint? string
 ---@field namespaces_id integer
----@field heads table<string, table>
+---@field heads table<string, hydra.HeadSpec>
 ---@field show function
 ---@field close function
 ---@field update function | nil
@@ -22,24 +22,21 @@ function Hint:_constructor(hydra, hint)
    self.namespaces_id = vim.api.nvim_create_namespace('hydra.hint')
 end
 
----In `self.heads` for every head makes the next:
+---In `self.heads` table for every head makes the next:
 ---
----````
+---```
 ---head = {              index = {
----   index = ...,          head = ...,
+---   head = ...,           head = ...,
+---   index = ...,          index = ...,
 ---   color = ...,   =>     color = ...,
 ---   desc = ...            desc = ...
 ---}                     }
----````
----@return table
+---```
+---@return table<integer, hydra.HeadSpec>
 function Hint:_swap_head_with_index()
-   local old = vim.deepcopy(self.heads)
    local new = {}
-   for head, properties in pairs(old) do
-      local index = properties.index
-      properties.index = nil
-      properties.head = head
-      new[index] = properties
+   for _, properties in pairs(self.heads) do
+      new[properties.index] = properties
    end
    return new
 end

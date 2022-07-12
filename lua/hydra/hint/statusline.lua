@@ -2,9 +2,9 @@ local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
 
 ---@class HydraHintStatusLine : HydraHint
----@field config 'statusline'
+---@field config "statusline"
 ---@field hint nil
----@field meta_accessors HydraOptions
+---@field meta_accessors hydra.Options
 ---@field update nil
 ---@field get_statusline nil
 local HintStatusLine = Class(Hint)
@@ -12,7 +12,6 @@ local HintStatusLine = Class(Hint)
 function HintStatusLine:_constructor(hydra, ...)
    Hint._constructor(self, hydra, ...)
    self.meta_accessors = hydra.options
-   self.statusline = nil
 end
 
 function HintStatusLine:_make_statusline()

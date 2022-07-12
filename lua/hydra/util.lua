@@ -19,12 +19,12 @@ end
 ---@param keys string
 ---@return string
 function util.termcodes(keys)
-   return vim.api.nvim_replace_termcodes(keys, true, true, true)
+   return vim.api.nvim_replace_termcodes(keys, true, true, true) --[[@as string]]
 end
 
----@param foreign_keys string | nil
+---@param foreign_keys hydra.foreign_keys
 ---@param exit boolean
----@return string color
+---@return hydra.color color
 function util.get_color_from_config(foreign_keys, exit)
    if foreign_keys == 'run' then
       if exit then
@@ -43,8 +43,8 @@ function util.get_color_from_config(foreign_keys, exit)
    end
 end
 
----@param color string
----@return string | nil foreign_keys
+---@param color hydra.color
+---@return hydra.foreign_keys foreign_keys
 ---@return boolean exit
 function util.get_config_from_color(color)
    if color == 'pink' then
@@ -118,7 +118,7 @@ function util.once(callback)
    end
 end
 
----@param func function
+---@param func? function
 ---@param new_fn function
 ---@return function
 function util.add_hook_before(func, new_fn)

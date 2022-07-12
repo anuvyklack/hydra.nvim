@@ -1,10 +1,11 @@
 local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
 
----@class HydraHintAutoWindow : HydraHint
+---@class hydra.hint.AutoWindow : hydra.Hint
 ---@field hint nil
----@field config table
----@field winid integer
+---@field config hydra.hint.Config
+---@field bufnr integer | nil
+---@field winid integer | nil
 ---@field update nil
 ---@field get_statusline nil
 local HintAutoWindow = Class(Hint)
@@ -16,9 +17,10 @@ end
 function HintAutoWindow:_make_buffer()
    self.bufnr = vim.api.nvim_create_buf(false, true)
 
+   ---@type string[]
    local hint = { ' ', self.hydra_name or 'HYDRA', ': ' }
    local heads = self:_swap_head_with_index()
-   for _, head in pairs(heads) do
+   for _, head in ipairs(heads) do
       if head.desc ~= false then
          hint[#hint+1] = string.format('_%s_', head.head)
          -- line[#line+1] = string.format('[_%s_]', head.head)

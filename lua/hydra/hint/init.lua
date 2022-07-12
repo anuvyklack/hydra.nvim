@@ -5,7 +5,7 @@ local HintStatusLine, HintStatusLineMute = unpack(require('hydra.hint.statusline
 ---@param hydra Hydra
 ---@param config table | 'statusline' | false
 ---@param hint? string[]
----@return HydraHint
+---@return hydra.Hint
 local function make_hint(hydra, config, hint)
    if hint then
       return HintManualWindow(hydra, hint)

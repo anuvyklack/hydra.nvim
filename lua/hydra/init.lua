@@ -4,40 +4,41 @@ local options = require('hydra.options')
 local util = require('hydra.util')
 local termcodes = util.termcodes
 
-local default_config = {
-   debug = false,
-   exit = false,
-   foreign_keys = nil, -- nil | 'warn' | 'run'
-   color = 'red',
-   on_enter  = nil, -- before entering hydra
-   on_exit = nil, -- after leaving hydra
-   timeout = false, -- true, false or number in milliseconds
-   invoke_on_body = false,
-   buffer = nil,
-   hint = { -- table | 'statusline' | false
-      position = 'bottom',
-      border = nil,
-   }
-}
-
 ---Currently active hydra
 _G.Hydra = nil
 
 ---@class Hydra
 ---@field id number
----@field name string | nil
----@field hint HydraHint
----@field config table
+---@field name? string
+---@field hint hydra.Hint
+---@field config hydra.Config
 ---@field mode string | string[]
----@field body string
----@field heads table<string, string | function | table>
----@field options HydraOptions
+---@field body? string
+---@field heads table<string, hydra.Head>
+---@field heads_spec table<string, hydra.HeadSpec>
+---@field options hydra.Options
 ---@field plug table<string, string>
----@field meta_accessors table
 local Hydra = Class()
 
+---@type hydra.Config
+local default_config = {
+   debug = false,
+   exit = false,
+   foreign_keys = nil, -- nil | 'warn' | 'run'
+   color = 'red',
+   on_enter = nil, -- before entering hydra
+   on_exit = nil, -- after leaving hydra
+   timeout = false, -- true, false or number in milliseconds
+   invoke_on_body = false,
+   buffer = nil,
+   hint = {
+      position = 'bottom',
+      border = nil,
+      functions = {}
+   }
+}
+
 ---@param input table
----@return Hydra
 function Hydra:_constructor(input)
    do -- validate parameters
       vim.validate({
@@ -97,7 +98,7 @@ function Hydra:_constructor(input)
 
    self.id = util.generate_id() -- Unique ID for each Hydra.
    self.name  = input.name
-   self.config = vim.tbl_deep_extend('force', default_config, input.config or {})
+   self.config = vim.tbl_deep_extend('force', default_config, input.config or {}) --[[@as hydra.Config]]
    self.mode  = input.mode or 'n'
    self.body  = input.body
    self.options = options('hydra.options')
@@ -117,7 +118,7 @@ function Hydra:_constructor(input)
       end
    )
 
-   -- make Hydra buffer local
+   -- make Hydra buffer-local
    if self.config.buffer and type(self.config.buffer) ~= 'number' then
       self.config.buffer = vim.api.nvim_get_current_buf()
    end
@@ -147,6 +148,7 @@ function Hydra:_constructor(input)
    local has_exit_head = self.config.exit and true or nil
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
+      ---@cast lhs string
 
       if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
          color = util.get_color_from_config(self.config.foreign_keys, opts.exit)
@@ -183,6 +185,7 @@ function Hydra:_constructor(input)
       self.heads[lhs] = { func, opts }
 
       self.heads_spec[lhs] = {
+         head = lhs,
          index = index,
          color = color:gsub("^%l", string.upper), -- capitalize first letter
          desc = desc
@@ -205,7 +208,7 @@ function Hydra:_constructor(input)
       if self.config.on_enter then
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
-         })
+         }) --[[@as table]]
          env.vim.o  = self.options.o
          env.vim.go = self.options.go
          env.vim.bo = self.options.bo
@@ -216,7 +219,7 @@ function Hydra:_constructor(input)
       if self.config.on_exit then
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
-         })
+         }) --[[@as table]]
          env.vim.o  = util.disable_meta_accessor('o')
          env.vim.go = util.disable_meta_accessor('go')
          env.vim.bo = util.disable_meta_accessor('bo')
