@@ -32,7 +32,7 @@ end
 ---}                     }
 ---````
 ---@return table
-function Hint:swap_head_with_index()
+function Hint:_swap_head_with_index()
    local old = vim.deepcopy(self.heads)
    local new = {}
    for head, properties in pairs(old) do

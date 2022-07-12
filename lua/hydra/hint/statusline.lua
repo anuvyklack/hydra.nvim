@@ -13,17 +13,16 @@ function HintStatusLine:_constructor(hydra, ...)
    Hint._constructor(self, hydra, ...)
    self.meta_accessors = hydra.options
    self.statusline = nil
-   return self
 end
 
-function HintStatusLine:make_statusline()
+function HintStatusLine:_make_statusline()
    if self.statusline then return end
 
    require('hydra.highlight').create_statusline_hl_groups()
 
    local statusline = {}
    local insert = table.insert
-   local heads = self:swap_head_with_index()
+   local heads = self:_swap_head_with_index()
    for _, head in ipairs(heads) do
       if head.desc ~= false then
          insert(statusline, string.format('%%#HydraStatusLine%s#', head.color))
@@ -43,7 +42,7 @@ function HintStatusLine:make_statusline()
 end
 
 function HintStatusLine:show()
-   if not self.statusline then self:make_statusline() end
+   if not self.statusline then self:_make_statusline() end
    local statusline = table.concat{
       ' ', self.hydra_name or 'HYDRA', ': ', self.statusline
    }
@@ -68,7 +67,7 @@ function HintStatusLineMute:_constructor(...)
 end
 
 function HintStatusLineMute:get_statusline()
-   if not self.statusline then self:make_statusline() end
+   if not self.statusline then self:_make_statusline() end
    return self.statusline
 end
 

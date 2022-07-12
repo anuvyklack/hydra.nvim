@@ -11,14 +11,13 @@ local HintAutoWindow = Class(Hint)
 
 function HintAutoWindow:_constructor(...)
    Hint._constructor(self, ...)
-   return self
 end
 
-function HintAutoWindow:make_buffer()
+function HintAutoWindow:_make_buffer()
    self.bufnr = vim.api.nvim_create_buf(false, true)
 
    local hint = { ' ', self.hydra_name or 'HYDRA', ': ' }
-   local heads = self:swap_head_with_index()
+   local heads = self:_swap_head_with_index()
    for _, head in pairs(heads) do
       if head.desc ~= false then
          hint[#hint+1] = string.format('_%s_', head.head)
@@ -53,7 +52,7 @@ function HintAutoWindow:make_buffer()
    vim.bo[self.bufnr].readonly = true
 end
 
-function HintAutoWindow:make_win_config()
+function HintAutoWindow:_make_win_config()
    self.win_config = {
       relative = 'editor',
       anchor = 'SW',
@@ -69,8 +68,8 @@ function HintAutoWindow:make_win_config()
 end
 
 function HintAutoWindow:show()
-   if not self.bufnr then self:make_buffer() end
-   if not self.win_config then self:make_win_config() end
+   if not self.bufnr then self:_make_buffer() end
+   if not self.win_config then self:_make_win_config() end
 
    local winid = vim.api.nvim_open_win(self.bufnr, false, self.win_config)
    self.winid = winid

@@ -24,16 +24,14 @@ function HintManualWindow:_constructor(...)
       and not vim.tbl_isempty(self.config.functions)
    then
       function self:update()
-         self:make_buffer()
-         self:make_win_config()
+         self:_make_buffer()
+         self:_make_win_config()
          vim.api.nvim_win_set_config(self.winid, self.win_config)
       end
    end
-
-   return self
 end
 
-function HintManualWindow:make_buffer()
+function HintManualWindow:_make_buffer()
    self.bufnr = self.bufnr or vim.api.nvim_create_buf(false, true)
 
    local hint = vim.deepcopy(self.hint)
@@ -138,7 +136,7 @@ function HintManualWindow:make_buffer()
    vim.bo[self.bufnr].readonly = true
 end
 
-function HintManualWindow:make_win_config()
+function HintManualWindow:_make_win_config()
    --   top-left   |   top   |  top-right
    -- -------------+---------+--------------
    --  middle-left | middle  | middle-right
@@ -177,10 +175,10 @@ end
 
 function HintManualWindow:show()
    if not self.bufnr then
-      self:make_buffer()
+      self:_make_buffer()
    end
    if not self.winid then
-      self:make_win_config()
+      self:_make_win_config()
    end
    if not self.winid or not vim.api.nvim_win_is_valid(self.winid) then
       local winid = vim.api.nvim_open_win(self.bufnr, false, self.win_config)
