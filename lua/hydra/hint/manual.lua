@@ -59,7 +59,6 @@ function HintManualWindow:make_buffer()
       local start, stop, fun = 0, nil, nil
       while start do
          start, stop, fun = line:find('%%{(.-)}', 1)
-         print(start, stop, fun)
          if start then
             line = table.concat({
                line:sub(1, start - 1),
