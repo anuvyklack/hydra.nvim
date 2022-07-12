@@ -1,6 +1,13 @@
 local util = {}
 local id = 0
 
+---@param msg string
+function util.warn(msg)
+   vim.schedule(function()
+      vim.notify_once('[Hydra] ' .. msg, vim.log.levels.WARN)
+   end)
+end
+
 ---Generate ID
 ---@return integer
 function util.generate_id()
@@ -77,6 +84,9 @@ function util.unlimited_depth_table()
    return setmetatable({}, mt)
 end
 
+---@param get function
+---@param set function
+---@return MetaAccessor
 function util.make_meta_accessor(get, set)
    return setmetatable({}, {
       __index = not get and nil or function(_, k) return get(k) end,
@@ -84,20 +94,16 @@ function util.make_meta_accessor(get, set)
    })
 end
 
-function util.disable_meta_accessor(accessor)
+---@param accessor_name string
+---@return MetaAccessor
+function util.disable_meta_accessor(accessor_name)
    local function disable()
       util.warn(string.format(
          '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
-         accessor))
+         accessor_name))
    end
-   return util.make_meta_accessor(disable, disable)
-end
 
----@param msg string
-function util.warn(msg)
-   vim.schedule(function()
-      vim.notify_once('[Hydra] ' .. msg, vim.log.levels.WARN)
-   end)
+   return util.make_meta_accessor(disable, disable)
 end
 
 ---Create once callback
@@ -109,6 +115,20 @@ function util.once(callback)
       if done then return end
       done = true
       callback(...)
+   end
+end
+
+---@param func function
+---@param new_fn function
+---@return function
+function util.add_hook_before(func, new_fn)
+   if func then
+      return function(...)
+         new_fn(...)
+         return func(...)
+      end
+   else
+      return new_fn
    end
 end
 

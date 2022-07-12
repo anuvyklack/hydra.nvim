@@ -1,10 +1,8 @@
 local Class = require('hydra.class')
 local hint = require('hydra.hint')
+local options = require('hydra.options')
 local util = require('hydra.util')
 local termcodes = util.termcodes
-
-local augroup_name = 'Hydra'
-local augroup_id = vim.api.nvim_create_augroup(augroup_name, { clear = true })
 
 local default_config = {
    debug = false,
@@ -33,6 +31,7 @@ _G.Hydra = nil
 ---@field mode string | string[]
 ---@field body string
 ---@field heads table<string, string | function | table>
+---@field options HydraOptions
 ---@field plug table<string, string>
 ---@field meta_accessors table
 local Hydra = Class()
@@ -101,8 +100,22 @@ function Hydra:_constructor(input)
    self.config = vim.tbl_deep_extend('force', default_config, input.config or {})
    self.mode  = input.mode or 'n'
    self.body  = input.body
-   self.original = {}
-   self:_make_meta_accessors()
+   self.options = options('hydra.options')
+
+   getmetatable(self.options.bo).__index = util.add_hook_before(
+      getmetatable(self.options.bo).__index,
+      function(_, opt)
+         assert(type(opt) ~= 'number',
+            '[Hydra] vim.bo[bufnr] meta-aссessor in config.on_enter() function is forbiden, use "vim.bo" instead')
+      end
+   )
+   getmetatable(self.options.wo).__index = util.add_hook_before(
+      getmetatable(self.options.wo).__index,
+      function(_, opt)
+         assert(type(opt) ~= 'number',
+            '[Hydra] vim.wo[winnr] meta-aссessor in config.on_enter() function is forbiden, use "vim.wo" instead')
+      end
+   )
 
    -- make Hydra buffer local
    if self.config.buffer and type(self.config.buffer) ~= 'number' then
@@ -193,10 +206,10 @@ function Hydra:_constructor(input)
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
          })
-         env.vim.o  = self.meta_accessors.o
-         env.vim.go = self.meta_accessors.go
-         env.vim.bo = self.meta_accessors.bo
-         env.vim.wo = self.meta_accessors.wo
+         env.vim.o  = self.options.o
+         env.vim.go = self.options.go
+         env.vim.bo = self.options.bo
+         env.vim.wo = self.options.wo
 
          setfenv(self.config.on_enter, env)
       end
@@ -289,7 +302,7 @@ function Hydra:_setup_pink_hydra()
             self.config.on_exit,
             function()
                self.hint:close()
-               self:_restore_original_options()
+               self.options:restore()
                vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
                _G.Hydra = nil
             end
@@ -352,7 +365,7 @@ function Hydra:_setup_pink_hydra()
             self.config.on_exit,
             function()
                self.hint:close()
-               self:_restore_original_options()
+               self.options:restore()
                vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
                _G.Hydra = nil
             end
@@ -406,7 +419,7 @@ function Hydra:_enter()
    end
    _G.Hydra = self
 
-   local o = self.meta_accessors.o
+   local o = self.options.o
    o.showcmd = false
 
    if self.config.timeout then
@@ -417,8 +430,8 @@ function Hydra:_enter()
    else
       o.timeout = false
    end
-   o.ttimeout = not self.original.timeout and true
-                or self.original.ttimeout
+   o.ttimeout = not self.options.original.timeout and true
+                or self.options.original.ttimeout
 
    if self.config.on_enter then self.config.on_enter() end
 
@@ -437,12 +450,8 @@ end
 
 -- Deactivate hydra
 function Hydra:exit()
-   self:_restore_original_options()
-
-   vim.api.nvim_clear_autocmds({ group = augroup_id })
-
+   self.options:restore()
    self.hint:close()
-
    if self.config.on_exit then self.config.on_exit() end
    _G.Hydra = nil
    vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
@@ -494,121 +503,6 @@ function Hydra:_set_keymap(lhs, rhs, opts)
    end
    o.buffer = self.config.buffer
    vim.keymap.set(self.mode, lhs, rhs, o)
-end
-
-function Hydra:_make_meta_accessors()
-   if self.meta_accessors then return end
-
-   local function set_buf_option(opt, val)
-      local bufnr = vim.api.nvim_get_current_buf()
-      self.original.bo = self.original.bo or {}
-      self.original.bo[bufnr] = self.original.bo[bufnr] or {}
-      if self.original.bo[bufnr][opt] then return end
-      self.original.bo[bufnr][opt] = vim.api.nvim_buf_get_option(bufnr, opt)
-      vim.api.nvim_buf_set_option(bufnr, opt, val)
-   end
-
-   local function set_win_option(opt, val)
-      local winnr = vim.api.nvim_get_current_win()
-      self.original.wo = self.original.wo or {}
-      self.original.wo[winnr] = self.original.wo[winnr] or {}
-      if self.original.wo[winnr][opt] then return end
-      self.original.wo[winnr][opt] = vim.api.nvim_win_get_option(winnr, opt)
-      vim.api.nvim_win_set_option(winnr, opt, val)
-   end
-
-   local ma = {
-       o = util.make_meta_accessor(
-         function(opt)
-            return vim.api.nvim_get_option_value(opt, {})
-         end,
-         function(opt, val)
-            self.original.o = self.original.o or {}
-            self.original.o[opt] = vim.api.nvim_get_option_value(opt, {})
-            vim.api.nvim_set_option_value(opt, val, {})
-         end
-      ),
-      go = util.make_meta_accessor(
-         function(opt)
-            return vim.api.nvim_get_option_value(opt, { scope = 'global' })
-         end,
-         function(opt, val)
-            self.original.go = self.original.go or {}
-            self.original.go[opt] = vim.api.nvim_get_option_value(opt, { scope = 'global' })
-            vim.api.nvim_set_option_value(opt, val, { scope = 'global' })
-         end
-      ),
-      bo = util.make_meta_accessor(
-         function(opt)
-            assert(type(opt) ~= 'number',
-               '[Hydra] "vim.bo[bufnr]" meta-aссessor in config.on_enter() function is forbiden, use "vim.bo" instead')
-            return vim.api.nvim_buf_get_option(0, opt)
-         end,
-         function(opt, val)
-            set_buf_option(opt, val)
-
-            vim.api.nvim_create_autocmd('BufEnter', {
-               group = augroup_id,
-               desc = string.format('set "%s" buffer option', opt),
-               callback = function()
-                  set_buf_option(opt, val)
-               end
-            })
-         end
-      ),
-      wo = util.make_meta_accessor(
-         function(opt)
-            assert(type(opt) ~= 'number',
-               '[Hydra] "vim.wo[winnr]" meta-aссessor in config.on_enter() function is forbiden, use "vim.wo" instead')
-            return vim.api.nvim_win_get_option(0, opt)
-         end,
-         function(opt, val)
-            set_win_option(opt, val)
-
-            vim.api.nvim_create_autocmd('WinEnter', {
-               group = augroup_id,
-               desc = string.format('set "%s" window option', opt),
-               callback = function()
-                  set_win_option(opt, val)
-               end
-            })
-         end
-      )
-   }
-
-   self.meta_accessors = ma
-end
-
-function Hydra:_restore_original_options()
-   for _, otype in ipairs({'o', 'go'}) do
-      if self.original[otype] then
-         for opt, val in pairs(self.original[otype]) do
-            vim[otype][opt] = val
-         end
-      end
-   end
-
-   if self.original.bo then
-      for bufnr, opts in pairs(self.original.bo) do
-         if vim.api.nvim_buf_is_valid(bufnr) then
-            for opt, val in pairs(opts) do
-               vim.bo[bufnr][opt] = val
-            end
-         end
-      end
-   end
-
-   if self.original.wo then
-      for winnr, opts in pairs(self.original.wo) do
-         if vim.api.nvim_win_is_valid(winnr) then
-            for opt, val in pairs(opts) do
-               vim.wo[winnr][opt] = val
-            end
-         end
-      end
-   end
-
-   self.original = {}
 end
 
 function Hydra:_debug(...)
