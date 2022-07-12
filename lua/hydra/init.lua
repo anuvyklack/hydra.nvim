@@ -1,7 +1,6 @@
 local Class = require('hydra.class')
 local hint = require('hydra.hint')
 local util = require('hydra.util')
-
 local termcodes = util.termcodes
 
 local augroup_name = 'Hydra'
@@ -28,12 +27,12 @@ _G.Hydra = nil
 
 ---@class Hydra
 ---@field id number
----@field name string
+---@field name string | nil
 ---@field hint HydraHint
 ---@field config table
----@field mode string
+---@field mode string | string[]
 ---@field body string
----@field heads table<string, string|function|table>
+---@field heads table<string, string | function | table>
 ---@field plug table<string, string>
 ---@field meta_accessors table
 local Hydra = Class()
@@ -131,10 +130,7 @@ function Hydra:_constructor(input)
    })
 
    self.heads = {};
-
-   ---@type table<string, table>
    self.heads_spec = {}
-
    local has_exit_head = self.config.exit and true or nil
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
@@ -152,7 +148,26 @@ function Hydra:_constructor(input)
       local desc = opts.desc
       opts.desc = nil
 
-      self.heads[lhs] = { rhs, opts }
+      local func = rhs and function()
+         local f = {} -- keys for feeding
+         if opts.expr then
+            if type(rhs) == 'function' then
+               f.keys = rhs()
+            elseif type(rhs) == 'string' then
+               f.keys = vim.api.nvim_eval(rhs)
+            end
+         elseif type(rhs) == 'function' then
+            rhs()
+            return
+         elseif type(rhs) == 'string' then
+            f.keys = rhs
+         end
+         f.keys = termcodes(f.keys)
+         f.mode = opts.remap and 'im' or 'in'
+         vim.api.nvim_feedkeys(f.keys, f.mode, true)
+      end
+
+      self.heads[lhs] = { func, opts }
 
       self.heads_spec[lhs] = {
          index = index,
@@ -201,46 +216,40 @@ function Hydra:_constructor(input)
 end
 
 function Hydra:_setup_hydra_keymaps()
-   self:_set_keymap(self.plug.enter, function() self:_enter() end)
-   self:_set_keymap(self.plug.exit,  function() self:_exit()  end)
-   self:_set_keymap(self.plug.leave, function() self:_leave() end)
-   self:_set_keymap(self.plug.wait, self.plug.leave)
+   self:_set_keymap(self.plug.wait, function() self:_leave() end)
 
    -- Define entering keymap if Hydra is called only on body keymap.
    if self.config.invoke_on_body and self.body then
-      self:_set_keymap(self.body, table.concat{ self.plug.enter, self.plug.wait })
+      self:_set_keymap(self.body, function()
+         self:_enter()
+         self:_wait()
+      end)
    end
 
    -- Define Hydra kyebindings.
    for head, map in pairs(self.heads) do
       local rhs, opts = map[1], map[2]
 
-      if not rhs then
-         self.plug[head] = ''
-      else
-         self:_set_keymap(self.plug[head], rhs, opts)
-      end
-
       -- Define enter mappings
       if not self.config.invoke_on_body and not opts.exit and not opts.private then
-         self:_set_keymap(self.body..head, table.concat{
-            self.plug.enter,
-            self.plug[head],
-            self.plug.wait
-         })
+         self:_set_keymap(self.body..head, function()
+            self:_enter()
+            if rhs then rhs() end
+            self:_wait()
+         end)
       end
 
       -- Define exit mappings
       if opts.exit then -- blue head
-         self:_set_keymap(self.plug.wait..head, table.concat{
-            self.plug.exit,
-            self.plug[head]
-         })
+         self:_set_keymap(self.plug.wait..head, function()
+            self:exit()
+            if rhs then rhs() end
+         end)
       else
-         self:_set_keymap(self.plug.wait..head, table.concat{
-            self.plug[head],
-            self.plug.wait
-         })
+         self:_set_keymap(self.plug.wait..head, function()
+            if rhs then rhs() end
+            self:_wait()
+         end)
       end
 
       -- Assumption:
@@ -249,7 +258,7 @@ function Hydra:_setup_hydra_keymaps()
       local keys = vim.fn.split(head, [[\(<[^<>]\+>\|.\)\zs]])
       for i = #keys-1, 1, -1 do
          local first_n_keys = table.concat(vim.list_slice(keys, 1, i))
-         self:_set_keymap(self.plug.wait..first_n_keys, self.plug.leave)
+         self:_set_keymap(self.plug.wait..first_n_keys, function() self:_leave() end)
       end
    end
 end
@@ -416,7 +425,18 @@ function Hydra:_enter()
    self.hint:show()
 end
 
-function Hydra:_exit()
+---Programmatically activate hydra
+function Hydra:activate()
+   if self.layer then
+      self.layer:enter()
+   else
+      self:_enter()
+      self:_wait()
+   end
+end
+
+-- Deactivate hydra
+function Hydra:exit()
    self:_restore_original_options()
 
    vim.api.nvim_clear_autocmds({ group = augroup_id })
@@ -426,6 +446,10 @@ function Hydra:_exit()
    if self.config.on_exit then self.config.on_exit() end
    _G.Hydra = nil
    vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
+end
+
+function Hydra:_wait()
+   vim.api.nvim_feedkeys( termcodes(self.plug.wait), '', false)
 end
 
 function Hydra:_leave()
@@ -439,9 +463,7 @@ function Hydra:_leave()
          }, false, {})
 
          vim.fn.getchar()
-         local keys = vim.api.nvim_replace_termcodes(self.plug.wait, true, true, true)
-         vim.api.nvim_feedkeys(keys, '', false)
-         -- vim.fn.feedkeys([[\]]..self.plug.wait)
+         self:_wait()
       end
    elseif self.config.color == 'teal' then
       if vim.fn.getchar(1) ~= 0 then
@@ -453,11 +475,10 @@ function Hydra:_leave()
          }, false, {})
 
          vim.fn.getchar()
-         local keys = vim.api.nvim_replace_termcodes(self.plug.wait, true, true, true)
-         vim.api.nvim_feedkeys(keys, '', false)
+         self:_wait()
       end
    else
-      self:_exit()
+      self:exit()
    end
 end
 
@@ -593,20 +614,6 @@ end
 function Hydra:_debug(...)
    if self.config.debug then
       vim.pretty_print(...)
-   end
-end
-
----Programmatically activate hydra
-function Hydra:activate()
-   if self.layer then
-      self.layer:enter()
-   else
-      local keys = { self.plug.enter, self.plug.wait }
-      for i, k in ipairs(keys) do
-         keys[i] = vim.api.nvim_replace_termcodes(k, true, true, true)
-      end
-      keys = table.concat(keys)
-      vim.api.nvim_feedkeys(keys, '', false)
    end
 end
 

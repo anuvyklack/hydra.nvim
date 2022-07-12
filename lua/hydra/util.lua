@@ -15,6 +15,9 @@ function util.termcodes(keys)
    return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
+---@param foreign_keys string | nil
+---@param exit boolean
+---@return string color
 function util.get_color_from_config(foreign_keys, exit)
    if foreign_keys == 'run' then
       if exit then
@@ -33,6 +36,9 @@ function util.get_color_from_config(foreign_keys, exit)
    end
 end
 
+---@param color string
+---@return string | nil foreign_keys
+---@return boolean exit
 function util.get_config_from_color(color)
    if color == 'pink' then
       return 'run', false
@@ -56,20 +62,6 @@ function util.deep_unsetmetatable(tbl)
          util.deep_unsetmetatable(subtbl)
       end
    end
-end
-
----Return table where all `key`, `value` pairs are reversed.
----```
----    table[key] = value  =>  table[value] = key
----```
----@param tbl table
----@return table
-function util.reverse_tbl(tbl)
-   local r = {}
-   for key, value in pairs(tbl) do
-      r[value] = key
-   end
-   return r
 end
 
 -- Recursive subtables
@@ -101,9 +93,10 @@ function util.disable_meta_accessor(accessor)
    return util.make_meta_accessor(disable, disable)
 end
 
+---@param msg string
 function util.warn(msg)
    vim.schedule(function()
-      vim.notify_once('[Hydra] '..msg, vim.log.levels.WARN)
+      vim.notify_once('[Hydra] ' .. msg, vim.log.levels.WARN)
    end)
 end
 
