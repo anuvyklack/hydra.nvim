@@ -103,21 +103,6 @@ function Hydra:_constructor(input)
    self.body  = input.body
    self.options = options('hydra.options')
 
-   getmetatable(self.options.bo).__index = util.add_hook_before(
-      getmetatable(self.options.bo).__index,
-      function(_, opt)
-         assert(type(opt) ~= 'number',
-            '[Hydra] vim.bo[bufnr] meta-aссessor in config.on_enter() function is forbiden, use "vim.bo" instead')
-      end
-   )
-   getmetatable(self.options.wo).__index = util.add_hook_before(
-      getmetatable(self.options.wo).__index,
-      function(_, opt)
-         assert(type(opt) ~= 'number',
-            '[Hydra] vim.wo[winnr] meta-aссessor in config.on_enter() function is forbiden, use "vim.wo" instead')
-      end
-   )
-
    -- make Hydra buffer-local
    if self.config.buffer and type(self.config.buffer) ~= 'number' then
       self.config.buffer = vim.api.nvim_get_current_buf()
@@ -145,14 +130,14 @@ function Hydra:_constructor(input)
 
    self.heads = {};
    self.heads_spec = {}
-   local has_exit_head = self.config.exit and true or nil
+   local has_exit_head = self.config.exit
    for index, head in ipairs(input.heads) do
       local lhs, rhs, opts = head[1], head[2], head[3] or {}
       ---@cast lhs string
 
       if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
          color = util.get_color_from_config(self.config.foreign_keys, opts.exit)
-         if opts.exit and has_exit_head == nil then
+         if opts.exit and not has_exit_head then
             has_exit_head = true
          end
       else
@@ -160,40 +145,27 @@ function Hydra:_constructor(input)
          color = self.config.color
       end
 
-      local desc = opts.desc
-      opts.desc = nil
-
-      local func = rhs and function()
-         local f = {} -- keys for feeding
-         if opts.expr then
-            if type(rhs) == 'function' then
-               f.keys = rhs()
-            elseif type(rhs) == 'string' then
-               f.keys = vim.api.nvim_eval(rhs)
-            end
-         elseif type(rhs) == 'function' then
-            rhs()
-            return
-         elseif type(rhs) == 'string' then
-            f.keys = rhs
-         end
-         f.keys = termcodes(f.keys)
-         f.mode = opts.remap and 'im' or 'in'
-         vim.api.nvim_feedkeys(f.keys, f.mode, true)
+      if type(opts.mode) == 'string' then
+         opts.mode = { opts.mode }
       end
-
-      self.heads[lhs] = { func, opts }
 
       self.heads_spec[lhs] = {
          head = lhs,
          index = index,
          color = color:gsub("^%l", string.upper), -- capitalize first letter
-         desc = desc
+         desc = opts.desc
       }
+
+      if type(opts.desc) ~= 'string' then opts.desc = nil end
+
+      ---@cast rhs string | function | nil
+      ---@cast opts hydra.HeadOpts
+      self.heads[lhs] = { rhs, opts }
    end
    if not has_exit_head then
       self.heads['<Esc>'] = { nil, { exit = true }}
       self.heads_spec['<Esc>'] = {
+         head = '<Esc>',
          index = vim.tbl_count(self.heads),
          color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue',
          desc = 'exit'
@@ -202,10 +174,33 @@ function Hydra:_constructor(input)
 
    self.hint = hint(self, self.config.hint, input.hint)
 
-   if self.config.color == 'pink' then
-      self:_setup_pink_hydra()
-   else
+   if self.config.color ~= 'pink' then
+      -- HACK: I replace in the backstage the `vim.bo` table called inside
+      -- `self.config.on_enter()` function with my own.
       if self.config.on_enter then
+         getmetatable(self.options.bo).__index = util.add_hook_before(
+            getmetatable(self.options.bo).__index,
+            function(_, opt)
+               assert(type(opt) ~= 'number',
+                  '[Hydra] vim.bo[bufnr] meta-aссessor in config.on_enter() function is forbiden, use "vim.bo" instead')
+            end
+         )
+         getmetatable(self.options.wo).__index = util.add_hook_before(
+            getmetatable(self.options.wo).__index,
+            function(_, opt)
+               assert(type(opt) ~= 'number',
+                  '[Hydra] vim.wo[winnr] meta-aссessor in config.on_enter() function is forbiden, use "vim.wo" instead')
+            end
+         )
+
+         -- HACK: The `vim.deepcopy()` rize an error if try to copy `getfenv()`
+         -- environment with next snippet:
+         -- ```
+         --    local env = vim.deepcopy(getfenv())
+         -- ```
+         -- But `vim.tbl_deep_extend` function makes a copy if extend `getfenv()`
+         -- with not empty table; another way, it returns the reference to the
+         -- original table.
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
          }) --[[@as table]]
@@ -228,6 +223,8 @@ function Hydra:_constructor(input)
          setfenv(self.config.on_exit, env)
       end
       self:_setup_hydra_keymaps()
+   else  -- color == 'pink'
+      self:_setup_pink_hydra()
    end
 end
 
@@ -246,26 +243,48 @@ function Hydra:_setup_hydra_keymaps()
    for head, map in pairs(self.heads) do
       local rhs, opts = map[1], map[2]
 
-      -- Define enter mappings
+      ---@type function | nil
+      local func = rhs and function()
+         ---@type string
+         local keys, mode
+         if opts.expr then
+            if type(rhs) == 'function' then
+               keys = rhs()
+            elseif type(rhs) == 'string' then
+               keys = vim.api.nvim_eval(rhs)
+            end
+         elseif type(rhs) == 'function' then
+            rhs()
+            return
+         elseif type(rhs) == 'string' then
+            keys = rhs
+         end
+         keys = util.termcodes(keys)
+         mode = opts.remap and 'im' or 'in'
+         vim.api.nvim_feedkeys(keys, mode, true)
+      end
+
+      -- Define enter mapping
       if not self.config.invoke_on_body and not opts.exit and not opts.private then
          self:_set_keymap(self.body..head, function()
             self:_enter()
-            if rhs then rhs() end
+            if func then func() end
             self:_wait()
-         end)
+         end, opts)
       end
 
-      -- Define exit mappings
+      -- Define mapping
       if opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, function()
             self:exit()
-            if rhs then rhs() end
-         end)
-      else
+            if func then func() end
+         end, opts)
+      else -- red head
          self:_set_keymap(self.plug.wait..head, function()
-            if rhs then rhs() end
+            if func then func() end
+            if self.hint.update then self.hint.update() end
             self:_wait()
-         end)
+         end, opts)
       end
 
       -- Assumption:
@@ -494,21 +513,20 @@ function Hydra:_leave()
    end
 end
 
+---@param lhs string
+---@param rhs function
+---@param opts? hydra.HeadOpts
 function Hydra:_set_keymap(lhs, rhs, opts)
-   local o = opts and vim.deepcopy(opts) or {}
-   if not vim.tbl_isempty(o) then
-      o.color = nil
-      o.private = nil
-      o.exit = nil
-      if type(o.desc) == 'boolean' then o.desc = nil end
-      o.nowait = nil
-      o.mode = nil
-   end
+   local o = {} ---@type KeymapOpts
    o.buffer = self.config.buffer
+   if opts then
+      o.desc = opts.desc
+      o.silent = opts.silent
+   end
    vim.keymap.set(self.mode, lhs, rhs, o)
 end
 
-function Hydra:_debug(...)
+function Hydra:debug(...)
    if self.config.debug then
       vim.pretty_print(...)
    end
