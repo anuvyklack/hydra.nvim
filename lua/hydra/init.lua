@@ -489,7 +489,7 @@ end
 ---Programmatically activate hydra
 function Hydra:activate()
    if self.layer then
-      self.layer:enter()
+      self.layer:activate()
    else
       self:_enter()
       self:_wait()
