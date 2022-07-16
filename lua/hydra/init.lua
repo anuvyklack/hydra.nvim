@@ -348,11 +348,14 @@ function Hydra:_setup_pink_hydra()
       }
 
       self.mode = type(self.mode) == 'table' and self.mode or { self.mode }
-      self.body = termcodes(self.body)
 
-      if self.config.invoke_on_body then
-         for _, mode in ipairs(self.mode) do
-            layer.enter_keymaps[mode][self.body] = { '<Nop>', {} }
+      if self.body then
+         self.body = termcodes(self.body)
+
+         if self.config.invoke_on_body then
+            for _, mode in ipairs(self.mode) do
+               layer.enter_keymaps[mode][self.body] = { '<Nop>', {} }
+            end
          end
       end
 
@@ -369,7 +372,11 @@ function Hydra:_setup_pink_hydra()
          }
 
          for _, mode in ipairs(opts.mode or self.mode) do
-            if not self.config.invoke_on_body and not opts.exit and not opts.private then
+            if self.body
+               and not self.config.invoke_on_body
+               and not opts.exit
+               and not opts.private
+            then
                layer.enter_keymaps[mode][self.body..head] = { rhs, o }
             end
 
