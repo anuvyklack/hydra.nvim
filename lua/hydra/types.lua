@@ -46,4 +46,8 @@
 ---@field desc? string
 
 ---@class MetaAccessor
+
 ---@class libuv.Timer
+---@field start function
+---@field again function
+---@field close function
