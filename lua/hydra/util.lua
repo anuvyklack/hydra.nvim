@@ -110,28 +110,6 @@ function util.deep_unsetmetatable(tbl)
    end
 end
 
----@param get function
----@param set function
----@return MetaAccessor
-function util.make_meta_accessor(get, set)
-   return setmetatable({}, {
-      __index = not get and nil or function(_, k) return get(k) end,
-      __newindex = not set and nil or function(_, k, v) return set(k, v) end
-   })
-end
-
----@param accessor_name string
----@return MetaAccessor
-function util.disable_meta_accessor(accessor_name)
-   local function disable()
-      util.warn(string.format(
-         '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
-         accessor_name))
-   end
-
-   return util.make_meta_accessor(disable, disable)
-end
-
 ---Create once callback
 ---@param callback function
 ---@return function

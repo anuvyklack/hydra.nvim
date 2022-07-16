@@ -11,7 +11,7 @@ local HintStatusLine = Class(Hint)
 
 function HintStatusLine:_constructor(hydra, ...)
    Hint._constructor(self, hydra, ...)
-   self.meta_accessors = hydra.options
+   self.meta_accessor = hydra.options
 end
 
 function HintStatusLine:_make_statusline()
@@ -45,7 +45,7 @@ function HintStatusLine:show()
    local statusline = table.concat{
       ' ', self.hydra_name or 'HYDRA', ': ', self.statusline
    }
-   local wo = self.meta_accessors.wo
+   local wo = self.meta_accessor.wo
    wo.statusline = statusline
 end
 

@@ -16,7 +16,7 @@ _G.Hydra = nil
 ---@field body? string
 ---@field heads table<string, hydra.Head>
 ---@field heads_spec table<string, hydra.HeadSpec>
----@field options hydra.Options
+---@field options hydra.MetaAccessor
 ---@field plug table<string, string>
 local Hydra = Class()
 
@@ -212,13 +212,25 @@ function Hydra:_constructor(input)
          setfenv(self.config.on_enter, env)
       end
       if self.config.on_exit then
+
+         ---@param name string
+         ---@return MetaAccessor
+         local function disable_meta_accessor(name)
+            local function disable()
+               util.warn(string.format(
+                  '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
+                  name))
+            end
+            return self.options.make_meta_accessor(disable, disable)
+         end
+
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
          }) --[[@as table]]
-         env.vim.o  = util.disable_meta_accessor('o')
-         env.vim.go = util.disable_meta_accessor('go')
-         env.vim.bo = util.disable_meta_accessor('bo')
-         env.vim.wo = util.disable_meta_accessor('wo')
+         env.vim.o  = disable_meta_accessor('o')
+         env.vim.go = disable_meta_accessor('go')
+         env.vim.bo = disable_meta_accessor('bo')
+         env.vim.wo = disable_meta_accessor('wo')
 
          setfenv(self.config.on_exit, env)
       end
