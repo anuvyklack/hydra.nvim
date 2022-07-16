@@ -453,7 +453,7 @@ function Hydra:_enter()
       if _G.Hydra.layer then
          _G.Hydra.layer:exit()
       else
-         _G.Hydra:_exit()
+         _G.Hydra:exit()
       end
    end
    _G.Hydra = self
