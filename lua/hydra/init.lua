@@ -1,6 +1,6 @@
 local Class = require('hydra.class')
 local hint = require('hydra.hint')
-local options = require('hydra.options')
+local options = require('hydra.meta-accessor')
 local util = require('hydra.util')
 local termcodes = util.termcodes
 
@@ -294,7 +294,7 @@ function Hydra:_setup_hydra_keymaps()
       else -- red head
          self:_set_keymap(self.plug.wait..head, function()
             if func then func() end
-            if self.hint.update then self.hint.update() end
+            if self.hint.update then self.hint:update() end
             self:_wait()
          end, opts)
       end
@@ -326,7 +326,9 @@ function Hydra:_setup_pink_hydra()
          debug = self.config.debug,
          buffer = self.config.buffer,
          timeout = self.config.timeout,
-         on_key = self.hint.update,
+         on_key = function()
+            if self.hint.update then self.hint:update() end
+         end,
          on_enter = {
             function()
                _G.Hydra = self

@@ -51,7 +51,6 @@ function HintAutoWindow:_make_buffer()
 
    vim.bo[self.bufnr].filetype = 'hydra_hint'
    vim.bo[self.bufnr].modifiable = false
-   vim.bo[self.bufnr].readonly = true
 end
 
 function HintAutoWindow:_make_win_config()

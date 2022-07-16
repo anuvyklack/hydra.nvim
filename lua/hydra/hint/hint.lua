@@ -10,6 +10,7 @@ local Class = require('hydra.class')
 ---@field close function
 ---@field update function | nil
 ---@field get_statusline function | nil
+---@field _debug boolean
 local Hint = Class()
 
 ---@param hydra Hydra
@@ -20,6 +21,8 @@ function Hint:_constructor(hydra, hint)
    self.config = hydra.config.hint
    self.hint = hint
    self.namespaces_id = vim.api.nvim_create_namespace('hydra.hint')
+
+   self._debug = hydra.config.debug
 end
 
 ---In `self.heads` table for every head makes the next:
@@ -39,6 +42,12 @@ function Hint:_swap_head_with_index()
       new[properties.index] = properties
    end
    return new
+end
+
+function Hint:debug(...)
+   if self._debug then
+      vim.pretty_print(...)
+   end
 end
 
 return Hint
