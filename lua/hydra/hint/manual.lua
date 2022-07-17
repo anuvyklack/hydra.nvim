@@ -1,5 +1,7 @@
 local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
+local vim_options = require('hydra.hint.vim_options')
+
 
 ---@class hydra.hint.ManualWindow : hydra.Hint
 ---@field config hydra.hint.Config
@@ -16,12 +18,15 @@ function HintManualWindow:_constructor(...)
    Hint._constructor(self, ...)
    self.need_to_update = false
 
+   self.config.functions = setmetatable(self.config.functions or {}, {
+      __index = vim_options
+   })
+
    self.hint = vim.split(self.hint, '\n')
    -- Remove last empty string.
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil
    end
-
 end
 
 function HintManualWindow:_make_buffer()
@@ -37,14 +42,20 @@ function HintManualWindow:_make_buffer()
 
    self.win_width = 0 -- The width of the window
    for line_nr, line in ipairs(hint) do
-      local start, stop, fun = 0, nil, nil
+      local start, stop, fname = 0, nil, nil
       while start do
-         start, stop, fun = line:find('%%{(.-)}', 1)
+         start, stop, fname = line:find('%%{(.-)}', 1)
          if start then
             self.need_to_update = true
+
+            local fun = self.config.functions[fname]
+            if not fun then
+               error(string.format('[Hydra] "%s" not present in "config.hint.functions" table', fname))
+            end
+
             line = table.concat({
                line:sub(1, start - 1),
-               self.config.functions[fun](),
+               fun(),
                line:sub(stop + 1)
             })
             hint[line_nr] = line
