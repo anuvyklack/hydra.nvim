@@ -28,6 +28,7 @@ local default_config = {
    color = 'red',
    on_enter = nil, -- before entering hydra
    on_exit = nil, -- after leaving hydra
+   on_key = nil, -- after every hydra head
    timeout = false, -- true, false or number in milliseconds
    invoke_on_body = false,
    buffer = nil,
@@ -247,22 +248,27 @@ function Hydra:_setup_hydra_keymaps()
    if self.config.invoke_on_body and self.body then
       self:_set_keymap(self.body, function()
          self:_enter()
+         if self.config.on_key then self.config.on_key() end
          self:_wait()
       end)
    end
 
    -- Define Hydra kyebindings.
    for head, map in pairs(self.heads) do
-      local rhs, opts = map[1], map[2]
+      local rhs local opts
+      rhs, opts = map[1], map[2]
+      ---@cast rhs string | function | nil
+      ---@cast opts hydra.HeadOpts
 
-      ---@type function | nil
-      local func = rhs and function()
-         ---@type string
-         local keys, mode
+      local keymap = function()
+         if not rhs then return end
+         ---@cast rhs -nil
+         local keys, mode ---@type string
          if opts.expr then
             if type(rhs) == 'function' then
                keys = rhs()
             elseif type(rhs) == 'string' then
+               ---@cast rhs string
                keys = vim.api.nvim_eval(rhs)
             end
          elseif type(rhs) == 'function' then
@@ -277,10 +283,16 @@ function Hydra:_setup_hydra_keymaps()
       end
 
       -- Define enter mapping
-      if not self.config.invoke_on_body and not opts.exit and not opts.private then
+      if not self.config.invoke_on_body
+         and not opts.exit
+         and not opts.private
+      then
          self:_set_keymap(self.body..head, function()
             self:_enter()
-            if func then func() end
+            keymap()
+            if opts.on_key ~= false and self.config.on_key then
+               self.config.on_key()
+            end
             self:_wait()
          end, opts)
       end
@@ -289,11 +301,16 @@ function Hydra:_setup_hydra_keymaps()
       if opts.exit then -- blue head
          self:_set_keymap(self.plug.wait..head, function()
             self:exit()
-            if func then func() end
+            keymap()
          end, opts)
       else -- red head
          self:_set_keymap(self.plug.wait..head, function()
-            if func then func() end
+            keymap()
+
+            if opts.on_key ~= false and self.config.on_key then
+               self.config.on_key()
+            end
+
             if self.hint.update then self.hint:update() end
             self:_wait()
          end, opts)

@@ -10,6 +10,7 @@
 ---@field color hydra.color
 ---@field on_enter? function
 ---@field on_exit? function
+---@field on_key? function
 ---@field invoke_on_body boolean
 ---@field timeout boolean | number
 ---@field hint hydra.hint.Config | "statusline" | false
@@ -32,9 +33,12 @@
 ---@class hydra.HeadOpts
 ---@field public private? boolean
 ---@field exit? boolean
----@field silent? boolean
----@field nowait? boolean
+---@field on_key? boolean
 ---@field mode? string[]
+---@field silent? boolean
+---@field expr? boolean
+---@field nowait? boolean
+---@field remap? boolean
 ---@field desc? string
 
 ---@class KeymapOpts

@@ -65,6 +65,7 @@ If you want to quickly understand the concept, you can watch
         * [`invoke_on_body`](#invoke_on_body)
         * [`on_enter` and `on_exit`](#on_enter-and-on_exit)
             * [meta-accessors](#meta-accessors)
+        * [`on_key`](#on_key)
         * [`timeout`](#timeout)
         * [`hint`](#hint)
     * [Hydra's heads](#hydras-heads)
@@ -73,6 +74,7 @@ If you want to quickly understand the concept, you can watch
         * [`opts`](#opts)
             * [`private`](#private)
             * [`exit`](#exit-1)
+            * [`on_key`](#on_key-1)
             * [`desc`](#desc)
             * [`expr`, `silent`](#expr-silent)
             * [`nowait`](#nowait)
@@ -442,6 +444,10 @@ config = {
 }
 ```
 
+#### `on_key`
+
+Function that will be called **after** every hydra head.
+
 #### `timeout`
 
 The `timeout` option set a timer after which the hydra will be automatically
@@ -524,6 +530,11 @@ Stop the hydra state after executing a command corresponds to such head.
 ```lua
 { '<Esc>', nil, { exit = true } }
 ```
+
+##### `on_key`
+`boolean`
+
+If `false` `config.on_key` function won't be executed after this head.
 
 ##### `desc`
 `string | false`

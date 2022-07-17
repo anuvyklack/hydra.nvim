@@ -37,6 +37,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
         `invoke_on_body`...............................|hydra-config.invoke_on_body|
         `on_enter` and `on_exit`...............................|hydra-config.on_enter|
             meta-accessors..................................|hydra-meta-accessors|
+        `on_key`...............................................|hydra-config.on_key|
         `timeout`.............................................|hydra-config.timeout|
         `hint`...................................................|hydra-config.hint|
     Hydra's heads....................................................|hydra-heads|
@@ -45,6 +46,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
         {opts}........................................................|hydra-opts|
             `private`...........................................|hydra-head.private|
             `exit`.................................................|hydra-head.exit|
+            `on_key`.............................................|hydra-head.on_key|
             `desc`.................................................|hydra-head.desc|
             `expr`, `silent`.........................................|hydra-head.expr|
             `nowait`.............................................|hydra-head.nowait|
@@ -359,7 +361,7 @@ config			table
 
 					*hydra-config.on_enter* *hydra-config.on_exit*
 	on_enter
-	on_exit
+	on_exit			function
 		Functions that will be called on enter and on exit hydra.
 
 							*hydra-meta-accessors*
@@ -387,6 +389,9 @@ config			table
 		   end
 		}
 <
+							*hydra-config.on_key*
+	on_key			function
+		Function that will be called after every hydra head.
 
 							*hydra-config.timeout*
 	timeout
@@ -481,6 +486,10 @@ heads			table
 >
 			    { '<Esc>', nil, { exit = true } }
 <
+								*hydra-head.on_key*
+		on_key		boolean
+			If `false` |hydra-config.on_key| function won't be executed
+			after this head.
 
 								*hydra-head.desc*
 		desc		string | false
