@@ -174,12 +174,12 @@ need next plugins:
     })
 <
 
-COMMUNITY WIKI
+MORE HYDRAS
 
-You can find more hydras in the project's community wiki:
-https://github.com/anuvyklack/hydra.nvim/wiki/Community-hydras.
+You can find more hydras in the project's wiki:
+https://github.com/anuvyklack/hydra.nvim/wiki
 
-Feel free to add your own or edit the existing ones.
+Feel free to add your own or edit the existing ones!
 
 --------------------------------------------------------------------------------
 INSTALATION						*hydra-instalation*
@@ -412,7 +412,7 @@ config			table
 
 								*hydra-config.hint*
 	hint
-				table | `'window'` | `'statusline'` | false
+				table | `'window'` | `'statusline'` | `false`
 		Configure hint display.
 
 		`hint = 'statusline'`
@@ -439,6 +439,13 @@ config			table
 <
 			• border		string    (default: `'none'`)
 				The border of the hint window. See |nvim_open_win()|
+
+			• functions		table<string: fun():string>
+				Table where keys are function names and values
+				are functions them self. Each function should
+				return string. This functions can be required
+				from `hint` with `%{func_name}` syntaxis.
+				Default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
 
 								*hydra-heads*
 heads			table
@@ -543,6 +550,20 @@ hint			multiline string
 	To insert an empty character, use `^` char. It won't be rendered.
 	The only use of it is to have your code aligned as nicely as the result.
 
+	You can also create a Lua functions which returns a string and place it
+	in `config.hint.functions` (see |hydra-config.hint|) table under some
+	key which will be used as a function name. Than you can require this
+	function from the |hint| wrap its name (key in the table) with `%{...}`.
+	The result of the function will be inserted in that place in the hint
+	when it will be shown. And later this function will be called every time
+	when hydra head will be pressed and the hint will be updated with the
+	function result string. Some functions are already built-in, you can
+	find them in next file:
+	https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
+	You may submit or request some others which you think may be useful.
+	The using of this feature is shown here:
+	https://github.com/anuvyklack/hydra.nvim/wiki/Vim-Options
+
 	If you pass no `hint`, then one line hint will be generated automatically.
 	The keys and their descriptions will be placed in the order heads were
 	passed in the {heads} table.  Heads with `desc = false` in {opts} table
@@ -555,9 +576,10 @@ hint			multiline string
 --------------------------------------------------------------------------------
 PUBLIC METHODS							*hydra-methods*
 
-`Hydra:activate()`
-			A public method, which serves to activate hydra
+Hydra:activate()	A public method, which serves to activate hydra
 			programmatically.
+
+Hydra:exit()		Exit hydra if it is active.
 
 --------------------------------------------------------------------------------
 HIGHLIGHT							*hydra-highlight*
@@ -585,7 +607,8 @@ get_name()	get the name of an active hydra if it has it;
 
 get_color()	get the color of an active hydra;
 
-get_hint()	get an active hydra's statusline hint if it provides it.
+get_hint()	get an active hydra's statusline hint. Return not `nil` only when
+		|hydra-config.hint| is set to `false.`
 
 --------------------------------------------------------------------------------
 DRAWBACKS							*hydra-drawbacks*

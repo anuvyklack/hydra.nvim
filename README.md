@@ -47,7 +47,8 @@ If you want to quickly understand the concept, you can watch
     * [Side scroll](#side-scroll)
     * [Git submode](#git-submode)
     * [Telescope menu](#telescope-menu)
-    * [Community wiki](#community-wiki)
+    * [Frequently used options](#frequently-used-options)
+    * [More hydras](#more-hydras)
 * [Installation](#installation)
 * [How to create hydra](#how-to-create-hydra)
     * [`name`](#name)
@@ -117,143 +118,30 @@ A full fledged git "submode".
 
 <!-- Finally, you can even create your custom submode, for example for git: -->
 
+[Link to the code](https://github.com/anuvyklack/hydra.nvim/wiki/Git)
+
 ![](https://user-images.githubusercontent.com/13056013/175947218-d1b70266-9964-48c9-aaae-75195501ef7e.png)
-
-<details> 
-  <summary>Click this spoiler to see the code </summary>
-
-The code is huge but, simple. For this hydra you need next plugins:
-
-- [Gitsigns](https://github.com/lewis6991/gitsigns.nvim)
-- [Neogit](https://github.com/TimUntersberger/neogit)
-
-```lua
-local Hydra = require('hydra')
-local gitsigns = require('gitsigns')
-
-local hint = [[
- _J_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
- _K_: prev hunk   _u_: undo stage hunk   _p_: preview hunk   _B_: blame show full 
- ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
- ^
- ^ ^              _<Enter>_: Neogit              _q_: exit
-]]
-
-Hydra({
-   hint = hint,
-   config = {
-      color = 'pink',
-      invoke_on_body = true,
-      hint = {
-         position = 'bottom',
-         border = 'rounded'
-      },
-      on_enter = function()
-         vim.bo.modifiable = false
-         gitsigns.toggle_signs(true)
-         gitsigns.toggle_linehl(true)
-      end,
-      on_exit = function()
-         gitsigns.toggle_signs(false)
-         gitsigns.toggle_linehl(false)
-         gitsigns.toggle_deleted(false)
-      end
-   },
-   mode = {'n','x'},
-   body = '<leader>g',
-   heads = {
-      { 'J', function()
-            if vim.wo.diff then return ']c' end
-            vim.schedule(function() gitsigns.next_hunk() end)
-            return '<Ignore>'
-         end, { expr = true } },
-      { 'K', function()
-            if vim.wo.diff then return '[c' end
-            vim.schedule(function() gitsigns.prev_hunk() end)
-            return '<Ignore>'
-         end, { expr = true } },
-      { 's', ':Gitsigns stage_hunk<CR>', { silent = true } },
-      { 'u', gitsigns.undo_stage_hunk },
-      { 'S', gitsigns.stage_buffer },
-      { 'p', gitsigns.preview_hunk },
-      { 'd', gitsigns.toggle_deleted, { nowait = true } },
-      { 'b', gitsigns.blame_line },
-      { 'B', function() gitsigns.blame_line{ full = true } end },
-      { '/', gitsigns.show, { exit = true } }, -- show the base of the file
-      { '<Enter>', '<cmd>Neogit<CR>', { exit = true } },
-      { 'q', nil, { exit = true, nowait = true } },
-   }
-})
-```
-
-</details>
 
 ### Telescope menu
 
 You can also create a fancy menu to easy recall seldom used mappings.
 
-![](https://user-images.githubusercontent.com/13056013/175949898-29c88460-1661-43f0-9c2d-61eb0cc7d663.png)
+[Link to the code](https://github.com/anuvyklack/hydra.nvim/wiki/Telescope)
 
-<details> 
-  <summary>Click this spoiler to see the code </summary>
-
-```lua
-local Hydra = require('hydra')
-
-local function cmd(command)
-   return table.concat({ '<Cmd>', command, '<CR>' })
-end
-
-local hint = [[
-                 _f_: files       _m_: marks
-   🭇🬭🬭🬭🬭🬭🬭🬭🬭🬼    _o_: old files   _g_: live grep
-  🭉🭁🭠🭘    🭣🭕🭌🬾   _p_: projects    _/_: search in file
-  🭅█ ▁     █🭐
-  ██🬿      🭊██   _h_: vim help    _c_: execute command
- 🭋█🬝🮄🮄🮄🮄🮄🮄🮄🮄🬆█🭀  _k_: keymap      _;_: commands history
- 🭤🭒🬺🬹🬱🬭🬭🬭🬭🬵🬹🬹🭝🭙  _r_: registers   _?_: search history
-
-                 _<Enter>_: Telescope           _<Esc>_ 
-]]
-
-Hydra({
-   name = 'Telescope',
-   hint = hint,
-   config = {
-      color = 'teal',
-      invoke_on_body = true,
-      hint = {
-         position = 'middle',
-         border = 'rounded',
-      },
-   },
-   mode = 'n',
-   body = '<Leader>f',
-   heads = {
-      { 'f', cmd 'Telescope find_files' },
-      { 'g', cmd 'Telescope live_grep' },
-      { 'h', cmd 'Telescope help_tags', { desc = 'Vim help' } },
-      { 'o', cmd 'Telescope oldfiles', { desc = 'Recently opened files' } },
-      { 'm', cmd 'MarksListBuf', { desc = 'Marks' } },
-      { 'k', cmd 'Telescope keymaps' },
-      { 'r', cmd 'Telescope registers' },
-      { 'p', cmd 'Telescope projects', { desc = 'Projects' } },
-      { '/', cmd 'Telescope current_buffer_fuzzy_find', { desc = 'Search in file' } },
-      { '?', cmd 'Telescope search_history',  { desc = 'Search history' } },
-      { ';', cmd 'Telescope command_history', { desc = 'Command-line history' } },
-      { 'c', cmd 'Telescope commands', { desc = 'Execute command' } },
-      { '<Enter>', cmd 'Telescope', { exit = true, desc = 'List all pickers' } },
-      { '<Esc>', nil, { exit = true, nowait = true } },
-   }
-})
-```
-</details>
+![](https://user-images.githubusercontent.com/13056013/179405895-b5206124-b091-42a4-ba5d-95bbc3e1b61b.png)
 
 
-### Community wiki
+### Frequently used options
 
-You can find more hydras in the project's [community wiki](https://github.com/anuvyklack/hydra.nvim/wiki/Community-hydras).
-Feel free to add your own or edit the existing ones.
+[Link to the code](https://github.com/anuvyklack/hydra.nvim/wiki/Vim-Options)
+
+![](https://user-images.githubusercontent.com/13056013/179405898-190c609c-3474-4809-a59b-a11e6da4e4ed.png)
+
+
+### More hydras
+
+You can find more hydras in [wiki](https://github.com/anuvyklack/hydra.nvim/wiki).
+Feel free to add your own or edit the existing ones!
 
 ## Installation
 
@@ -468,7 +356,7 @@ Configure the manually- or auto-generated hint.
 - `false` — disable auto-generating hint;
 - `{...}` — a table with settings for the manually created hint. Read about hint below.
    Accepts following keys:
-  - **position**     `string`    (default: `"bottom"`)
+  - **position**   `string`   (default: `"bottom"`)
 
     Set the position of the hint. Should be one from the next table:
 
@@ -480,9 +368,15 @@ Configure the manually- or auto-generated hint.
      bottom-left |  bottom  | bottom-right
     ```
 
-  - **border**   `string`    (default: `'none'`)
+  - **border**   `string`   (default: `'none'`)
 
     The border of the hint window. See `:help nvim_open_win()`
+
+  - **functions**   `table<string: fun():string>`   ([default](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))
+
+    Table where keys are function names and values are functions them self. Each
+    function should return string. This functions can be required from `hint` with
+    `%{func_name}` syntaxis.
 
 ### Hydra's heads
 
@@ -594,6 +488,17 @@ of the key, i.e.  if the key will make the hydra exit, the color will be blue.
 To insert an empty character, use `^`. It won't be rendered. The only use of it is to have
 your code aligned as nicely as the result.
 
+You can also create a Lua functions which returns a string and place it in
+`config.hint.functions` table under some key which will be used as a function name. Than
+you can require this function from the `hint` wrap its name (key in the table) with
+`%{...}`. The result of the function will be inserted in that place in the hint when it
+will be shown. And later this function will be called every time when hydra head will be
+pressed and the hint will be updated with the function result string. Some functions are
+already built-in, you can find them in
+[this file](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua).
+You may submit or request some others which you think may be useful.
+The using of this feature is shown in [options hydra](https://github.com/anuvyklack/hydra.nvim/wiki/Vim-Options).
+
 If you pass no `hint`, then one line hint will be generated automatically. The keys and
 their descriptions will be placed in the order heads were passed in the `heads` table.
 Heads with `desc = false` in `opts` table will be skipped.
@@ -603,7 +508,8 @@ at the bottom of the hint window according to rules of auto generated hint.
 
 ## Public methods
 
-- `Hydra:activate()` — a public method, which serves to activate hydra programmatically.
+- `Hydra:activate()` — a public method, which serves to activate hydra programmatically;
+- `Hydra:exit()` — exit hydra if it is active.
 
 ## Highlight
 
@@ -628,7 +534,8 @@ you to integrate Hydra in your statusline:
 - `is_active()` — returns `true` if there is an active hydra;
 - `get_name()` — get the name of an active hydra if it has it;
 - `get_color()` — get the color of an active hydra;
-- `get_hint()` — get an active hydra's statusline hint if it provides it.
+- `get_hint()` — get an active hydra's statusline hint.  Return not `nil` only when
+  `config.hint` is set to `false.`
 
 ## Drawbacks
 
