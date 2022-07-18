@@ -286,7 +286,7 @@ heads, what can be useful.
 
 ##### Pink color
 
-Pink hydra is of a different nature. It is a [key-layer](https://github.com/anuvyklack/keymap-layer.nvim)
+Pink hydra is of a different nature. It is a [key-layer](https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer)
 inside, so all keys except overwritten are work as usual. Even `[count]` prefixes.
 
 #### `buffer`
@@ -445,9 +445,10 @@ Built-in map arguments. See:
 ##### `nowait`
 `boolean`
 
-Only relevant for `pink` hydra. For all others will be skipped. The `pink` hydra is a
-[layer](https://github.com/anuvyklack/keymap-layer.nvim) inside, and Layer binds its
-keymaps buffer local, which makes flag `nowait` available. See `:help :map-<nowait>`.
+Only relevant for `pink` hydra. For all others will be skipped. The `pink` hydra is
+a [layer](https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer) inside,
+and Layer binds its keymaps buffer local, which makes flag `nowait` available. See `:help
+:map-<nowait>`.
 
 This allows, for example bind exit key:
 
@@ -538,7 +539,7 @@ you to integrate Hydra in your statusline:
 ## Drawbacks
 
 `[count]` is not supported in a red, amaranth and teal hydras (see `:help count`).
-But supported in pink hydra since it is a [layer](https://github.com/anuvyklack/keymap-layer.nvim).
+But supported in pink hydra since it is a [layer](https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer).
 
 ## How it works under the hood
 

@@ -342,9 +342,9 @@ config			table
 		Pink color~
 
 		Pink hydra is of a different nature. It is a key-layer
-		(https://github.com/anuvyklack/keymap-layer.nvim) inside, so
-		all keys except overwritten are work as usual. Even `[count]`
-		prefixes.
+		https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer
+		inside, so all keys except overwritten are work as usual. Even
+		`[count]` prefixes.
 
 							*hydra-config.buffer*
 	buffer			true | number
@@ -515,7 +515,7 @@ heads			table
 		nowait		boolean
 			Only relevant for `pink` hydra. For all others will be
 			skipped. The `pink` hydra is a layer
-			https://github.com/anuvyklack/keymap-layer.nvim
+			https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer
 			inside, and Layer binds its keymaps buffer local,
 			which makes flag `nowait` available. See |:map-<nowait>|
 
@@ -615,7 +615,7 @@ DRAWBACKS							*hydra-drawbacks*
 
 `[count]` is not supported in a red, amaranth and teal hydras (see `:help count`).
 But supported in pink hydra since it is a layer:
-	https://github.com/anuvyklack/keymap-layer.nvim
+https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer
 
 --------------------------------------------------------------------------------
  vim:tw=80:isk=!-~,^*,^\|,^\":ts=8:noet:ft=help:norl:
