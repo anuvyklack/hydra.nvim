@@ -27,8 +27,8 @@
 ---@field desc? string | false
 
 ---@class hydra.Head
----@field rhs string | function | nil
----@field opts hydra.HeadOpts
+---@field [1] string | function | nil
+---@field [2] hydra.HeadOpts
 
 ---@class hydra.HeadOpts
 ---@field public private? boolean

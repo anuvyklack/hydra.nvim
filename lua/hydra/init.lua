@@ -255,20 +255,15 @@ function Hydra:_setup_hydra_keymaps()
 
    -- Define Hydra kyebindings.
    for head, map in pairs(self.heads) do
-      local rhs local opts
-      rhs, opts = map[1], map[2]
-      ---@cast rhs string | function | nil
-      ---@cast opts hydra.HeadOpts
+      local rhs, opts = map[1], map[2]
 
       local keymap = function()
          if not rhs then return end
-         ---@cast rhs -nil
          local keys, mode ---@type string
          if opts.expr then
             if type(rhs) == 'function' then
                keys = rhs()
             elseif type(rhs) == 'string' then
-               ---@cast rhs string
                keys = vim.api.nvim_eval(rhs)
             end
          elseif type(rhs) == 'function' then
@@ -306,11 +301,9 @@ function Hydra:_setup_hydra_keymaps()
       else -- red head
          self:_set_keymap(self.plug.wait..head, function()
             keymap()
-
             if opts.on_key ~= false and self.config.on_key then
                self.config.on_key()
             end
-
             if self.hint.update then self.hint:update() end
             self:_wait()
          end, opts)
