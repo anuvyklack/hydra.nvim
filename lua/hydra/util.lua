@@ -102,8 +102,8 @@ end
 ---Deep unset metatable for input table and all nested tables.
 ---@param tbl table
 function util.deep_unsetmetatable(tbl)
+   setmetatable(tbl, nil)
    for _, subtbl in pairs(tbl) do
-      setmetatable(tbl, nil)
       if type(subtbl) == 'table' then
          util.deep_unsetmetatable(subtbl)
       end
