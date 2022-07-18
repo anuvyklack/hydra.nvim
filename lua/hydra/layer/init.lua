@@ -15,7 +15,7 @@ _G.active_keymap_layer = nil
 ---@field config hydra.layer.Config
 ---@field enter_keymaps table
 ---@field layer_keymaps table
----@field options keymap.layer.MetaAccessor
+---@field options hydra.MetaAccessor
 ---@field timer libuv.Timer | nil
 ---@field saved_keymaps table
 local Layer = Class()
@@ -180,7 +180,7 @@ function Layer:_constructor(input)
       for mode, keymaps in pairs(self.enter_keymaps) do
          for lhs, map in pairs(keymaps) do
             local rhs, opts = map[1], map[2] or {}
-            local keymap = self.make_keymap_function(mode, rhs, opts)
+            local keymap = self._make_keymap_function(mode, rhs, opts)
 
             vim.keymap.set(mode, lhs, function()
                keymap()
@@ -199,7 +199,7 @@ function Layer:_constructor(input)
    for mode, maps in pairs(self.layer_keymaps) do
       for lhs, map in pairs(maps) do
          local rhs, opts = map[1], map[2] or {}
-         local keymap = self.make_keymap_function(mode, rhs, opts)
+         local keymap = self._make_keymap_function(mode, rhs, opts)
 
          self.layer_keymaps[mode][lhs] = {
             function()
@@ -221,7 +221,7 @@ function Layer:_constructor(input)
       for mode, keymaps in pairs(exit_keymaps) do
          for lhs, map in pairs(keymaps) do
             local rhs, opts = map[1], map[2] or {}
-            local keymap = self.make_keymap_function(mode, rhs, opts)
+            local keymap = self._make_keymap_function(mode, rhs, opts)
 
             self.layer_keymaps[mode][lhs] = {
                function()
@@ -324,7 +324,7 @@ end
 ---@param rhs string | function
 ---@param opts? KeymapOpts
 ---@return function
-function Layer.make_keymap_function(mode, rhs, opts)
+function Layer._make_keymap_function(mode, rhs, opts)
    opts = opts or {}
    local nop = {
       ['<nop>'] = true,

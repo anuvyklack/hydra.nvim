@@ -47,13 +47,13 @@ This, among other things, allows the use of the `<nowait>` keymap option.
 
 On activating, Layer sets its keymaps for the current buffer, and while active, for all
 visited buffers.  Original key mappings, overwritten by Layer, are putted into
-`self.original.buf_keymaps[bufnr]` table.  On deactivating Layer, the buffer local key
+`self.saved_keymaps[bufnr]` table.  On deactivating Layer, the buffer local key
 bindings are restoring where they were for all buffers that are still "listed". 
 
-`self.original.buf_keymaps` table has the next structure:
+`self.saved_keymaps` table has the next structure:
 
 ``` lua
-    self.original.buf_keymaps = {
+    self.saved_keymaps = {
        3 = { -- bufnr
           n = { -- normal mode
              l = true,
