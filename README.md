@@ -372,7 +372,7 @@ Configure the manually- or auto-generated hint.
 
     The border of the hint window. See `:help nvim_open_win()`
 
-  - **functions**   `table<string: fun():string>`   ([default](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))
+  - **funcs**   `table<string, fun():string>`   ([default](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))
 
     Table where keys are function names and values are functions them self. Each
     function should return string. This functions can be required from `hint` with
@@ -489,7 +489,7 @@ To insert an empty character, use `^`. It won't be rendered. The only use of it 
 your code aligned as nicely as the result.
 
 You can also create a Lua functions which returns a string and place it in
-`config.hint.functions` table under some key which will be used as a function name. Than
+`config.hint.funcs` table under some key which will be used as a function name. Than
 you can require this function from the `hint` wrap its name (key in the table) with
 `%{...}`. The result of the function will be inserted in that place in the hint when it
 will be shown. And later this function will be called every time when hydra head will be

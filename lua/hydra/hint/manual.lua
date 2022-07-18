@@ -10,7 +10,6 @@ local vim_options = require('hydra.hint.vim_options')
 ---@field winid integer | nil
 ---@field win_width integer
 ---@field need_to_update boolean
----@field update function
 ---@field get_statusline nil
 local HintManualWindow = Class(Hint)
 
@@ -18,7 +17,7 @@ function HintManualWindow:_constructor(...)
    Hint._constructor(self, ...)
    self.need_to_update = false
 
-   self.config.functions = setmetatable(self.config.functions or {}, {
+   self.config.funcs = setmetatable(self.config.funcs or {}, {
       __index = vim_options
    })
 
@@ -48,7 +47,7 @@ function HintManualWindow:_make_buffer()
          if start then
             self.need_to_update = true
 
-            local fun = self.config.functions[fname]
+            local fun = self.config.funcs[fname]
             if not fun then
                error(string.format('[Hydra] "%s" not present in "config.hint.functions" table', fname))
             end

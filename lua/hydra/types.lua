@@ -18,7 +18,7 @@
 ---@class hydra.hint.Config
 ---@field position string
 ---@field border string | table | nil
----@field functions function[]
+---@field funcs table<string, fun():string>
 
 ---@class hydra.HeadSpec
 ---@field index integer

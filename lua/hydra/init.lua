@@ -35,7 +35,7 @@ local default_config = {
    hint = {
       position = 'bottom',
       border = nil,
-      functions = {}
+      funcs = {}
    }
 }
 
