@@ -136,31 +136,4 @@ function util.add_hook_before(func, new_fn)
    end
 end
 
--- ---Wraps a passed keymap into a function, on call of which the keymap content
--- ---will be executed.
--- ---@param rhs string | function
--- ---@param opts KeymapOpts
--- ---@return function
--- function util.get_keymap_function(rhs, opts)
---    return function()
---       ---@type string
---       local keys, mode
---       if opts.expr then
---          if type(rhs) == 'function' then
---             keys = rhs()
---          elseif type(rhs) == 'string' then
---             keys = vim.api.nvim_eval(rhs)
---          end
---       elseif type(rhs) == 'function' then
---          rhs()
---          return
---       elseif type(rhs) == 'string' then
---          keys = rhs
---       end
---       keys = util.termcodes(keys)
---       mode = opts.remap and 'im' or 'in'
---       vim.api.nvim_feedkeys(keys, mode, true)
---    end
--- end
-
 return util

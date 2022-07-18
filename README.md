@@ -148,9 +148,7 @@ Feel free to add your own or edit the existing ones!
 To install with [packer](https://github.com/wbthomason/packer.nvim) use:
 
 ```lua
-use { 'anuvyklack/hydra.nvim', 
-    requires = 'anuvyklack/keymap-layer.nvim' -- needed only for pink hydras
-}
+use 'anuvyklack/hydra.nvim' 
 ```
 
 ## How to create hydra

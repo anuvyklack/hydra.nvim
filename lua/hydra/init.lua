@@ -321,14 +321,15 @@ function Hydra:_setup_hydra_keymaps()
 end
 
 function Hydra:_setup_pink_hydra()
-   local ok, Layer = pcall(require, 'keymap-layer')
-   if not ok then
-      vim.schedule(function() vim.notify_once(
-         '[hydra.nvim] For pink hydra you need https://github.com/anuvyklack/keymap-layer.nvim package',
-         vim.log.levels.ERROR)
-      end)
-      return false
-   end
+   local Layer = require('hydra.layer')
+   -- local ok, Layer = pcall(require, 'keymap-layer')
+   -- if not ok then
+   --    vim.schedule(function() vim.notify_once(
+   --       '[hydra.nvim] For pink hydra you need https://github.com/anuvyklack/keymap-layer.nvim package',
+   --       vim.log.levels.ERROR)
+   --    end)
+   --    return false
+   -- end
 
    local function create_layer_input_in_internal_form()
       local layer = util.unlimited_depth_table()
