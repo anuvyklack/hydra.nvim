@@ -20,7 +20,6 @@ Hydra.nvim............................................................|hydra.nvi
 Description for Poets................................|hydra-description_for_poets|
 Description for Pragmatics......................|hydra-description_for_pragmatics|
 Sample Hydras......................................................|hydra-samples|
-Instalation....................................................|hydra-instalation|
 How to create hydra....................................|hydra-how_to_create_hydra|
     `name`..............................................................|hydra-name|
     `mode`..............................................................|hydra-mode|
@@ -181,15 +180,6 @@ https://github.com/anuvyklack/hydra.nvim/wiki
 
 Feel free to add your own or edit the existing ones!
 
---------------------------------------------------------------------------------
-INSTALATION						*hydra-instalation*
-
-To install with packer (https://github.com/wbthomason/packer.nvim) use:
->
-    use { 'anuvyklack/hydra.nvim',
-        requires = 'anuvyklack/keymap-layer.nvim' -- needed only for pink hydras
-    }
-<
 --------------------------------------------------------------------------------
 HOW TO CREATE HYDRA
 
