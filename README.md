@@ -366,7 +366,11 @@ Configure the manually- or auto-generated hint.
      bottom-left |  bottom  | bottom-right
     ```
 
-  - **border**   `string`   (default: `'none'`)
+  - **`offset`**  `number`   (default: `0`)
+
+    The offset from the nearest editor border.
+
+  - **`border`**   `string`   (default: `"none"`)
 
     The border of the hint window. See `:help nvim_open_win()`
 

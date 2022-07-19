@@ -22,6 +22,12 @@ function Hint:_constructor(hydra, hint)
    self.hint = hint
    self.namespaces_id = vim.api.nvim_create_namespace('hydra.hint')
 
+   if vim.tbl_get(self, 'config', 'position')
+      and type(self.config.position) == 'string'
+   then
+      self.config.position = vim.split(self.config.position, '-')
+   end
+
    self._debug = hydra.config.debug
 end
 

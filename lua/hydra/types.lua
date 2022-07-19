@@ -16,9 +16,14 @@
 ---@field hint hydra.hint.Config | "statusline" | false
 
 ---@class hydra.hint.Config
----@field position string
----@field border string | table | nil
+---@field position hydra.hint.Config.position
+---@field offset integer
+---@field border? string | table
 ---@field funcs table<string, fun():string>
+
+---@class hydra.hint.Config.position
+---@field [1] 'top' | 'middle' | 'bottom'
+---@field [2]? 'left' | 'right'
 
 ---@class hydra.HeadSpec
 ---@field index integer

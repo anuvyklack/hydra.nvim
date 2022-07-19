@@ -417,7 +417,8 @@ config			table
 			A table with settings for the manually created hint.
 			Read about hint below. Accepts following keys:
 
-			• position	string    (default: `"bottom"`)
+			• position		string
+						default: `"bottom"`
 				Set the position of the hint. Should be one from
 				the next table:
 >
@@ -427,15 +428,20 @@ config			table
 				    -------------+----------+--------------
 				     bottom-left |  bottom  | bottom-right
 <
-			• border		string    (default: `'none'`)
+			• offset		number
+						default: `0`
+				The offset from the nearest editor border.
+
+			• border		string
+						default: `'none'`
 				The border of the hint window. See |nvim_open_win()|
 
 			• funcs			table<string, fun():string>
+						default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
 				Table where keys are function names and values
 				are functions them self. Each function should
 				return string. This functions can be required
 				from `hint` with `%{func_name}` syntaxis.
-				Default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
 
 								*hydra-heads*
 heads			table

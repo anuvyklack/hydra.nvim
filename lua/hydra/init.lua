@@ -33,7 +33,8 @@ local default_config = {
    invoke_on_body = false,
    buffer = nil,
    hint = {
-      position = 'bottom',
+      position = { 'bottom' },
+      offset = 0,
       border = nil,
       funcs = {}
    }

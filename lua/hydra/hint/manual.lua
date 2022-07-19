@@ -142,40 +142,49 @@ function HintManualWindow:_make_buffer()
 end
 
 function HintManualWindow:_make_win_config()
-   --   top-left   |   top   |  top-right
-   -- -------------+---------+--------------
-   --  middle-left | middle  | middle-right
-   -- -------------+---------+--------------
-   --  bottom-left | bottome | bottom-right
-
-   local pos = vim.split(self.config.position, '-')
+    --   top-left   |   top    |  top-right
+    -- -------------+----------+--------------
+    --  middle-left |  middle  | middle-right
+    -- -------------+----------+--------------
+    --  bottom-left |  bottom  | bottom-right
+   local pos = self.config.position
+   local offset = self.config.offset
+   local anchor
 
    self.win_config = {
       relative = 'editor',
-      anchor = 'SW',
+      -- anchor = 'SW',
       width  = self.win_width,
       height = self.win_height,
       style = 'minimal',
-      border = self.config.border or 'none',
+      border = self.config.border,
       focusable = false,
       noautocmd = true,
    }
 
    if pos[1] == 'top' then
-      self.win_config.row = 2
+      anchor = 'N'
+      self.win_config.row = offset
    elseif pos[1] == 'middle' then
+      anchor = 'S'
       self.win_config.row = math.floor((vim.o.lines + self.win_height) / 2)
    elseif pos[1] == 'bottom' then
-      self.win_config.row = vim.o.lines - vim.o.cmdheight - 1
+      anchor = 'S'
+      self.win_config.row = vim.o.lines - vim.o.cmdheight - 1 - offset
    end
 
    if pos[2] == 'left' then
-      self.win_config.col = 0
+      anchor = anchor..'w'
+      self.win_config.col = offset
    elseif pos[2] == 'right' then
-      self.win_config.col = vim.o.columns - self.win_width
+      anchor = anchor..'E'
+      self.win_config.col = vim.o.columns - offset
    else -- center
+      anchor = anchor..'w'
       self.win_config.col = math.floor((vim.o.columns - self.win_width) / 2)
    end
+
+   self.win_config.anchor = anchor
 end
 
 function HintManualWindow:show()

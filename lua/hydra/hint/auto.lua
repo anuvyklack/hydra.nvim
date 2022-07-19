@@ -62,7 +62,7 @@ function HintAutoWindow:_make_win_config()
       width  = vim.o.columns,
       height = 1,
       style = 'minimal',
-      border = self.config.border or 'none',
+      border = self.config.border,
       focusable = false,
       noautocmd = true,
    }
