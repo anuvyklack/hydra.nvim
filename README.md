@@ -176,7 +176,8 @@ Each of the fields of this table is described in details below.
 The name of the hydra. Not necessary, used only in auto-generated hint.
 
 ### `mode`
-`string | string[]`     (default: `'n'`)
+`string | string[]`  
+default: `"n"`
 
 Mode or modes in which this hydra will exist. Same format as `vim.keymap.set()` accepts.
 
@@ -199,7 +200,8 @@ customized for each head particularly.  Below is a list of all options.
 ---
 
 #### `exit`
-`boolean`
+`boolean`  
+default: `true`
 
 The `exit` option (heads can override it) defines what will happen after executing head's
 command:
@@ -209,6 +211,8 @@ command:
 - `exit = true` means that the hydra state will stop.
 
 #### `foreign_keys`
+`"warn" | "run" | nil`  
+default: `nil`
 
 The `foreign_keys` option belongs to the body and decides what to do when a key is pressed
 that doesn't belong to any head:
@@ -220,7 +224,8 @@ that doesn't belong to any head:
 - `foreign_keys = "run"` will not stop the hydra state, and try to run the foreign key.
 
 #### `color`
-`string`
+`"red" | "amaranth" | "teal" | "pink"`  
+default: `"red"`
 
 The `color` option is a shortcut for both `exit` and `foreign_keys` options and aggregates
 them in the following way:
@@ -296,7 +301,8 @@ Define hydra only for particular buffer. If `true` — the current buffer will b
 
 #### `invoke_on_body`
 
-`boolean`   (default: `false`)
+`boolean`  
+default: `false`
 
 By default, to invoke the hydra you need to press in sequence keys corresponds to `body` +
 any non-private `head` (about private heads see later).
@@ -335,6 +341,7 @@ config = {
 Function that will be called **after** every hydra head.
 
 #### `timeout`
+`boolean | number`
 
 The `timeout` option set a timer after which the hydra will be automatically
 disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help timeoutlen`)
@@ -345,16 +352,16 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
 - `timeout = 5000` — set timer to desired amount of milliseconds.
 
 #### `hint`
-`table | 'statusline' | false`
+`table | "statusline" | false`
 
 Configure the manually- or auto-generated hint.
 
-- `'statusline'` — By default auto-generated hint is shown in a floating
+- `"statusline"` — By default auto-generated hint is shown in a floating
   window above statusline.  When this option set, it will be shown in the statusline.;
 - `false` — disable auto-generating hint;
 - `{...}` — a table with settings for the manually created hint. Read about hint below.
    Accepts following keys:
-  - **position**   `string`   (default: `"bottom"`)
+  - **`position`**   `string`   (default: `"bottom"`)
 
     Set the position of the hint. Should be one from the next table:
 
@@ -374,7 +381,7 @@ Configure the manually- or auto-generated hint.
 
     The border of the hint window. See `:help nvim_open_win()`
 
-  - **funcs**   `table<string, fun():string>`   ([default](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))
+  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))
 
     Table where keys are function names and values are functions them self. Each
     function should return string. This functions can be required from `hint` with

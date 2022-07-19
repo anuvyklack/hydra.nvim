@@ -8,11 +8,11 @@
 ---@field exit boolean
 ---@field foreign_keys hydra.foreign_keys
 ---@field color hydra.color
----@field on_enter? function
----@field on_exit? function
----@field on_key? function
+---@field on_enter? function  Before entering hydra
+---@field on_exit? function   After leaving hydra
+---@field on_key? function    After every hydra head
 ---@field invoke_on_body boolean
----@field timeout boolean | number
+---@field timeout boolean | number  Number of milliseconds
 ---@field hint hydra.hint.Config | "statusline" | false
 
 ---@class hydra.hint.Config

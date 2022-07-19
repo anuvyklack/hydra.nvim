@@ -183,8 +183,8 @@ Feel free to add your own or edit the existing ones!
 --------------------------------------------------------------------------------
 HOW TO CREATE HYDRA
 
-To create hydra you need to call Hydra's constructor with input parameters table of the
-next form:
+To create hydra you need to call Hydra's constructor with input parameters table
+of the next form:
 >
     local Hydra = require('hydra')
     Hydra({
@@ -204,7 +204,7 @@ name			string (optional)
 
 								*hydra-mode*
 mode			string | string[]
-			default: `'n'`
+			default: `"n"`
 	Mode or modes in which this hydra will exist. Same format as
 	`vim.keymap.set()` accepts.
 								*hydra-body*
@@ -222,10 +222,11 @@ config			table
 
 							*hydra-config.exit*
 	exit			boolean
+				default: `false`
 		The `exit` option (heads can override it) defines what will
 		happen after executing head's command:
 
-		`exit = false` (the default)
+		`exit = false`
 			means that the hydra state will continue you'll still
 			see the hint and be able to use hydra bindings;
 
@@ -233,12 +234,12 @@ config			table
 			means that the hydra state will stop.
 
 						*hydra-config.foreign_keys*
-	foreign_keys
-				string
+	foreign_keys		`"warn"` | `"run"` | `nil`
+				default: `nil`
 		The `foreign_keys` option belongs to the body and decides what
 		to do when a key is pressed that doesn't belong to any head:
 
-		`foreign_keys = nil` (the default)
+		`foreign_keys = nil`
 			means that the hydra state will stop and the foreign
 			key will do whatever it was supposed to do if there
 			was no hydra state.
@@ -250,9 +251,9 @@ config			table
 		`foreign_keys = "run"`
 			will not stop the hydra state, and try to run the
 			foreign key.
-
 							*hydra-config.color*
-	color			string
+	color		`"red"` | `"amaranth"` | `"teal"` | `"pink"`
+				default: `"red"`
 		The `color` option is a shortcut for both `exit` and `foreign_keys`
 		options and aggregates them in the following way:
 >
@@ -337,13 +338,13 @@ config			table
 		`[count]` prefixes.
 
 							*hydra-config.buffer*
-	buffer			true | number
+	buffer			`true` | number
 		Define hydra only for particular buffer.  If `true` — the current
 		buffer will be used.
 
 						*hydra-config.invoke_on_body*
-	invoke_on_body
-				boolean (default: `false`)
+	invoke_on_body		boolean
+				default: `false`
 		By default, to invoke the hydra you need to press in sequence
 		keys corresponds to `body` + any non-private `head` (about private
 		heads see later).  This option allows you to summon hydra by
@@ -384,8 +385,8 @@ config			table
 		Function that will be called after every hydra head.
 
 							*hydra-config.timeout*
-	timeout
-				boolean | number
+	timeout			boolean | number
+				default: `false`
 		The `timeout` option set a timer after which the hydra will be
 		automatically disabled. Calling any head will refresh the
 		timer (see |timeout| and |timeoutlen)|.
@@ -401,8 +402,8 @@ config			table
 			set timer to desired amount of milliseconds.
 
 								*hydra-config.hint*
-	hint
-				table | `'window'` | `'statusline'` | `false`
+
+	hint			table | `"window"` | `"statusline"` | `false`
 		Configure hint display.
 
 		`hint = 'statusline'`
@@ -444,10 +445,10 @@ config			table
 				from `hint` with `%{func_name}` syntaxis.
 
 								*hydra-heads*
-heads			table
+heads			table[]
 	Each hydra's head has the form:
 >
-	    { lhs, rhs, opts }
+	    { {lhs}, {rhs}, {opts} }
 <
 	which is pretty-much compares to the signature of the
 	|vim.keymap.set()| function.
@@ -458,7 +459,7 @@ heads			table
 		press to call an action.
 
 								*hydra-head.rhs*
-	{rhs}			string | function | nil
+	{rhs}			string | function | `nil`
 		Right-hand-side of the mapping.  Can be `nil` which means just
 		do nothing, but if you also want to pass {opts} table, you
 		need to pass `nil` explicitly.
@@ -468,14 +469,13 @@ heads			table
 		A table with head options to tune its behavior.
 
 								*hydra-head.private*
-		private
-				boolean
+		private			boolean
 			When the hydra hides (not active), the private head
 			does not bounce outside.  I.e., the private head is
 			unreachable outside of the hydra state.
 
 								*hydra-head.exit*
-		exit		boolean
+		exit			boolean
 			Stop the hydra state after executing a command
 			corresponds to such head.
 
@@ -490,25 +490,25 @@ heads			table
 			    { '<Esc>', nil, { exit = true } }
 <
 								*hydra-head.on_key*
-		on_key		boolean
+		on_key			boolean
 			If `false` |hydra-config.on_key| function won't be executed
 			after this head.
 
 								*hydra-head.desc*
-		desc		string | false
+		desc			string | `false`
 			The description that will be shown in the
 			auto-generated part of the hint.  If `false` won't be
 			show in the hint window
 
 						*hydra-head.expr* *hydra-head.silent*
 		expr
-		silent		boolean
+		silent			boolean
 			Built-in map arguments. See:
 			- |:map-<expr>|
 			- |:map-<silent>|
 
 								*hydra-head.nowait*
-		nowait		boolean
+		nowait			boolean
 			Only relevant for `pink` hydra. For all others will be
 			skipped. The `pink` hydra is a layer
 			https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer
@@ -530,7 +530,7 @@ heads			table
 			milliseconds for possible continuation.
 
 								*hydra-head.mode*
-		mode		string | string[]
+		mode			string | string[]
 			Overwrite `mode` field for this particular head.  Only
 			relevant for `pink` hydra, for all others will be ignored.
 
