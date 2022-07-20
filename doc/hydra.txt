@@ -433,8 +433,9 @@ config			table
 						default: `0`
 				The offset from the nearest editor border.
 
-			• border		string
-						default: `'none'`
+			• border	`"single"` | `"double"` | `"rounded"` |
+					`"solid"` | `"shadow"` | `"none"` | string[]
+						default: `"none"`
 				The border of the hint window. See |nvim_open_win()|
 
 			• funcs			table<string, fun():string>

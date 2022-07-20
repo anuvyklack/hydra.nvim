@@ -140,7 +140,7 @@ You can also create a fancy menu to easy recall seldom used mappings.
 
 ### More hydras
 
-You can find more hydras in [wiki](https://github.com/anuvyklack/hydra.nvim/wiki).
+You can find more hydras in the [wiki](https://github.com/anuvyklack/hydra.nvim/wiki).
 Feel free to add your own or edit the existing ones!
 
 ## Installation
@@ -377,7 +377,8 @@ Configure the manually- or auto-generated hint.
 
     The offset from the nearest editor border.
 
-  - **`border`**   `string`   (default: `"none"`)
+  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)
+<!-- `"single"` | `"double"` | `"rounded"` | `"solid"` | `"shadow"` | `"none"` | string[] -->
 
     The border of the hint window. See `:help nvim_open_win()`
 
