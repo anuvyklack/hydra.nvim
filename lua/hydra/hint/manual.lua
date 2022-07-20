@@ -161,7 +161,6 @@ function HintManualWindow:_make_win_config()
 
    self.win_config = {
       relative = 'editor',
-      -- anchor = 'SW',
       width  = self.win_width,
       height = self.win_height,
       style = 'minimal',
@@ -235,9 +234,7 @@ function HintManualWindow:update()
    self:_make_win_config()
    local win_config = vim.deepcopy(self.win_config)
    win_config.noautocmd = nil
-
    vim.api.nvim_win_set_config(self.winid, win_config)
-
 end
 
 function HintManualWindow:close()
@@ -245,6 +242,7 @@ function HintManualWindow:close()
       vim.api.nvim_win_close(self.winid, false)
    end
    self.winid = nil
+
    if self.need_to_update then
       vim.api.nvim_buf_delete(self.bufnr, {})
       self.bufnr = nil

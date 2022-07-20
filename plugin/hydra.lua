@@ -10,8 +10,9 @@ hl('HydraPink',     { fg = '#ff55de', bold = true, default = true })
 
 hl('HydraHint', { link = 'NormalFloat', default = true })
 
--- TODO: find out how to global clear namespace.
 
+-- local ns_id = vim.api.nvim_create_namespace('hydra.plugin')
+--
 -- -- Restore options overridden by Hydra if it was emergency leaved with <C-c>.
 -- local function emergency_exit(keys)
 --    if _G.active_hydra and
@@ -24,4 +25,5 @@ hl('HydraHint', { link = 'NormalFloat', default = true })
 --    end
 -- end
 --
--- vim.on_key(emergency_exit, vim.api.nvim_create_namespace('hydra.plugin'))
+-- vim.on_key(emergency_exit, ns_id)
+-- vim.on_key(nil, ns_id)

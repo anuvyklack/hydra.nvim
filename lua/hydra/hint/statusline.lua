@@ -62,7 +62,6 @@ local HintStatusLineMute = Class(HintStatusLine)
 
 function HintStatusLineMute:_constructor(...)
    HintStatusLine._constructor(self, ...)
-   return self
 end
 
 function HintStatusLineMute:get_statusline()
