@@ -206,10 +206,12 @@ function HintManualWindow:show()
    if not self.winid or not vim.api.nvim_win_is_valid(self.winid) then
       local winid = vim.api.nvim_open_win(self.bufnr, false, self.win_config)
       self.winid = winid
+      vim.o.eventignore = 'all'
       vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
       vim.wo[winid].conceallevel = 3
       vim.wo[winid].foldenable = false
       vim.wo[winid].wrap = false
+      vim.o.eventignore = nil
    end
 end
 
