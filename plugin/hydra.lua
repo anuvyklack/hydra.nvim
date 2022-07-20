@@ -7,8 +7,8 @@ hl('HydraBlue',     { fg = '#5EBCF6', bold = true, default = true })
 hl('HydraAmaranth', { fg = '#ff1757', bold = true, default = true })
 hl('HydraTeal',     { fg = '#00a1a1', bold = true, default = true })
 hl('HydraPink',     { fg = '#ff55de', bold = true, default = true })
-hl('HydraHint', { link = 'NormalFloat' })
 
+hl('HydraHint', { link = 'NormalFloat', default = true })
 
 -- TODO: find out how to global clear namespace.
 
