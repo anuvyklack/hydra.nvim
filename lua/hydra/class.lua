@@ -3,7 +3,7 @@
 local function Class(parent)
    local class = {}
    class.__index = class
-   -- class.Super = parent
+   class.Super = parent
 
    local meta_class = {}
    meta_class.__index = parent

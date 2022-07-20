@@ -1,20 +1,17 @@
 local Class = require('hydra.class')
-local Hint = require('hydra.hint.hint')
+local HintAutoWindow = require('hydra.hint.auto_window')
 local vim_options = require('hydra.hint.vim_options')
 
-
----@class hydra.hint.ManualWindow : hydra.Hint
----@field config hydra.hint.Config
+---@class hydra.hint.ManualWindow : hydra.hint.AutoWindow
+---@field Super hydra.hint.AutoWindow Parent class
 ---@field hint string[]
 ---@field bufnr integer | nil
----@field winid integer | nil
 ---@field win_width integer
 ---@field need_to_update boolean
----@field get_statusline nil
-local HintManualWindow = Class(Hint)
+local HintManualWindow = Class(HintAutoWindow)
 
 function HintManualWindow:_constructor(...)
-   Hint._constructor(self, ...)
+   self.Super._constructor(self, ...)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {
@@ -26,14 +23,6 @@ function HintManualWindow:_constructor(...)
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil
    end
-
-   vim.api.nvim_create_autocmd('VimResized', {
-      group = self.augroup,
-      desc = 'update Hydra hint window position',
-      callback = function()
-         self.win_config = nil
-      end
-   })
 end
 
 function HintManualWindow:_make_buffer()
@@ -92,7 +81,7 @@ function HintManualWindow:_make_buffer()
             local color = heads[head].color
             if color then
                vim.api.nvim_buf_add_highlight(
-                  self.bufnr, self.namespaces_id, 'Hydra'..color, line_nr-1, start, stop-1)
+                  self.bufnr, self.namespace, 'Hydra'..color, line_nr-1, start, stop-1)
             end
             heads[head] = nil
          end
@@ -140,7 +129,7 @@ function HintManualWindow:_make_buffer()
          if start then
             local color = self.heads[head].color
             vim.api.nvim_buf_add_highlight(
-               self.bufnr, self.namespaces_id, 'Hydra'..color, self.win_height - 1, start, stop - 1)
+               self.bufnr, self.namespace, 'Hydra'..color, self.win_height - 1, start, stop - 1)
          end
       end
    end
@@ -194,26 +183,6 @@ function HintManualWindow:_make_win_config()
    self.win_config.anchor = anchor
 end
 
-function HintManualWindow:show()
-   if not self.bufnr then
-      self:_make_buffer()
-   end
-   if not self.winid then
-      self:_make_win_config()
-   end
-
-   if not self.winid or not vim.api.nvim_win_is_valid(self.winid) then
-      local winid = vim.api.nvim_open_win(self.bufnr, false, self.win_config)
-      self.winid = winid
-      vim.o.eventignore = 'all'
-      vim.wo[winid].winhighlight = 'NormalFloat:HydraHint'
-      vim.wo[winid].conceallevel = 3
-      vim.wo[winid].foldenable = false
-      vim.wo[winid].wrap = false
-      vim.o.eventignore = nil
-   end
-end
-
 function HintManualWindow:update()
    -- All this method is full of HACKs:
    -- 1. If update buffer, the concealing falls,
@@ -238,12 +207,10 @@ function HintManualWindow:update()
 end
 
 function HintManualWindow:close()
-   if self.winid and vim.api.nvim_win_is_valid(self.winid) then
-      vim.api.nvim_win_close(self.winid, false)
-   end
-   self.winid = nil
+   self.Super.close(self)
 
    if self.need_to_update then
+      self.win_config = nil
       vim.api.nvim_buf_delete(self.bufnr, {})
       self.bufnr = nil
    end

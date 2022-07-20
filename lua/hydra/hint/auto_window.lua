@@ -2,10 +2,12 @@ local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
 
 ---@class hydra.hint.AutoWindow : hydra.Hint
----@field hint nil
 ---@field config hydra.hint.Config
+---@field augroup integer
+---@field namespace integer
 ---@field bufnr integer | nil
 ---@field winid integer | nil
+---@field hint nil
 ---@field update nil
 ---@field get_statusline nil
 local HintAutoWindow = Class(Hint)
@@ -13,8 +15,11 @@ local HintAutoWindow = Class(Hint)
 function HintAutoWindow:_constructor(...)
    Hint._constructor(self, ...)
 
+   self.augroup = vim.api.nvim_create_augroup('hydra.hint', { clear = false })
+   self.namespace = vim.api.nvim_create_namespace('hydra.hint.window')
+
    vim.api.nvim_create_autocmd('VimResized', {
-      group = self.augroup,
+      -- group = self.augroup,
       desc = 'update Hydra hint window position',
       callback = function()
          self.win_config = nil
@@ -53,7 +58,7 @@ function HintAutoWindow:_make_buffer()
       if start then
          local color = self.heads[head].color
          vim.api.nvim_buf_add_highlight(
-            self.bufnr, self.namespaces_id, 'Hydra'..color, 0, start, stop)
+            self.bufnr, self.namespace, 'Hydra'..color, 0, start, stop)
       end
    end
 
@@ -88,6 +93,16 @@ function HintAutoWindow:show()
    vim.wo[winid].foldenable = false
    vim.wo[winid].wrap = false
    vim.o.eventignore = nil
+
+   vim.api.nvim_create_autocmd('TabEnter', {
+      group = self.augroup,
+      callback = function()
+         if vim.api.nvim_win_is_valid(self.winid) then
+            vim.api.nvim_win_close(self.winid, false)
+         end
+         self:show()
+      end
+   })
 end
 
 function HintAutoWindow:close()
@@ -95,6 +110,8 @@ function HintAutoWindow:close()
       vim.api.nvim_win_close(self.winid, false)
    end
    self.winid = nil
+
+   vim.api.nvim_clear_autocmds({ group = self.augroup })
 end
 
 return HintAutoWindow

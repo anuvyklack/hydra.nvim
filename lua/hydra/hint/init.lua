@@ -1,5 +1,5 @@
-local HintManualWindow = require('hydra.hint.manual')
-local HintAutoWindow = require('hydra.hint.auto')
+local HintManualWindow = require('hydra.hint.manual_window')
+local HintAutoWindow = require('hydra.hint.auto_window')
 local HintStatusLine, HintStatusLineMute = unpack(require('hydra.hint.statusline'))
 
 ---@param hydra Hydra
