@@ -12,6 +12,14 @@ local HintAutoWindow = Class(Hint)
 
 function HintAutoWindow:_constructor(...)
    Hint._constructor(self, ...)
+
+   vim.api.nvim_create_autocmd('VimResized', {
+      group = self.augroup,
+      desc = 'update Hydra hint window position',
+      callback = function()
+         self.win_config = nil
+      end
+   })
 end
 
 function HintAutoWindow:_make_buffer()

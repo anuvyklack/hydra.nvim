@@ -26,6 +26,14 @@ function HintManualWindow:_constructor(...)
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil
    end
+
+   vim.api.nvim_create_autocmd('VimResized', {
+      group = self.augroup,
+      desc = 'update Hydra hint window position',
+      callback = function()
+         self.win_config = nil
+      end
+   })
 end
 
 function HintManualWindow:_make_buffer()

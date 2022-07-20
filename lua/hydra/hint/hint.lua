@@ -4,6 +4,7 @@ local Class = require('hydra.class')
 ---@field hydra_name? string
 ---@field config hydra.hint.Config | "statusline" | false
 ---@field hint? string
+---@field augroup integer
 ---@field namespaces_id integer
 ---@field heads table<string, hydra.HeadSpec>
 ---@field show function
@@ -20,6 +21,7 @@ function Hint:_constructor(hydra, hint)
    self.heads = hydra.heads_spec
    self.config = hydra.config.hint
    self.hint = hint
+   self.augroup = vim.api.nvim_create_augroup('hydra.hint', { clear = false })
    self.namespaces_id = vim.api.nvim_create_namespace('hydra.hint')
 
    if vim.tbl_get(self, 'config', 'position')
