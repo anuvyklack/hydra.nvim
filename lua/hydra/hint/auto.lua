@@ -65,7 +65,7 @@ function HintAutoWindow:_make_win_config()
    self.win_config = {
       relative = 'editor',
       anchor = 'SW',
-      row = vim.o.lines - vim.o.cmdheight - 1,
+      row = vim.o.lines - vim.o.cmdheight - 1 - self.config.offset,
       col = 1,
       width  = vim.o.columns,
       height = 1,
