@@ -312,7 +312,12 @@ function Hydra:_setup_hydra_keymaps()
       local keys = vim.fn.split(head, [[\(<[^<>]\+>\|.\)\zs]])
       for i = #keys-1, 1, -1 do
          local first_n_keys = table.concat(vim.list_slice(keys, 1, i))
-         self:_set_keymap(self.plug.wait..first_n_keys, function() self:_leave() end)
+         self:_set_keymap(self.plug.wait..first_n_keys, function()
+            local leave = self:_leave()
+            if leave then
+               vim.api.nvim_feedkeys( termcodes(first_n_keys), 'ti', false)
+            end
+         end)
       end
    end
 end
@@ -517,33 +522,37 @@ function Hydra:_wait()
    vim.api.nvim_feedkeys( termcodes(self.plug.wait), '', false)
 end
 
+---@return boolean condition Are we leaving hydra or not?
 function Hydra:_leave()
    if self.config.color == 'amaranth' then
-      if vim.fn.getchar(1) ~= 0 then
-         -- 'An Amaranth Hydra can only exit through a blue head'
-         vim.api.nvim_echo({
-            {'An '},
-            {'Amaranth', 'HydraAmaranth'},
-            {' Hydra can only exit through a blue head'}
-         }, false, {})
+      -- 'An Amaranth Hydra can only exit through a blue head'
+      vim.api.nvim_echo({
+         {'An '},
+         {'Amaranth', 'HydraAmaranth'},
+         {' Hydra can only exit through a blue head'}
+      }, false, {})
 
+      if vim.fn.getchar(1) ~= 0 then
          vim.fn.getchar()
-         self:_wait()
       end
+      self:_wait()
+      return false
    elseif self.config.color == 'teal' then
-      if vim.fn.getchar(1) ~= 0 then
-         -- 'A Teal Hydra can only exit through one of its heads'
-         vim.api.nvim_echo({
-            {'A '},
-            {'Teal', 'HydraTeal'},
-            {' Hydra can only exit through one of its heads'}
-         }, false, {})
+      -- 'A Teal Hydra can only exit through one of its heads'
+      vim.api.nvim_echo({
+         {'A '},
+         {'Teal', 'HydraTeal'},
+         {' Hydra can only exit through one of its heads'}
+      }, false, {})
 
+      if vim.fn.getchar(1) ~= 0 then
          vim.fn.getchar()
-         self:_wait()
       end
+      self:_wait()
+      return false
    else
       self:exit()
+      return true
    end
 end
 
