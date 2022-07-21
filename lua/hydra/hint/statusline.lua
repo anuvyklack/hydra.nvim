@@ -73,5 +73,4 @@ function HintStatusLineMute:show() end
 
 function HintStatusLineMute:close() end
 
-
 return { HintStatusLine, HintStatusLineMute }

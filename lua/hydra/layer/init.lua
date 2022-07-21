@@ -89,7 +89,6 @@ function Layer:_constructor(input)
       self.config.on_exit = { self.config.on_exit }
    end
 
-   self.namespace_id = vim.api.nvim_create_namespace('hydra.layer')
    self.options = options('hydra.layer_options') -- meta-accessors
 
    self.saved_keymaps = {}
