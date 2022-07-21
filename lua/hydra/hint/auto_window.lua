@@ -19,7 +19,14 @@ function HintAutoWindow:_constructor(...)
    self.namespace = vim.api.nvim_create_namespace('hydra.hint.window')
 
    vim.api.nvim_create_autocmd('VimResized', {
-      -- group = self.augroup,
+      desc = 'update Hydra hint window position',
+      callback = function()
+         self.win_config = nil
+      end
+   })
+
+   vim.api.nvim_create_autocmd('OptionSet', {
+      pattern = 'cmdheight',
       desc = 'update Hydra hint window position',
       callback = function()
          self.win_config = nil
