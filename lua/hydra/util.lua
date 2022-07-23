@@ -136,4 +136,23 @@ function util.add_hook_before(func, new_fn)
    end
 end
 
+---Merge input config into default
+---@param default hydra.Config
+---@param input hydra.Config
+---@return hydra.Config
+function util.megre_config(default, input)
+   if not default then
+      return vim.deepcopy(input)
+   end
+   local r = vim.deepcopy(default)
+   for key, value in pairs(input) do
+      if type(value) == 'table' then
+         r[key] = util.megre_config(r[key], value)
+      else
+         r[key] = input[key]
+      end
+   end
+   return r
+end
+
 return util

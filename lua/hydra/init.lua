@@ -32,7 +32,6 @@ local default_config = {
       position = { 'bottom' },
       offset = 0,
       border = nil,
-      funcs = {}
    }
 }
 
@@ -96,7 +95,7 @@ function Hydra:_constructor(input)
 
    self.id = util.generate_id() -- Unique ID for each Hydra.
    self.name  = input.name
-   self.config = vim.tbl_deep_extend('force', default_config, input.config or {}) --[[@as hydra.Config]]
+   self.config = util.megre_config(default_config, input.config or {})
    self.mode  = input.mode or 'n'
    self.body  = input.body
    self.options = options('hydra.options')
