@@ -1,11 +1,18 @@
 local Class = require('hydra.class')
 
+---@class hydra.MetaAccessor.original
+---@field o table<integer, table<string, any>>
+---@field go table<integer, table<string, any>>
+---@field bo table<integer, table<string, any>>
+---@field wo table<integer, table<string, any>>
+
 ---@class hydra.MetaAccessor
 ---@field _augroup_id integer
 ---@field o MetaAccessor
 ---@field go MetaAccessor
 ---@field bo MetaAccessor
 ---@field wo MetaAccessor
+---@field original hydra.MetaAccessor.original
 local ma = Class()
 
 ---@param augroup_name string
@@ -20,7 +27,9 @@ function ma:_constructor(augroup_name)
       end,
       function(opt, val)
          self.original.o = self.original.o or {}
-         self.original.o[opt] = vim.api.nvim_get_option_value(opt, {})
+         if not self.original.o[opt] then
+            self.original.o[opt] = vim.api.nvim_get_option_value(opt, {})
+         end
          vim.api.nvim_set_option_value(opt, val, {})
       end
    )
@@ -31,7 +40,9 @@ function ma:_constructor(augroup_name)
       end,
       function(opt, val)
          self.original.go = self.original.go or {}
-         self.original.go[opt] = vim.api.nvim_get_option_value(opt, { scope = 'global' })
+         if self.original.go[opt] then
+            self.original.go[opt] = vim.api.nvim_get_option_value(opt, { scope = 'global' })
+         end
          vim.api.nvim_set_option_value(opt, val, { scope = 'global' })
       end
    )
@@ -90,8 +101,10 @@ function ma:_set_buf_option(opt, val)
    local bufnr = vim.api.nvim_get_current_buf()
    self.original.bo = self.original.bo or {}
    self.original.bo[bufnr] = self.original.bo[bufnr] or {}
-   if self.original.bo[bufnr][opt] then return end
-   self.original.bo[bufnr][opt] = vim.api.nvim_buf_get_option(bufnr, opt)
+
+   if not self.original.bo[bufnr][opt] then
+      self.original.bo[bufnr][opt] = vim.api.nvim_buf_get_option(bufnr, opt)
+   end
    vim.api.nvim_buf_set_option(bufnr, opt, val)
 end
 
@@ -99,8 +112,9 @@ function ma:_set_win_option(opt, val)
    local winnr = vim.api.nvim_get_current_win()
    self.original.wo = self.original.wo or {}
    self.original.wo[winnr] = self.original.wo[winnr] or {}
-   if self.original.wo[winnr][opt] then return end
-   self.original.wo[winnr][opt] = vim.api.nvim_win_get_option(winnr, opt)
+   if not self.original.wo[winnr][opt] then
+      self.original.wo[winnr][opt] = vim.api.nvim_win_get_option(winnr, opt)
+   end
    vim.api.nvim_win_set_option(winnr, opt, val)
 end
 
