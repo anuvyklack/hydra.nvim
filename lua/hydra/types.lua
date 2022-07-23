@@ -16,6 +16,7 @@
 ---@field hint hydra.hint.Config | false
 
 ---@class hydra.hint.Config
+---@field type 'statusline' | 'cmdline' | 'window'
 ---@field position hydra.hint.Config.position
 ---@field offset integer
 ---@field border? string | table

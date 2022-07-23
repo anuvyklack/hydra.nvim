@@ -169,6 +169,13 @@ function Hydra:_constructor(input)
       }
    end
 
+   if self.config.hint and not self.config.hint.type then
+      if input.hint then
+         self.config.hint.type = 'window'
+      else
+         self.config.hint.type = 'cmdline'
+      end
+   end
    self.hint = hint(self, self.config.hint, input.hint)
 
    if self.config.color ~= 'pink' then
