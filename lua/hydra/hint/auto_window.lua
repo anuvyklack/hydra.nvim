@@ -2,18 +2,20 @@ local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
 
 ---@class hydra.hint.AutoWindow : hydra.Hint
----@field config hydra.hint.Config
 ---@field augroup integer
 ---@field namespace integer
 ---@field bufnr integer | nil
 ---@field winid integer | nil
----@field hint nil
 ---@field update nil
 ---@field get_statusline nil
 local HintAutoWindow = Class(Hint)
 
 function HintAutoWindow:_constructor(...)
    Hint._constructor(self, ...)
+
+   if type(self.config.position) == 'string' then
+      self.config.position = vim.split(self.config.position, '-')
+   end
 
    self.augroup = vim.api.nvim_create_augroup('hydra.hint', { clear = false })
    self.namespace = vim.api.nvim_create_namespace('hydra.hint.window')

@@ -2,8 +2,7 @@ local Class = require('hydra.class')
 
 ---@class hydra.Hint
 ---@field hydra_name? string
----@field config hydra.hint.Config | "statusline" | false
----@field hint? string
+---@field config hydra.hint.Config
 ---@field heads table<string, hydra.HeadSpec>
 ---@field show function
 ---@field close function
@@ -13,17 +12,11 @@ local Class = require('hydra.class')
 local Hint = Class()
 
 ---@param hydra Hydra
----@param hint? string[]
-function Hint:_constructor(hydra, hint)
+function Hint:_constructor(hydra)
    self.hydra_name = hydra.name
    self.heads = hydra.heads_spec
-   self.config = hydra.config.hint
-   self.hint = hint
-
-   if vim.tbl_get(self, 'config', 'position')
-      and type(self.config.position) == 'string'
-   then
-      self.config.position = vim.split(self.config.position, '-')
+   if hydra.config.hint then
+      self.config = hydra.config.hint --[[@as hydra.hint.Config]]
    end
 
    self._debug = hydra.config.debug

@@ -3,22 +3,23 @@ local HintAutoWindow = require('hydra.hint.auto_window')
 local vim_options = require('hydra.hint.vim_options')
 
 ---@class hydra.hint.ManualWindow : hydra.hint.AutoWindow
----@field Super hydra.hint.AutoWindow Parent class
 ---@field hint string[]
 ---@field bufnr integer | nil
 ---@field win_width integer
 ---@field need_to_update boolean
 local HintManualWindow = Class(HintAutoWindow)
 
-function HintManualWindow:_constructor(...)
-   self.Super._constructor(self, ...)
+---@param hydra Hydra
+---@param hint string
+function HintManualWindow:_constructor(hydra, hint)
+   HintAutoWindow._constructor(self, hydra)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {
       __index = vim_options
    })
 
-   self.hint = vim.split(self.hint, '\n')
+   self.hint = vim.split(hint, '\n')
    -- Remove last empty string.
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil
@@ -207,7 +208,7 @@ function HintManualWindow:update()
 end
 
 function HintManualWindow:close()
-   self.Super.close(self)
+   HintAutoWindow.close(self)
 
    if self.need_to_update then
       self.win_config = nil

@@ -13,7 +13,7 @@
 ---@field on_key? function    After every hydra head
 ---@field invoke_on_body boolean
 ---@field timeout boolean | number  Number of milliseconds
----@field hint hydra.hint.Config | "statusline" | false
+---@field hint hydra.hint.Config | false
 
 ---@class hydra.hint.Config
 ---@field position hydra.hint.Config.position
