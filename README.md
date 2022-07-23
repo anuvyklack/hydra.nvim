@@ -387,7 +387,6 @@ hint.
     The offset from the nearest editor border.
 
   - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)
-<!-- `"single"` | `"double"` | `"rounded"` | `"solid"` | `"shadow"` | `"none"` | string[] -->
 
     The border of the hint window. See `:help nvim_open_win()`
 
