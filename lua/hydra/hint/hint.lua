@@ -13,6 +13,7 @@ local Hint = Class()
 ---@param hydra Hydra
 function Hint:_constructor(hydra)
    self.hydra_name = hydra.name
+   self.hydra_color = hydra.config.color
    self.heads = hydra.heads_spec
    if hydra.config.hint then
       self.config = hydra.config.hint --[[@as hydra.hint.Config]]

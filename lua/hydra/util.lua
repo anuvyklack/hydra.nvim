@@ -136,6 +136,35 @@ function util.add_hook_before(func, new_fn)
    end
 end
 
+---@param text string
+---@return string[]
+function util.split_string(text)
+   local r = {}
+   local stop = 0
+   while stop do
+      _, stop = text:find('%s+%S+')
+      if stop then
+         r[#r+1] = text:sub(1, stop)
+         text = text:sub(stop + 1)
+      end
+   end
+   r[#r+1] = text
+   return r
+end
+
+-- ---@param input table<integer, string[]>
+-- function util.echo(input)
+--    local msg = {}
+--    local text, hl
+--    for _, chunk in ipairs(input) do
+--       text = string.format('echon "%s"', chunk[1])
+--       hl = string.format('echohl %s', chunk[2] or 'None')
+--       table.insert(msg, hl)
+--       table.insert(msg, text)
+--    end
+--    msg = table.concat(msg, ' | ')
+-- end
+
 ---Merge input config into default
 ---@param default hydra.Config
 ---@param input hydra.Config
