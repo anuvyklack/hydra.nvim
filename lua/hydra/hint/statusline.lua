@@ -2,14 +2,13 @@ local Class = require('hydra.class')
 local Hint = require('hydra.hint.hint')
 
 ---@class hydra.hint.StatusLine : hydra.Hint
----@field meta_accessors hydra.MetaAccessor
 ---@field update nil
 local HintStatusLine = Class(Hint)
 
-   self.meta_accessor = hydra.options
 ---@param hydra Hydra
 function HintStatusLine:_constructor(hydra)
    Hint._constructor(self, hydra)
+   self.meta_accessors = hydra.options
 end
 
 function HintStatusLine:_make_statusline()
@@ -47,13 +46,13 @@ function HintStatusLine:show()
    end
    statusline = table.concat(statusline)
 
+   local wo = self.meta_accessors.wo
    wo.statusline = statusline
 end
 
 --------------------------------------------------------------------------------
 
 ---@class HydraHintStatusLineMute : hydra.hint.StatusLine
----@field update nil
 ---@field config nil
 local HintStatusLineMute = Class(HintStatusLine)
 

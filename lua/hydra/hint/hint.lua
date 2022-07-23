@@ -18,7 +18,6 @@ function Hint:_constructor(hydra)
    if hydra.config.hint then
       self.config = hydra.config.hint --[[@as hydra.hint.Config]]
    end
-
    self._debug = hydra.config.debug
 end
 

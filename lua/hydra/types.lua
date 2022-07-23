@@ -1,6 +1,6 @@
 ---@alias hydra.foreign_keys "warn" | "run" | nil
----@alias hydra.color "red" | "pink" | "amaranth" | "teal"
----@alias hydra.Color "Red" | "Pink" | "Amaranth" | "Teal"
+---@alias hydra.color "red" | "pink" | "amaranth" | "teal" | "blue"
+---@alias hydra.Color "Red" | "Pink" | "Amaranth" | "Teal" | "Blue"
 
 ---@class hydra.Config
 ---@field debug boolean

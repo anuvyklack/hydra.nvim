@@ -38,7 +38,7 @@ function HintManualWindow:_make_buffer()
    local heads = vim.deepcopy(self.heads)
 
    self.win_width = 0 -- The width of the window
-   for line_nr, line in ipairs(hint) do
+   for n, line in ipairs(hint) do
       local start, stop, fname = 0, nil, nil
       while start do
          start, stop, fname = line:find('%%{(.-)}', 1)
@@ -55,7 +55,7 @@ function HintManualWindow:_make_buffer()
                fun(),
                line:sub(stop + 1)
             })
-            hint[line_nr] = line
+            hint[n] = line
          end
       end
 
@@ -77,7 +77,7 @@ function HintManualWindow:_make_buffer()
          if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
          if start then
             if not heads[head] then
-               error(string.format('Hydra: docsting error, head "%s" does not exist', head))
+               error(string.format('[Hydra] docsting error, head "%s" does not exist', head))
             end
             local color = heads[head].color
             vim.api.nvim_buf_add_highlight(

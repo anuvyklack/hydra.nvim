@@ -143,6 +143,10 @@ function Hydra:_constructor(input)
          color = self.config.color
       end
 
+      -- if opts.exit and not rhs then
+      --    color = 'blue'
+      -- end
+
       if type(opts.mode) == 'string' then
          opts.mode = { opts.mode }
       end
@@ -166,6 +170,7 @@ function Hydra:_constructor(input)
          head = '<Esc>',
          index = vim.tbl_count(self.heads),
          color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue',
+         -- color = 'Blue',
          desc = 'exit'
       }
    end
