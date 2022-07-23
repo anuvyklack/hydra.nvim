@@ -21,6 +21,24 @@ function Hint:_constructor(hydra)
    self._debug = hydra.config.debug
 end
 
+function Hint:leave()
+   if self.hydra_color == 'amaranth' then
+      -- 'An Amaranth Hydra can only exit through a blue head'
+      vim.api.nvim_echo({
+         {'An '},
+         {'Amaranth', 'HydraAmaranth'},
+         {' Hydra can only exit through a blue head'}
+      }, false, {})
+   elseif self.hydra_color == 'teal' then
+      -- 'A Teal Hydra can only exit through one of its heads'
+      vim.api.nvim_echo({
+         {'A '},
+         {'Teal', 'HydraTeal'},
+         {' Hydra can only exit through one of its heads'}
+      }, false, {})
+   end
+end
+
 ---In `self.heads` table for every head makes the next:
 ---
 ---```

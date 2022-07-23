@@ -514,27 +514,8 @@ end
 
 ---@return boolean condition Are we leaving hydra or not?
 function Hydra:_leave()
-   if self.config.color == 'amaranth' then
-      -- 'An Amaranth Hydra can only exit through a blue head'
-      vim.api.nvim_echo({
-         {'An '},
-         {'Amaranth', 'HydraAmaranth'},
-         {' Hydra can only exit through a blue head'}
-      }, false, {})
-
-      if vim.fn.getchar(1) ~= 0 then
-         vim.fn.getchar()
-      end
-      self:_wait()
-      return false
-   elseif self.config.color == 'teal' then
-      -- 'A Teal Hydra can only exit through one of its heads'
-      vim.api.nvim_echo({
-         {'A '},
-         {'Teal', 'HydraTeal'},
-         {' Hydra can only exit through one of its heads'}
-      }, false, {})
-
+   if self.config.color == 'amaranth' or self.config.color == 'teal' then
+      self.hint:leave()
       if vim.fn.getchar(1) ~= 0 then
          vim.fn.getchar()
       end
