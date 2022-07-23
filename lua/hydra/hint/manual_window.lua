@@ -70,7 +70,7 @@ function HintManualWindow:_make_buffer()
    local line_count = vim.api.nvim_buf_line_count(self.bufnr)
    vim.api.nvim_buf_set_lines(self.bufnr, 0, line_count, false, hint)
 
-   for line_nr, line in ipairs(hint) do
+   for n, line in ipairs(hint) do
       local start, stop, head = 0, 0, nil
       while start do
          start, stop, head = line:find('_(.-)_', stop + 1)
@@ -80,10 +80,8 @@ function HintManualWindow:_make_buffer()
                error(string.format('Hydra: docsting error, head "%s" does not exist', head))
             end
             local color = heads[head].color
-            if color then
-               vim.api.nvim_buf_add_highlight(
-                  self.bufnr, self.namespace, 'Hydra'..color, line_nr-1, start, stop-1)
-            end
+            vim.api.nvim_buf_add_highlight(
+               self.bufnr, self.namespace, 'Hydra'..color, n-1, start, stop-1)
             heads[head] = nil
          end
       end
