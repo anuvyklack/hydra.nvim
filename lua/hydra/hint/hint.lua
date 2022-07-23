@@ -64,4 +64,6 @@ function Hint:debug(...)
    end
 end
 
+function Hint:close() end
+
 return Hint

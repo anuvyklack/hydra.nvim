@@ -47,8 +47,6 @@ function HintStatusLine:show()
    wo.statusline = statusline
 end
 
-function HintStatusLine:close() end
-
 --------------------------------------------------------------------------------
 
 ---@class HydraHintStatusLineMute : hydra.hint.StatusLine
@@ -69,8 +67,5 @@ function HintStatusLineMute:show(return_value)
    return self.statusline
 end
 
-function HintStatusLineMute:show() end
-
-function HintStatusLineMute:close() end
 
 return { HintStatusLine, HintStatusLineMute }
