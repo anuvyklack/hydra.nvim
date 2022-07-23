@@ -420,6 +420,11 @@ config			table
 				If |hydra-hint| is passed — this value will be
 				ignored and `"window"` will be used.
 
+		• show_name		boolean
+					default: `true`
+			Show a hydras name or `HYDRA:` label at the beginning of
+			auto-generated hint.
+
 		• position		string
 					default: `"bottom"`
 			Set the position of the hint. Should be one from the

@@ -366,6 +366,9 @@ hint.
     - `"statusline"` — show auto-generated hint in the statusline.  If hint is passed,
       then this value will be ignored and `"window"` will be used.
 
+  - **`show_name`**   `boolean`   (default: `true`)
+
+    Show hydras name or `HYDRA:` label at the beginning of an auto-generated hint.
 
   - **`position`**   `string`   (default: `"bottom"`)
 
