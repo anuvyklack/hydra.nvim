@@ -29,6 +29,7 @@ local default_config = {
    timeout = false,
    invoke_on_body = false,
    hint = {
+      show_name = true,
       position = { 'bottom' },
       offset = 0,
       border = nil,

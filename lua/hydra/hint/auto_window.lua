@@ -39,7 +39,12 @@ function HintAutoWindow:_make_buffer()
    self.bufnr = vim.api.nvim_create_buf(false, true)
 
    ---@type string[]
-   local hint = { ' ', self.hydra_name or 'HYDRA', ': ' }
+   local hint = { ' ' }
+
+   if self.config.show_name then
+      hint[#hint+1] = (self.hydra_name or 'HYDRA')..': '
+   end
+
    local heads = self:_swap_head_with_index()
    for _, head in ipairs(heads) do
       if head.desc ~= false then

@@ -40,10 +40,13 @@ end
 
 function HintStatusLine:show()
    if not self.statusline then self:_make_statusline() end
-   local statusline = table.concat{
-      ' ', self.hydra_name or 'HYDRA', ': ', self.statusline
-   }
-   local wo = self.meta_accessor.wo
+
+   local statusline = { ' ', self.statusline }
+   if self.config.show_name then
+      table.insert(statusline, 2, (self.hydra_name or 'HYDRA')..': ')
+   end
+   statusline = table.concat(statusline)
+
    wo.statusline = statusline
 end
 

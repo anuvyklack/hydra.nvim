@@ -21,6 +21,7 @@
 ---@field offset integer
 ---@field border? string | table
 ---@field funcs table<string, fun():string>
+---@field show_name boolean
 
 ---@class hydra.hint.Config.position
 ---@field [1] 'top' | 'middle' | 'bottom'
