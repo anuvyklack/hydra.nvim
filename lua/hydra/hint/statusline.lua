@@ -4,7 +4,6 @@ local Hint = require('hydra.hint.hint')
 ---@class hydra.hint.StatusLine : hydra.Hint
 ---@field meta_accessors hydra.MetaAccessor
 ---@field update nil
----@field get_statusline nil
 local HintStatusLine = Class(Hint)
 
    self.meta_accessor = hydra.options
@@ -54,7 +53,6 @@ function HintStatusLine:close() end
 
 ---@class HydraHintStatusLineMute : hydra.hint.StatusLine
 ---@field update nil
----@field get_statusline function
 ---@field config nil
 local HintStatusLineMute = Class(HintStatusLine)
 
@@ -62,7 +60,11 @@ function HintStatusLineMute:_constructor(...)
    HintStatusLine._constructor(self, ...)
 end
 
-function HintStatusLineMute:get_statusline()
+---@param return_value boolean Return statusline string or not?
+---@return string?
+function HintStatusLineMute:show(return_value)
+   if not return_value then return end
+
    if not self.statusline then self:_make_statusline() end
    return self.statusline
 end

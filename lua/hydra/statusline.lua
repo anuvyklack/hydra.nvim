@@ -13,10 +13,10 @@ function statusline.get_name()
 end
 
 ---Get an active Hydra's statusline hint if it provides it
----@return string | nil
+---@return string?
 function statusline.get_hint()
-   if _G.Hydra and _G.Hydra.hint.get_statusline then
-      return _G.Hydra.hint:get_statusline()
+   if _G.Hydra and _G.Hydra.config.hint == false then
+      return _G.Hydra.hint:show(true)
    end
 end
 

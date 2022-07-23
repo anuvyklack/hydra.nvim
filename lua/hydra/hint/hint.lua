@@ -7,7 +7,6 @@ local Class = require('hydra.class')
 ---@field show function
 ---@field close function
 ---@field update function | nil
----@field get_statusline function | nil
 ---@field _debug boolean
 local Hint = Class()
 

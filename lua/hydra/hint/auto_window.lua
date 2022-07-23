@@ -7,7 +7,6 @@ local Hint = require('hydra.hint.hint')
 ---@field bufnr integer | nil
 ---@field winid integer | nil
 ---@field update nil
----@field get_statusline nil
 local HintAutoWindow = Class(Hint)
 
 function HintAutoWindow:_constructor(...)
