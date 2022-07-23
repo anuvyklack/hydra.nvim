@@ -402,48 +402,50 @@ config			table
 			set timer to desired amount of milliseconds.
 
 								*hydra-config.hint*
+	hint			table | `false`
+		If `false` — doesn't show hint, or a table with settings for
+		manually- or auto-generated |hydra-hint|.
 
-	hint			table | `"window"` | `"statusline"` | `false`
-		Configure hint display.
+		• type			`"window"` | `"cmdline"` | `"statusline"`
+					default: if |hydra-hint| passed => `"window"`
+						 else `"cmdline"`
+			• `"window"`
+				Show hint in a floating window.
 
-		`hint = 'statusline'`
-			By default auto-generated hint is shown in a floating
-			window above statusline.  When this option set, it will
-			be shown in the statusline.;
+			• `"cmdline"`
+				Show hint in a echo area.
 
-		`hint = false`
-			disable auto-generating hint;
+			• `"statusline"`
+				Show auto-generated hint in the statusline.
+				If |hydra-hint| is passed — this value will be
+				ignored and `"window"` will be used.
 
-		`hint = {...}`
-			A table with settings for the manually created hint.
-			Read about hint below. Accepts following keys:
-
-			• position		string
-						default: `"bottom"`
-				Set the position of the hint. Should be one from
-				the next table:
+		• position		string
+					default: `"bottom"`
+			Set the position of the hint. Should be one from the
+			next table:
 >
-				      top-left   |   top    |  top-right
-				    -------------+----------+--------------
-				     middle-left |  middle  | middle-right
-				    -------------+----------+--------------
-				     bottom-left |  bottom  | bottom-right
+			      top-left   |   top    |  top-right
+			    -------------+----------+--------------
+			     middle-left |  middle  | middle-right
+			    -------------+----------+--------------
+			     bottom-left |  bottom  | bottom-right
 <
-			• offset		number
-						default: `0`
-				The offset from the nearest editor border.
+		• offset		number
+					default: `0`
+			The offset from the nearest editor border.
 
-			• border	`"single"` | `"double"` | `"rounded"` |
-					`"solid"` | `"shadow"` | `"none"` | string[]
-						default: `"none"`
-				The border of the hint window. See |nvim_open_win()|
+		• border	`"single"` | `"double"` | `"rounded"` |
+				`"solid"` | `"shadow"` | `"none"` | string[]
+					default: `"none"`
+			The border of the hint window. See |nvim_open_win()|
 
-			• funcs			table<string, fun():string>
-						default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
-				Table where keys are function names and values
-				are functions them self. Each function should
-				return string. This functions can be required
-				from `hint` with `%{func_name}` syntaxis.
+		• funcs			table<string, fun():string>
+					default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
+			Table where keys are function names and values are
+			functions them self. Each function should return string.
+			This functions can be required from `hint` with
+			`%{func_name}` syntaxis.
 
 								*hydra-heads*
 heads			table[]

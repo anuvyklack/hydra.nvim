@@ -352,15 +352,21 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
 - `timeout = 5000` — set timer to desired amount of milliseconds.
 
 #### `hint`
-`table | "statusline" | false`
+`table | false`
 
-Configure the manually- or auto-generated hint.
+If `false` — doesn't show hint. Or a table with settings for manually- or auto-generated
+hint.
 
-- `"statusline"` — By default auto-generated hint is shown in a floating
-  window above statusline.  When this option set, it will be shown in the statusline.;
-- `false` — disable auto-generating hint;
-- `{...}` — a table with settings for the manually created hint. Read about hint below.
-   Accepts following keys:
+  - **`type`**   `"window" | "cmdline" | "statusline"`  (default: if hint passed then `"window"` else `"cmdline"`)
+
+    - `"window"` — show hint in a floating window;
+
+    - `"cmdline"` — show hint in a echo area;
+
+    - `"statusline"` — show auto-generated hint in the statusline.  If hint is passed,
+      then this value will be ignored and `"window"` will be used.
+
+
   - **`position`**   `string`   (default: `"bottom"`)
 
     Set the position of the hint. Should be one from the next table:
