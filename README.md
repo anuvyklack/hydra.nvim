@@ -357,7 +357,7 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
 If `false` — doesn't show hint. Or a table with settings for manually- or auto-generated
 hint.
 
-  - **`type`**   `"window" | "cmdline" | "statusline"`  (default: if hint passed then `"window"` else `"cmdline"`)
+  - **`type`**   `"window" | "cmdline" | "statusline"`  (default: if hint passed: `"window"`, else: `"cmdline"`)
 
     - `"window"` — show hint in a floating window;
 
@@ -366,11 +366,8 @@ hint.
     - `"statusline"` — show auto-generated hint in the statusline.  If hint is passed,
       then this value will be ignored and `"window"` will be used.
 
-  - **`show_name`**   `boolean`   (default: `true`)
-
-    Show hydras name or `HYDRA:` label at the beginning of an auto-generated hint.
-
-  - **`position`**   `string`   (default: `"bottom"`)
+  - **`position`**   `string`   (default: `"bottom"`)  
+    (valid when `type` is `"window"`)
 
     Set the position of the hint. Should be one from the next table:
 
@@ -382,15 +379,21 @@ hint.
      bottom-left |  bottom  | bottom-right
     ```
 
-  - **`offset`**  `number`   (default: `0`)
+  - **`offset`**  `number`   (default: `0`)  
+    (valid when `type` is `"window"`)
 
     The offset from the nearest editor border.
 
-  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)
+  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)  
+    (valid when `type` is `"window"`)
 
     The border of the hint window. See `:help nvim_open_win()`
 
-  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))
+  - **`show_name`**   `boolean`   (default: `true`)  
+
+    Show hydras name or `HYDRA:` label at the beginning of an auto-generated hint.
+
+  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))  
 
     Table where keys are function names and values are functions them self. Each
     function should return string. This functions can be required from `hint` with

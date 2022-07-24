@@ -420,13 +420,9 @@ config			table
 				If |hydra-hint| is passed — this value will be
 				ignored and `"window"` will be used.
 
-		• show_name		boolean
-					default: `true`
-			Show a hydras name or `HYDRA:` label at the beginning of
-			auto-generated hint.
-
 		• position		string
 					default: `"bottom"`
+					valid when `type` is `"window"`
 			Set the position of the hint. Should be one from the
 			next table:
 >
@@ -438,12 +434,19 @@ config			table
 <
 		• offset		number
 					default: `0`
+					valid when `type` is `"window"`
 			The offset from the nearest editor border.
 
 		• border	`"single"` | `"double"` | `"rounded"` |
 				`"solid"` | `"shadow"` | `"none"` | string[]
 					default: `"none"`
+					valid when `type` is `"window"`
 			The border of the hint window. See |nvim_open_win()|
+
+		• show_name		boolean
+					default: `true`
+			Show a hydras name or `HYDRA:` label at the beginning of
+			auto-generated hint.
 
 		• funcs			table<string, fun():string>
 					default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
