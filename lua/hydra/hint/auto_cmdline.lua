@@ -81,7 +81,9 @@ end
 function HintAutoCmdline:show()
    -- 'shortmess' 'shm'	string	(Vim default "filnxtToOF", Vi default: "S")
    if not self.message then self:_make_message() end
-   self.o.cmdheight = self.height
+   if self.o.cmdheight < self.height then
+      self.o.cmdheight = self.height
+   end
    vim.cmd 'redraw'
    vim.api.nvim_echo(self.message, false, {})
 end
