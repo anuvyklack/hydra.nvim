@@ -494,8 +494,8 @@ function Hydra:_enter()
    else
       o.timeout = false
    end
-   o.ttimeout = not self.options.original.timeout and true
-                or self.options.original.ttimeout
+   o.ttimeout = not self.options.original.o.timeout and true
+                or self.options.original.o.ttimeout
 
    if self.config.on_enter then self.config.on_enter() end
 

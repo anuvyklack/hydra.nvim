@@ -1,8 +1,8 @@
 local Class = require('hydra.class')
 
 ---@class hydra.MetaAccessor.original
----@field o table<integer, table<string, any>>
----@field go table<integer, table<string, any>>
+---@field o table<string, any>
+---@field go table<string, any>
 ---@field bo table<integer, table<string, any>>
 ---@field wo table<integer, table<string, any>>
 
@@ -22,9 +22,12 @@ function ma:_constructor(augroup_name)
    self.original = {}
 
    self.o = self.make_meta_accessor(
+      ---@param opt string
       function(opt)
          return vim.api.nvim_get_option_value(opt, {})
       end,
+      ---@param opt string
+      ---@param val any
       function(opt, val)
          self.original.o = self.original.o or {}
          if not self.original.o[opt] then
@@ -35,9 +38,12 @@ function ma:_constructor(augroup_name)
    )
 
    self.go = self.make_meta_accessor(
+      ---@param opt string
       function(opt)
          return vim.api.nvim_get_option_value(opt, { scope = 'global' })
       end,
+      ---@param opt string
+      ---@param val any
       function(opt, val)
          self.original.go = self.original.go or {}
          if self.original.go[opt] then
@@ -48,11 +54,14 @@ function ma:_constructor(augroup_name)
    )
 
    self.bo = self.make_meta_accessor(
+      ---@param opt string
       function(opt)
          -- assert(type(opt) ~= 'number',
          --    '[Hydra] "vim.bo[bufnr]" meta-aссessor in config.on_enter() function is forbiden, use "vim.bo" instead')
          return vim.api.nvim_buf_get_option(0, opt)
       end,
+      ---@param opt string
+      ---@param val any
       function(opt, val)
          self:_set_buf_option(opt, val)
 
@@ -67,11 +76,14 @@ function ma:_constructor(augroup_name)
    )
 
    self.wo = self.make_meta_accessor(
+      ---@param opt string
       function(opt)
          -- assert(type(opt) ~= 'number',
          --    '[Hydra] "vim.wo[winnr]" meta-aссessor in config.on_enter() function is forbiden, use "vim.wo" instead')
          return vim.api.nvim_win_get_option(0, opt)
       end,
+      ---@param opt string
+      ---@param val any
       function(opt, val)
          self:_set_win_option(opt, val)
 
@@ -97,7 +109,10 @@ function ma.make_meta_accessor(get, set)
    })
 end
 
+---@param opt string
+---@param val any
 function ma:_set_buf_option(opt, val)
+   ---@type integer
    local bufnr = vim.api.nvim_get_current_buf()
    self.original.bo = self.original.bo or {}
    self.original.bo[bufnr] = self.original.bo[bufnr] or {}
@@ -108,7 +123,10 @@ function ma:_set_buf_option(opt, val)
    vim.api.nvim_buf_set_option(bufnr, opt, val)
 end
 
+---@param opt string
+---@param val any
 function ma:_set_win_option(opt, val)
+   ---@type integer
    local winnr = vim.api.nvim_get_current_win()
    self.original.wo = self.original.wo or {}
    self.original.wo[winnr] = self.original.wo[winnr] or {}
