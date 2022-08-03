@@ -608,7 +608,7 @@ KEYMAP UTILITY FUNCTIONS				     *hydra-keymap_util*
 
 Utility functions to use in keymaps. Can be required from the next table:
 >
-    require('hydra.keymap_util')
+    require('hydra.keymap-util')
 <
 
 cmd({command})		fun(string): string
