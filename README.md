@@ -553,7 +553,7 @@ HydraHint  link  NormalFloat
 
 Utility functions to use in keymaps. Can be required from the next table:
 ```lua
-require('hydra.keymap_util')
+require('hydra.keymap-util')
 ```
 
 - `cmd(command)`
