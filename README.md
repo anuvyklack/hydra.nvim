@@ -83,6 +83,7 @@ If you want to quickly understand the concept, you can watch
     * [`hint`](#hint-1)
 * [Public methods](#public-methods)
 * [Highlight](#highlight)
+* [Keymap utility functions](#keymap-utility-functions)
 * [Statusline](#statusline)
 * [Drawbacks](#drawbacks)
 * [How it works under the hood](#how-it-works-under-the-hood)
@@ -547,6 +548,45 @@ HydraHint  link  NormalFloat
 ```
 
 `HydraHint` defines the fore- and background of the hint window.
+
+## Keymap utility functions
+
+Utility functions to use in keymaps. Can be required from the next table:
+```lua
+require('hydra.keymap_util')
+```
+
+- `cmd(command)`
+
+  Get a string and wrap it in `<Cmd>`, `<CR>`. I.e.: 
+  ```
+  cmd(vsplit)  ->  "<Cmd>vsplit<CR>"
+  ```
+  **param:**  `command` : `string`  
+  **return:**  `string`
+
+- `pcmd(try_cmd, catch?, catch_cmd?)`  
+
+  Protected `cmd`. Examples explain better:
+  ```
+  pcmd("wincmd k", "E11", "close")
+  ->  "<Cmd>try | wincmd k | catch /^Vim\%((\a\+)\)\=:E11:/ | close | endtry<CR>"
+
+  pcmd("wincmd k", nil, "close")
+  ->  "<Cmd>try | wincmd k | catch | close | endtry<CR>"
+
+  pcmd("close")
+  ->  "<Cmd>try | close | catch | endtry<CR>"
+  ```
+  See: `:help exception-handling`
+
+  **params:**  
+
+  * `try_cmd` : `string`
+  * `catch` : `string` (optional) — String of the form `E` + some digits, like `E12` or `E444`.
+  * `catch_cmd` : `string` (optional)
+
+  **return:**  `string`
 
 ## Statusline
 

@@ -53,6 +53,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
     `hint`..............................................................|hydra-hint|
 Public methods.....................................................|hydra-methods|
 Highlight........................................................|hydra-highlight|
+Keymap utility functions.......................................|hydra-keymap_util|
 Statusline......................................................|hydra-statusline|
 Drawbacks........................................................|hydra-drawbacks|
 
@@ -603,7 +604,46 @@ Hydra defines next highlight groups with their defaults:
 		Defines the fore- and background of the hint window.
 
 --------------------------------------------------------------------------------
-STATUSLINE							*hydra-statusline*
+KEYMAP UTILITY FUNCTIONS				     *hydra-keymap_util*
+
+Utility functions to use in keymaps. Can be required from the next table:
+>
+    require('hydra.keymap_util')
+<
+
+cmd({command})		fun(string): string
+		Get a string and wrap it in `<Cmd>`, `<CR>`.  Example:
+>
+		    cmd(vsplit)  ->  "<Cmd>vsplit<CR>"
+
+
+pcmd({try_cmd}, {catch}?, {catch_cmd}?)
+				fun(string, string?, string?): string
+		Protected `cmd`. Examples explain better:
+>
+    pcmd("wincmd k", "E11", "close")
+    ->  "<Cmd>try | wincmd k | catch /^Vim\%((\a\+)\)\=:E11:/ | close | endtry<CR>"
+
+    pcmd("wincmd k", nil, "close")
+    ->  "<Cmd>try | wincmd k | catch | close | endtry<CR>"
+
+    pcmd("close")
+    ->  "<Cmd>try | close | catch | endtry<CR>"
+<
+		See: |exception-handling|
+
+		Parameters:~
+			{try_cmd}	string
+			{catch}		string (optional)
+				String of the form `E` + some digits, like `E12` or `E444`.
+			{catch_cmd}	string (optional)
+
+		Return:~
+			string
+
+
+--------------------------------------------------------------------------------
+STATUSLINE						      *hydra-statusline*
 
 In the statusline module `require('hydra.statusline')` there are functions that
 can help you to integrate Hydra in your statusline:
