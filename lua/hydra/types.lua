@@ -5,6 +5,7 @@
 ---@class hydra.Config
 ---@field debug boolean
 ---@field buffer? integer
+---@field catch_errors boolean
 ---@field exit boolean
 ---@field foreign_keys hydra.foreign_keys
 ---@field color hydra.color

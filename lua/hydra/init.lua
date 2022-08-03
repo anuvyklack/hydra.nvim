@@ -18,11 +18,13 @@ _G.Hydra = nil
 ---@field heads_spec table<string, hydra.HeadSpec>
 ---@field options hydra.MetaAccessor
 ---@field plug table<string, string>
+---@field error? string
 local Hydra = Class()
 
 ---@type hydra.Config
 local default_config = {
    debug = false,
+   catch_errors = true,
    exit = false,
    foreign_keys = nil,
    color = 'red',
@@ -48,6 +50,7 @@ function Hydra:_constructor(input)
       })
       if input.config then
          vim.validate({
+            catch_errors = { input.config.catch_errors, 'boolean', true },
             on_enter = { input.config.on_enter, 'function', true },
             on_exit = { input.config.on_exit, 'function', true },
             exit = { input.config.exit, 'boolean', true },
@@ -283,7 +286,21 @@ function Hydra:_setup_hydra_keymaps()
          end
          keys = util.termcodes(keys)
          mode = opts.remap and 'im' or 'in'
-         vim.api.nvim_feedkeys(keys, mode, true)
+         vim.api.nvim_feedkeys(keys, mode, false)
+      end
+
+      ---@return boolean ok
+      local function pkeymap()
+         local ok, error = pcall(keymap)
+         if not ok and not self.config.catch_errors then
+            self.error = error
+            self:exit()
+            return false
+         elseif not ok then
+            util.error(error)
+         end
+         self:debug(ok, error, vim.v.errmsg)
+         return true
       end
 
       -- Define enter mapping
@@ -293,7 +310,8 @@ function Hydra:_setup_hydra_keymaps()
       then
          self:_set_keymap(self.body..head, function()
             self:_enter()
-            keymap()
+            local ok = pkeymap()
+            if not ok then return end
             if opts.on_key ~= false and self.config.on_key then
                self.config.on_key()
             end
@@ -309,7 +327,8 @@ function Hydra:_setup_hydra_keymaps()
          end, opts)
       else -- red head
          self:_set_keymap(self.plug.wait..head, function()
-            keymap()
+            local ok = pkeymap()
+            if not ok then return end
             if opts.on_key ~= false and self.config.on_key then
                self.config.on_key()
             end
@@ -518,7 +537,11 @@ function Hydra:exit()
    self.hint:close()
    if self.config.on_exit then self.config.on_exit() end
    _G.Hydra = nil
-   vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
+   if self.error then
+      util.error(self.error)
+   else
+      vim.api.nvim_echo({}, false, {})  -- vim.cmd 'echo'
+   end
 end
 
 function Hydra:_wait()

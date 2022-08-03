@@ -68,6 +68,7 @@ If you want to quickly understand the concept, you can watch
             * [meta-accessors](#meta-accessors)
         * [`on_key`](#on_key)
         * [`timeout`](#timeout)
+        * [`catch_errors`](#catch_errors)
         * [`hint`](#hint)
     * [Hydra's heads](#hydras-heads)
         * [`head`](#head)
@@ -351,13 +352,20 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
   until you manually cancel it;
 - `timeout = 5000` — set timer to desired amount of milliseconds.
 
+#### `catch_errors`
+`boolean`  
+default: `false`
+
+
+
 #### `hint`
 `table | false`
 
 If `false` — doesn't show hint. Or a table with settings for manually- or auto-generated
 hint.
 
-  - **`type`**   `"window" | "cmdline" | "statusline"`  (default: if hint passed: `"window"`, else: `"cmdline"`)
+  - **`type`**   `"window" | "cmdline" | "statusline"`  
+    default: if hint passed: `"window"`, else: `"cmdline"`
 
     - `"window"` — show hint in a floating window;
 
@@ -366,8 +374,9 @@ hint.
     - `"statusline"` — show auto-generated hint in the statusline.  If hint is passed,
       then this value will be ignored and `"window"` will be used.
 
-  - **`position`**   `string`   (default: `"bottom"`)  
-    (valid when `type` is `"window"`)
+  - **`position`**   `string`   
+    default: `"bottom"`  
+    valid when `type` is `"window"`
 
     Set the position of the hint. Should be one from the next table:
 
@@ -379,21 +388,25 @@ hint.
      bottom-left |  bottom  | bottom-right
     ```
 
-  - **`offset`**  `number`   (default: `0`)  
-    (valid when `type` is `"window"`)
+  - **`offset`**  `number`  
+    default: `0`  
+    valid when `type` is `"window"`  
 
     The offset from the nearest editor border.
 
-  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)  
-    (valid when `type` is `"window"`)
+  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  
+    default: `"none"`  
+    valid when `type` is `"window"`
 
     The border of the hint window. See `:help nvim_open_win()`
 
-  - **`show_name`**   `boolean`   (default: `true`)  
+  - **`show_name`**   `boolean`  
+    default: `true`  
 
     Show hydras name or `HYDRA:` label at the beginning of an auto-generated hint.
 
-  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))  
+  - **`funcs`**   `table<string, fun():string>`  
+    [built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua)  
 
     Table where keys are function names and values are functions them self. Each
     function should return string. This functions can be required from `hint` with

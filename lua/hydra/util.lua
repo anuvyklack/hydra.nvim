@@ -7,6 +7,12 @@ function util.warn(msg)
    end)
 end
 
+function util.error(msg)
+   vim.schedule(function()
+      vim.notify_once('[Hydra] ' .. msg, vim.log.levels.ERROR)
+   end)
+end
+
 local id = 0
 ---Generate ID
 ---@return integer
