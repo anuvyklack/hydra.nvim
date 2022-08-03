@@ -57,7 +57,7 @@ Statusline......................................................|hydra-statuslin
 Drawbacks........................................................|hydra-drawbacks|
 
 ================================================================================
-HYDRA.NVIM                                                           *hydra.nvim*
+HYDRA.NVIM                                                            *hydra.nvim*
 
 This is the Neovim port of the famous Emacs Hydra package.
 
@@ -88,7 +88,7 @@ Hydra also allows assigning a custom hint to such group of keybindings to
 allows you an easy glance at what you can do.
 >
 --------------------------------------------------------------------------------
-SAMPLE HYDRAS							*hydra-samples*
+SAMPLE HYDRAS							   *hydra-samples*
 
 SIDE SCROLL
 
@@ -198,29 +198,29 @@ of the next form:
 
 Each of the fields of this table is described in details below.
 
-								*hydra-name*
+								    *hydra-name*
 name			string (optional)
 	The name of the hydra. Not necessary, used only in auto-generated hint.
 
-								*hydra-mode*
+								    *hydra-mode*
 mode			string | string[]
 			default: `"n"`
 	Mode or modes in which this hydra will exist. Same format as
 	`vim.keymap.set()` accepts.
-								*hydra-body*
+								    *hydra-body*
 body			string (optional)
 	To summon the hydra you need to press in sequence keys corresponds to
 	`body` + any `head`.  For example, if body is `z` and heads are: `a`, `b`, `c`, you
 	can invoke hydra with any of the `za`, `zb`, `zc` keybindings.
 	Hydra without body can only be summoned through `Hydra:activate()` method.
 
-								*hydra-config*
+								  *hydra-config*
 config			table
 	With this table, you can set the behavior of the whole hydra, which
 	later can be customized for each head particularly.  Below is a list of
 	all options.
 
-							*hydra-config.exit*
+							     *hydra-config.exit*
 	exit			boolean
 				default: `false`
 		The `exit` option (heads can override it) defines what will
@@ -233,7 +233,7 @@ config			table
 		`exit = true`
 			means that the hydra state will stop.
 
-						*hydra-config.foreign_keys*
+						     *hydra-config.foreign_keys*
 	foreign_keys		`"warn"` | `"run"` | `nil`
 				default: `nil`
 		The `foreign_keys` option belongs to the body and decides what
@@ -251,7 +251,7 @@ config			table
 		`foreign_keys = "run"`
 			will not stop the hydra state, and try to run the
 			foreign key.
-							*hydra-config.color*
+							    *hydra-config.color*
 	color		`"red"` | `"amaranth"` | `"teal"` | `"pink"`
 				default: `"red"`
 		The `color` option is a shortcut for both `exit` and `foreign_keys`
@@ -276,7 +276,7 @@ config			table
 		into account and for `color` option the matching value will be
 		automatically set
 
-								*hydra-colors*
+								  *hydra-colors*
 		More about colors concept~
 
 		Each hydra head has a basic associated color, red or blue,
@@ -319,7 +319,7 @@ config			table
 		Hydras with amaranth body are impossible to quit with any
 		binding except a blue head.
 
-							*hydra-blue* *hydra-teal*
+							 *hydra-blue* *hydra-teal*
 		Blue and teal colors	~
 
 		A blue hydra has little sense in Vim since it works exactly
@@ -329,7 +329,7 @@ config			table
 		A teal hydra working the same way, except it blocks all other
 		keys which are not hydra heads, what can be useful.
 
-								*hydra-pink*
+								    *hydra-pink*
 		Pink color~
 
 		Pink hydra is of a different nature. It is a key-layer
@@ -337,12 +337,12 @@ config			table
 		inside, so all keys except overwritten are work as usual. Even
 		`[count]` prefixes.
 
-							*hydra-config.buffer*
+							   *hydra-config.buffer*
 	buffer			`true` | number
 		Define hydra only for particular buffer.  If `true` — the current
 		buffer will be used.
 
-						*hydra-config.invoke_on_body*
+						   *hydra-config.invoke_on_body*
 	invoke_on_body		boolean
 				default: `false`
 		By default, to invoke the hydra you need to press in sequence
@@ -350,12 +350,12 @@ config			table
 		heads see later).  This option allows you to summon hydra by
 		pressing only the `body` keys.
 
-					*hydra-config.on_enter* *hydra-config.on_exit*
+				    *hydra-config.on_enter* *hydra-config.on_exit*
 	on_enter
 	on_exit			function
 		Functions that will be called on enter and on exit hydra.
 
-							*hydra-meta-accessors*
+							  *hydra-meta-accessors*
 		Meta-accessors~
 
 		Inside the `on_enter` functions the `vim.o`, `vim.go`, `vim.bo` and
@@ -380,11 +380,11 @@ config			table
 		   end
 		}
 <
-							*hydra-config.on_key*
+							   *hydra-config.on_key*
 	on_key			function
 		Function that will be called after every hydra head.
 
-							*hydra-config.timeout*
+							  *hydra-config.timeout*
 	timeout			boolean | number
 				default: `false`
 		The `timeout` option set a timer after which the hydra will be
@@ -401,7 +401,7 @@ config			table
 		`timeout = 5000`
 			set timer to desired amount of milliseconds.
 
-								*hydra-config.hint*
+							     *hydra-config.hint*
 	hint			table | `false`
 		If `false` — doesn't show hint, or a table with settings for
 		manually- or auto-generated |hydra-hint|.
@@ -455,7 +455,7 @@ config			table
 			This functions can be required from `hint` with
 			`%{func_name}` syntaxis.
 
-								*hydra-heads*
+								   *hydra-heads*
 heads			table[]
 	Each hydra's head has the form:
 >
@@ -475,17 +475,17 @@ heads			table[]
 		do nothing, but if you also want to pass {opts} table, you
 		need to pass `nil` explicitly.
 
-								*hydra-head.opts*
+							       *hydra-head.opts*
 	{opts}			table
 		A table with head options to tune its behavior.
 
-								*hydra-head.private*
+							    *hydra-head.private*
 		private			boolean
 			When the hydra hides (not active), the private head
 			does not bounce outside.  I.e., the private head is
 			unreachable outside of the hydra state.
 
-								*hydra-head.exit*
+							       *hydra-head.exit*
 		exit			boolean
 			Stop the hydra state after executing a command
 			corresponds to such head.
@@ -500,25 +500,25 @@ heads			table[]
 >
 			    { '<Esc>', nil, { exit = true } }
 <
-								*hydra-head.on_key*
+							     *hydra-head.on_key*
 		on_key			boolean
 			If `false` |hydra-config.on_key| function won't be executed
 			after this head.
 
-								*hydra-head.desc*
+							       *hydra-head.desc*
 		desc			string | `false`
 			The description that will be shown in the
 			auto-generated part of the hint.  If `false` won't be
 			show in the hint window
 
-						*hydra-head.expr* *hydra-head.silent*
+					     *hydra-head.expr* *hydra-head.silent*
 		expr
 		silent			boolean
 			Built-in map arguments. See:
 			- |:map-<expr>|
 			- |:map-<silent>|
 
-								*hydra-head.nowait*
+							     *hydra-head.nowait*
 		nowait			boolean
 			Only relevant for `pink` hydra. For all others will be
 			skipped. The `pink` hydra is a layer
@@ -540,12 +540,12 @@ heads			table[]
 			which will exit layer, without waiting |'timeoutlen'|
 			milliseconds for possible continuation.
 
-								*hydra-head.mode*
+							       *hydra-head.mode*
 		mode			string | string[]
 			Overwrite `mode` field for this particular head.  Only
 			relevant for `pink` hydra, for all others will be ignored.
 
-								*hydra-hint*
+								    *hydra-hint*
 hint			multiline string
 	You can create any hint you wish.
 
@@ -581,7 +581,7 @@ hint			multiline string
 	rules of auto generated hint.
 
 --------------------------------------------------------------------------------
-PUBLIC METHODS							*hydra-methods*
+PUBLIC METHODS							 *hydra-methods*
 
 Hydra:activate()	A public method, which serves to activate hydra
 			programmatically.
@@ -589,7 +589,7 @@ Hydra:activate()	A public method, which serves to activate hydra
 Hydra:exit()		Exit hydra if it is active.
 
 --------------------------------------------------------------------------------
-HIGHLIGHT							*hydra-highlight*
+HIGHLIGHT						       *hydra-highlight*
 
 Hydra defines next highlight groups with their defaults:
 
@@ -618,7 +618,7 @@ get_hint()	get an active hydra's statusline hint. Return not `nil` only when
 		|hydra-config.hint| is set to `false.`
 
 --------------------------------------------------------------------------------
-DRAWBACKS							*hydra-drawbacks*
+DRAWBACKS						       *hydra-drawbacks*
 
 `[count]` is not supported in a red, amaranth and teal hydras (see `:help count`).
 But supported in pink hydra since it is a layer:
