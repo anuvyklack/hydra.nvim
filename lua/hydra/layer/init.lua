@@ -11,7 +11,6 @@ _G.active_keymap_layer = nil
 
 ---@class hydra.Layer
 ---@field active boolean
----@field name? string
 ---@field config hydra.layer.Config
 ---@field enter_keymaps table
 ---@field layer_keymaps table
@@ -74,7 +73,6 @@ function Layer:_constructor(input)
 
    self.active = false
    self.id = util.generate_id() -- Unique ID for each Layer.
-   self.name = input.name
    self.config = input.config or {}
    if self.config.timeout == true then
       self.config.timeout = vim.o.timeoutlen --[[@as integer]]
