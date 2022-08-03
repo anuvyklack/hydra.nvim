@@ -221,7 +221,7 @@ function Layer:_constructor(input)
          for lhs, map in pairs(keymaps) do
             local rhs, opts = map[1], map[2] or {}
             local keymap = self._make_keymap_function(mode, rhs, opts)
-
+            self.layer_keymaps[mode] = self.layer_keymaps[mode] or {}
             self.layer_keymaps[mode][lhs] = {
                function()
                   self:exit()
