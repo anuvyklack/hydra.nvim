@@ -58,7 +58,7 @@
 
 ---@class MetaAccessor
 
----@class libuv.Timer
+---@class uv.Timer
 ---@field start function
 ---@field again function
 ---@field close function

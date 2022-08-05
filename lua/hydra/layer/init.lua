@@ -15,7 +15,7 @@ _G.active_keymap_layer = nil
 ---@field enter_keymaps table
 ---@field layer_keymaps table
 ---@field options hydra.MetaAccessor
----@field timer libuv.Timer | nil
+---@field timer uv.Timer | nil
 ---@field saved_keymaps table
 local Layer = Class()
 
