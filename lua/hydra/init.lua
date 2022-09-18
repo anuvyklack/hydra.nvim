@@ -276,7 +276,7 @@ function Hydra:_setup_hydra_keymaps()
             keys = rhs
          end
          keys = util.termcodes(keys)
-         mode = opts.remap and 'im' or 'in'
+         mode = opts.remap and 'mx' or 'nx'
          vim.api.nvim_feedkeys(keys, mode, true)
       end
 
