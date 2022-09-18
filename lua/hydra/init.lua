@@ -17,7 +17,7 @@ _G.Hydra = nil
 ---@field heads table<string, hydra.Head>
 ---@field heads_spec table<string, hydra.HeadSpec>
 ---@field options hydra.MetaAccessor
----@field plug table<string, string>
+---@field plug_wait string
 local Hydra = Class()
 
 ---@type hydra.Config
@@ -118,13 +118,7 @@ function Hydra:initialize(input)
       self.config.invoke_on_body = true
    end
 
-   -- Table with all left hand sides of key mappings of the type `<Plug>...`.
-   self.plug = setmetatable({}, {
-      __index = function(t, key)
-         t[key] = ('<Plug>(Hydra%s_%s)'):format(self.id, key)
-         return t[key]
-      end
-   })
+   self.plug_wait = string.format('<Plug>(Hydra%d_wait)', self.id)
 
    self.heads = {};
    self.heads_spec = {}
@@ -251,7 +245,7 @@ function Hydra:initialize(input)
 end
 
 function Hydra:_setup_hydra_keymaps()
-   self:_set_keymap(self.plug.wait, function() self:_leave() end)
+   self:_set_keymap(self.plug_wait, function() self:_leave() end)
 
    -- Define entering keymap if Hydra is called only on body keymap.
    if self.config.invoke_on_body and self.body then
@@ -303,12 +297,12 @@ function Hydra:_setup_hydra_keymaps()
 
       -- Define mapping
       if opts.exit then -- blue head
-         self:_set_keymap(self.plug.wait..head, function()
+         self:_set_keymap(self.plug_wait..head, function()
             self:exit()
             keymap()
          end, opts)
       else -- red head
-         self:_set_keymap(self.plug.wait..head, function()
+         self:_set_keymap(self.plug_wait..head, function()
             keymap()
             if opts.on_key ~= false and self.config.on_key then
                self.config.on_key()
@@ -324,7 +318,7 @@ function Hydra:_setup_hydra_keymaps()
       local keys = vim.fn.split(head, [[\(<[^<>]\+>\|.\)\zs]])
       for i = #keys-1, 1, -1 do
          local first_n_keys = table.concat(vim.list_slice(keys, 1, i))
-         self:_set_keymap(self.plug.wait..first_n_keys, function()
+         self:_set_keymap(self.plug_wait..first_n_keys, function()
             local leave = self:_leave()
             if leave then
                vim.api.nvim_feedkeys( termcodes(first_n_keys), 'ti', false)
@@ -522,7 +516,7 @@ function Hydra:exit()
 end
 
 function Hydra:_wait()
-   vim.api.nvim_feedkeys( termcodes(self.plug.wait), '', false)
+   vim.api.nvim_feedkeys( termcodes(self.plug_wait), '', false)
 end
 
 ---@return boolean condition Are we leaving hydra or not?
