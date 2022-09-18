@@ -28,7 +28,7 @@ local Layer = Class()
 ---@field on_exit? table<integer, function>
 
 ---@param input table
-function Layer:_constructor(input)
+function Layer:initialize(input)
    if input.enter then
       for _, keymap in ipairs(input.enter) do
          local opts = keymap[4] or {}

@@ -9,8 +9,8 @@ local Hint = require('hydra.hint.hint')
 ---@field update nil
 local HintAutoWindow = Class(Hint)
 
-function HintAutoWindow:_constructor(...)
-   Hint._constructor(self, ...)
+function HintAutoWindow:initialize(...)
+   Hint.initialize(self, ...)
 
    if type(self.config.position) == 'string' then
       self.config.position = vim.split(self.config.position, '-')

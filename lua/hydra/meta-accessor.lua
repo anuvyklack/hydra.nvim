@@ -16,7 +16,7 @@ local Class = require('hydra.class')
 local ma = Class()
 
 ---@param augroup_name string
-function ma:_constructor(augroup_name)
+function ma:initialize(augroup_name)
    self._augroup_name = augroup_name
    self._augroup_id = vim.api.nvim_create_augroup(augroup_name, { clear = true })
    self.original = {}

@@ -11,7 +11,7 @@ local Class = require('hydra.class')
 local Hint = Class()
 
 ---@param hydra Hydra
-function Hint:_constructor(hydra)
+function Hint:initialize(hydra)
    self.hydra_name = hydra.name
    self.hydra_color = hydra.config.color
    self.heads = hydra.heads_spec

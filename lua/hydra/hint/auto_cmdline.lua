@@ -7,8 +7,8 @@ local strdisplaywidth = vim.fn.strdisplaywidth
 local HintAutoCmdline = Class(Hint)
 
 ---@param hydra Hydra
-function HintAutoCmdline:_constructor(hydra)
-   Hint._constructor(self, hydra)
+function HintAutoCmdline:initialize(hydra)
+   Hint.initialize(self, hydra)
    self.o = hydra.options.o
    self.height = 1
 end

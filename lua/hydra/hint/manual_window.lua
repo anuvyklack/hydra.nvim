@@ -11,8 +11,8 @@ local HintManualWindow = Class(HintAutoWindow)
 
 ---@param hydra Hydra
 ---@param hint string
-function HintManualWindow:_constructor(hydra, hint)
-   HintAutoWindow._constructor(self, hydra)
+function HintManualWindow:initialize(hydra, hint)
+   HintAutoWindow.initialize(self, hydra)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {

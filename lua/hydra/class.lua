@@ -10,8 +10,8 @@ local function Class(parent)
 
    function meta_class:__call(...)
       local obj = setmetatable({}, class)
-      if type(class._constructor ) == 'function' then
-         return obj, obj:_constructor(...)
+      if type(class.initialize ) == 'function' then
+         return obj, obj:initialize(...)
       else
          return obj
       end

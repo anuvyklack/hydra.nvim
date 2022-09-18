@@ -10,8 +10,8 @@ local HintManualCmdline = Class(HintAutoCmdline)
 
 ---@param hydra Hydra
 ---@param hint string
-function HintManualCmdline:_constructor(hydra, hint)
-   HintAutoCmdline._constructor(self, hydra)
+function HintManualCmdline:initialize(hydra, hint)
+   HintAutoCmdline.initialize(self, hydra)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {

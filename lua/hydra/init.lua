@@ -37,7 +37,7 @@ local default_config = {
 }
 
 ---@param input table
-function Hydra:_constructor(input)
+function Hydra:initialize(input)
    do -- validate parameters
       vim.validate({
          name = { input.name, 'string', true },

@@ -6,8 +6,8 @@ local Hint = require('hydra.hint.hint')
 local HintStatusLine = Class(Hint)
 
 ---@param hydra Hydra
-function HintStatusLine:_constructor(hydra)
-   Hint._constructor(self, hydra)
+function HintStatusLine:initialize(hydra)
+   Hint.initialize(self, hydra)
    self.meta_accessors = hydra.options
 end
 
@@ -56,8 +56,8 @@ end
 ---@field config nil
 local HintStatusLineMute = Class(HintStatusLine)
 
-function HintStatusLineMute:_constructor(...)
-   HintStatusLine._constructor(self, ...)
+function HintStatusLineMute:initialize(...)
+   HintStatusLine.initialize(self, ...)
 end
 
 ---@param return_value boolean Return statusline string or not?
