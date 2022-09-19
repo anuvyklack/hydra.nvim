@@ -1,6 +1,6 @@
 ---@param parent table?
 ---@return table
-local function Class(parent)
+local function class(parent)
    local class = {}
    class.__index = class
    -- class.Super = parent
@@ -20,4 +20,4 @@ local function Class(parent)
    return setmetatable(class, meta_class)
 end
 
-return Class
+return class

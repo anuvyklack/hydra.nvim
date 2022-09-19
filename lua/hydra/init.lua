@@ -1,4 +1,4 @@
-local Class = require('hydra.class')
+local class = require('hydra.class')
 local hint = require('hydra.hint')
 local options = require('hydra.meta-accessor')
 local util = require('hydra.util')
@@ -18,7 +18,7 @@ _G.Hydra = nil
 ---@field heads_spec table<string, hydra.HeadSpec>
 ---@field options hydra.MetaAccessor
 ---@field plug_wait string
-local Hydra = Class()
+local Hydra = class()
 
 ---@type hydra.Config
 local default_config = {

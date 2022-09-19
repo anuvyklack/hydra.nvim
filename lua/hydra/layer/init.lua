@@ -1,4 +1,4 @@
-local Class = require('hydra.class')
+local class = require('hydra.class')
 local options = require('hydra.meta-accessor')
 local util = require('hydra.util')
 local termcodes = util.termcodes
@@ -17,7 +17,7 @@ _G.active_keymap_layer = nil
 ---@field options hydra.MetaAccessor
 ---@field timer uv.Timer | nil
 ---@field saved_keymaps table
-local Layer = Class()
+local Layer = class()
 
 ---@class hydra.layer.Config
 ---@field debug? boolean

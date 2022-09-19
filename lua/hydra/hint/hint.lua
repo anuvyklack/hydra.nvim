@@ -1,4 +1,4 @@
-local Class = require('hydra.class')
+local class = require('hydra.class')
 
 ---@class hydra.Hint
 ---@field hydra_name? string
@@ -8,7 +8,7 @@ local Class = require('hydra.class')
 ---@field close function
 ---@field update function | nil
 ---@field _debug boolean
-local Hint = Class()
+local Hint = class()
 
 ---@param hydra Hydra
 function Hint:initialize(hydra)
