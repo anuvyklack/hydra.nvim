@@ -394,7 +394,7 @@ hint.
 
     Show hydras name or `HYDRA:` label at the beginning of an auto-generated hint.
 
-  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua))  
+  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua))  
 
     Table where keys are function names and values are functions them self. Each
     function should return string. This functions can be required from `hint` with
@@ -518,7 +518,7 @@ you can require this function from the `hint` wrap its name (key in the table) w
 will be shown. And later this function will be called every time when hydra head will be
 pressed and the hint will be updated with the function result string. Some functions are
 already built-in, you can find them in
-[this file](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua).
+[this file](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua).
 You may submit or request some others which you think may be useful.
 The using of this feature is shown in [options hydra](https://github.com/anuvyklack/hydra.nvim/wiki/Vim-Options).
 
