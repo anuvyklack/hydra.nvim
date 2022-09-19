@@ -64,6 +64,7 @@ function Hint:debug(...)
    end
 end
 
+---Virtual method
 function Hint:close() end
 
 return Hint
