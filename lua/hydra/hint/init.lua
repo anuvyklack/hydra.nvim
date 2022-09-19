@@ -1,8 +1,15 @@
-local HintAutoCmdline = require('hydra.hint.auto_cmdline')
-local HintManualCmdline = require('hydra.hint.manual_cmdline')
-local HintManualWindow = require('hydra.hint.manual_window')
-local HintAutoWindow = require('hydra.hint.auto_window')
-local HintStatusLine, HintStatusLineMute = unpack(require('hydra.hint.statusline'))
+local cmdline = require('hydra.hint.cmdline')
+local window = require('hydra.hint.window')
+local statusline = require('hydra.hint.statusline')
+
+local HintAutoCmdline = cmdline.HintAutoCmdline
+local HintManualCmdline = cmdline.HintManualCmdline
+
+local HintAutoWindow = window.HintAutoWindow
+local HintManualWindow = window.HintManualWindow
+
+local HintStatusLine = statusline.HintStatusLine
+local HintStatusLineMute = statusline.HintStatusLineMute
 
 ---@param hydra Hydra
 ---@param config hydra.hint.Config | false
@@ -22,7 +29,7 @@ local function make_hint(hydra, config, hint)
    elseif config.type == 'window' then
       return HintAutoWindow(hydra)
    end
-   error('wrong hint type')
+   error('Wrong hint type')
 end
 
 return make_hint

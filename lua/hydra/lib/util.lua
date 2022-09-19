@@ -8,6 +8,7 @@ function util.warn(msg)
 end
 
 local id = 0
+
 ---Generate ID
 ---@return integer
 function util.generate_id()
@@ -151,19 +152,6 @@ function util.split_string(text)
    r[#r+1] = text
    return r
 end
-
--- ---@param input table<integer, string[]>
--- function util.echo(input)
---    local msg = {}
---    local text, hl
---    for _, chunk in ipairs(input) do
---       text = string.format('echon "%s"', chunk[1])
---       hl = string.format('echohl %s', chunk[2] or 'None')
---       table.insert(msg, hl)
---       table.insert(msg, text)
---    end
---    msg = table.concat(msg, ' | ')
--- end
 
 ---Merge input config into default
 ---@param default hydra.Config

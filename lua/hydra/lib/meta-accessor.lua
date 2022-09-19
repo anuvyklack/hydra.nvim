@@ -1,4 +1,4 @@
-local Class = require('hydra.class')
+local class = require('hydra.lib.class')
 
 ---@class hydra.MetaAccessor.original
 ---@field o table<string, any>
@@ -13,7 +13,7 @@ local Class = require('hydra.class')
 ---@field bo MetaAccessor
 ---@field wo MetaAccessor
 ---@field original hydra.MetaAccessor.original
-local ma = Class()
+local ma = class()
 
 ---@param augroup_name string
 function ma:initialize(augroup_name)

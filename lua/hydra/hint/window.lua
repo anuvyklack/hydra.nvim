@@ -1,13 +1,150 @@
-local Class = require('hydra.class')
-local HintAutoWindow = require('hydra.hint.auto_window')
-local vim_options = require('hydra.hint.vim_options')
+local class = require('hydra.lib.class')
+local api = vim.api
+local Hint = require('hydra.hint.hint')
+local api_wrappers = require('hydra.lib.api-wrappers')
+local Window = api_wrappers.Window
+local Buffer = api_wrappers.Buffer
+local autocmd = api.nvim_create_autocmd
+local vim_options = require('hydra.hint.vim-options')
+local M = {}
+
+--------------------------------------------------------------------------------
+
+---@class hydra.hint.AutoWindow : hydra.Hint
+---@field augroup integer
+---@field namespace integer
+---@field buf hydra.api.Buffer | nil
+---@field win hydra.api.Window | nil
+---@field update nil
+local HintAutoWindow = class(Hint)
+
+function HintAutoWindow:initialize(...)
+   Hint.initialize(self, ...)
+
+   if type(self.config.position) == 'string' then
+      self.config.position = vim.split(self.config.position, '-')
+   end
+
+   self.augroup = api.nvim_create_augroup('hydra.hint', { clear = false })
+   self.namespace = api.nvim_create_namespace('hydra.hint.window')
+
+   autocmd('VimResized', { group = self.augroup,
+      callback = function() self.win_config = nil end,
+      desc = 'update Hydra hint window position',
+   })
+
+   autocmd('OptionSet', { group = self.augroup,
+      pattern = 'cmdheight',
+      callback = function() self.win_config = nil end,
+      desc = 'update Hydra hint window position',
+   })
+end
+
+function HintAutoWindow:_make_buffer()
+   ---@type hydra.api.Buffer
+   local buffer = Buffer(api.nvim_create_buf(false, true))
+   self.buf = buffer
+
+   local hint = { ' ' } ---@type string[]
+
+   if self.config.show_name then
+      hint[#hint+1] = (self.hydra_name or 'HYDRA')..': '
+   end
+
+   local heads = self:_swap_head_with_index()
+   for _, head in ipairs(heads) do
+      if head.desc ~= false then
+         hint[#hint+1] = string.format('_%s_', head.head)
+         -- line[#line+1] = string.format('[_%s_]', head.head)
+         local desc = head.desc
+         if desc then
+            desc = string.format(': %s, ', desc)
+         else
+            desc = ', '
+         end
+         hint[#hint+1] = desc
+      end
+   end
+   ---@diagnostic disable
+   hint = table.concat(hint)
+   hint = hint:gsub(', $', '')
+   ---@diagnostic enable
+   buffer:set_lines(0, 1, false, { hint })
+
+   -- Add highlight to buffer
+   local start, stop, head = 0, 0, nil
+   while start do
+      start, stop, head = hint:find('_(.-)_', stop + 1)
+      if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
+      if start then
+         local color = self.heads[head].color
+         buffer:add_highlight(self.namespace, 'Hydra'..color, 0, start, stop)
+      end
+   end
+
+   buffer.bo.filetype = 'hydra_hint'
+   buffer.bo.modifiable = false
+end
+
+function HintAutoWindow:_make_win_config()
+   self.win_config = {
+      relative = 'editor',
+      anchor = 'SW',
+      row = vim.o.lines - vim.o.cmdheight - 1 - self.config.offset,
+      col = 1,
+      width  = vim.o.columns,
+      height = 1,
+      style = 'minimal',
+      border = self.config.border,
+      focusable = false,
+      noautocmd = true,
+   }
+end
+
+function HintAutoWindow:show()
+   if not self.buf then self:_make_buffer() end
+   if not self.win_config then self:_make_win_config() end
+
+   vim.o.eventignore = 'all' -- turn off autocommands
+
+   local winid = api.nvim_open_win(self.buf.id, false, self.win_config)
+   local win = Window(winid) ---@type hydra.api.Window
+   self.win = win
+
+   win.wo.winhighlight ='NormalFloat:HydraHint'
+   win.wo.conceallevel = 3
+   win.wo.foldenable = false
+   win.wo.wrap = false
+
+   vim.o.eventignore = nil -- turn on autocommands
+
+   autocmd('TabEnter', { group = self.augroup,
+      callback = function()
+         if self.win:is_valid() then
+            self.win:close()
+         end
+         self:show()
+      end
+   })
+end
+
+function HintAutoWindow:close()
+   if self.win and self.win:is_valid() then
+      self.win:close()
+   end
+   self.win = nil
+
+   api.nvim_clear_autocmds({ group = self.augroup })
+end
+
+--------------------------------------------------------------------------------
 
 ---@class hydra.hint.ManualWindow : hydra.hint.AutoWindow
 ---@field hint string[]
----@field bufnr integer | nil
+---@field buf hydra.api.Buffer | nil
 ---@field win_width integer
 ---@field need_to_update boolean
-local HintManualWindow = Class(HintAutoWindow)
+local HintManualWindow = class(HintAutoWindow)
 
 ---@param hydra Hydra
 ---@param hint string
@@ -27,9 +164,11 @@ function HintManualWindow:initialize(hydra, hint)
 end
 
 function HintManualWindow:_make_buffer()
-   if self.bufnr then return end
+   if self.buf then return end
 
-   self.bufnr = vim.api.nvim_create_buf(false, true)
+   local bufnr = vim.api.nvim_create_buf(false, true)
+   local buffer = Buffer(bufnr)
+   self.buf = buffer
 
    ---@type string[]
    local hint = vim.deepcopy(self.hint)
@@ -67,8 +206,8 @@ function HintManualWindow:_make_buffer()
 
    self.win_height = #hint
 
-   local line_count = vim.api.nvim_buf_line_count(self.bufnr)
-   vim.api.nvim_buf_set_lines(self.bufnr, 0, line_count, false, hint)
+   local line_count = buffer:line_count()
+   buffer:set_lines(0, line_count, false, hint)
 
    for n, line in ipairs(hint) do
       local start, stop, head = 0, 0, nil
@@ -80,8 +219,7 @@ function HintManualWindow:_make_buffer()
                error(string.format('[Hydra] docsting error, head "%s" does not exist', head))
             end
             local color = heads[head].color
-            vim.api.nvim_buf_add_highlight(
-               self.bufnr, self.namespace, 'Hydra'..color, n-1, start, stop-1)
+            buffer:add_highlight(self.namespace, 'Hydra'..color, n-1, start, stop-1)
             heads[head] = nil
          end
       end
@@ -119,7 +257,7 @@ function HintManualWindow:_make_buffer()
       local len = vim.fn.strdisplaywidth(line:gsub('[_^]', '')) --[[@as integer]]
       if len > self.win_width then self.win_width = len end
 
-      vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, false, { '', line })
+      buffer:set_lines(-1, -1, false, { '', line })
       self.win_height = self.win_height + 2
 
       local start, stop, head = 0, 0, nil
@@ -127,14 +265,13 @@ function HintManualWindow:_make_buffer()
          start, stop, head = line:find('_(.-)_', stop + 1)
          if start then
             local color = self.heads[head].color
-            vim.api.nvim_buf_add_highlight(
-               self.bufnr, self.namespace, 'Hydra'..color, self.win_height - 1, start, stop - 1)
+            buffer:add_highlight(self.namespace, 'Hydra'..color, self.win_height - 1, start, stop - 1)
          end
       end
    end
 
-   vim.bo[self.bufnr].filetype = 'hydra_hint'
-   vim.bo[self.bufnr].modifiable = false
+   buffer.bo.filetype = 'hydra_hint'
+   buffer.bo.modifiable = false
 end
 
 function HintManualWindow:_make_win_config()
@@ -192,17 +329,17 @@ function HintManualWindow:update()
 
    if not self.need_to_update then return end
 
-   local old_bufnr = self.bufnr --[[@as integer]]
-   self.bufnr = nil
+   local old_buffer = self.buf
+   self.buf = nil
    self:_make_buffer()
 
-   vim.api.nvim_win_set_buf(self.winid, self.bufnr)
-   vim.api.nvim_buf_delete(old_bufnr, {})
+   self.win:set_buf(self.buf)
+   if old_buffer then old_buffer:delete() end
 
    self:_make_win_config()
    local win_config = vim.deepcopy(self.win_config)
    win_config.noautocmd = nil
-   vim.api.nvim_win_set_config(self.winid, win_config)
+   self.win:set_config(win_config)
 end
 
 function HintManualWindow:close()
@@ -210,9 +347,13 @@ function HintManualWindow:close()
 
    if self.need_to_update then
       self.win_config = nil
-      vim.api.nvim_buf_delete(self.bufnr, {})
-      self.bufnr = nil
+      self.buf:delete()
+      self.buf = nil
    end
 end
 
-return HintManualWindow
+--------------------------------------------------------------------------------
+
+M.HintAutoWindow = HintAutoWindow
+M.HintManualWindow = HintManualWindow
+return M

@@ -1,9 +1,10 @@
-local Class = require('hydra.class')
+local class = require('hydra.lib.class')
 local Hint = require('hydra.hint.hint')
+local M = {}
 
 ---@class hydra.hint.StatusLine : hydra.Hint
 ---@field update nil
-local HintStatusLine = Class(Hint)
+local HintStatusLine = class(Hint)
 
 ---@param hydra Hydra
 function HintStatusLine:initialize(hydra)
@@ -54,7 +55,7 @@ end
 
 ---@class HydraHintStatusLineMute : hydra.hint.StatusLine
 ---@field config nil
-local HintStatusLineMute = Class(HintStatusLine)
+local HintStatusLineMute = class(HintStatusLine)
 
 function HintStatusLineMute:initialize(...)
    HintStatusLine.initialize(self, ...)
@@ -69,5 +70,8 @@ function HintStatusLineMute:show(return_value)
    return self.statusline
 end
 
+--------------------------------------------------------------------------------
 
-return { HintStatusLine, HintStatusLineMute }
+M.intStatusLine = HintStatusLine
+M.HintStatusLineMute = HintStatusLineMute
+return M

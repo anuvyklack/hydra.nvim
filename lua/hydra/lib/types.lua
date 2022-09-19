@@ -58,7 +58,11 @@
 
 ---@class MetaAccessor
 
----@class uv.Timer
+---@class hydra.EchoChunk Chunk for vim.api.nvim_echo function
+---@field [1] string Text
+---@field [2] string | nil Highlight group name
+
+---@class luv.Timer
 ---@field start function
 ---@field again function
 ---@field close function

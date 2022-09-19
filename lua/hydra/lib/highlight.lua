@@ -1,5 +1,5 @@
 local M = {}
-local once = require('hydra.util').once
+local once = require('hydra.lib.util').once
 
 function M.get_hl(name)
    if vim.o.termguicolors then
