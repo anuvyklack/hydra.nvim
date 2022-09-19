@@ -1,4 +1,4 @@
-local class = require('hydra.class')
+local class = require('hydra.lib.class')
 
 ---@class hydra.MetaAccessor.original
 ---@field o table<string, any>

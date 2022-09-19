@@ -1,4 +1,4 @@
-local class = require('hydra.class')
+local class = require('hydra.lib.class')
 local Hint = require('hydra.hint.hint')
 local M = {}
 

@@ -1,7 +1,7 @@
-local class = require('hydra.class')
+local class = require('hydra.lib.class')
 local hint = require('hydra.hint')
-local options = require('hydra.meta-accessor')
-local util = require('hydra.util')
+local options = require('hydra.lib.meta-accessor')
+local util = require('hydra.lib.util')
 local termcodes = util.termcodes
 
 ---Currently active hydra

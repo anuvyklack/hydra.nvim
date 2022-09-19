@@ -1,4 +1,4 @@
-local class = require('hydra.class')
+local class = require('hydra.lib.class')
 
 ---@class hydra.Hint
 ---@field hydra_name? string

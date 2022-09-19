@@ -1,6 +1,6 @@
-local class = require('hydra.class')
-local options = require('hydra.meta-accessor')
-local util = require('hydra.util')
+local class = require('hydra.lib.class')
+local options = require('hydra.lib.meta-accessor')
+local util = require('hydra.lib.util')
 local termcodes = util.termcodes
 
 local augroup_name = 'Layer'
