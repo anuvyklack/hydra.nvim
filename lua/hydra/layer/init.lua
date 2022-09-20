@@ -238,8 +238,12 @@ end
 
 ---Activate layer
 function Layer:activate()
-   if _G.active_keymap_layer and _G.active_keymap_layer.id == self.id then
-      return
+   if _G.active_keymap_layer then
+      if _G.active_keymap_layer.id ~= self.id then
+         _G.active_keymap_layer:exit()
+      else
+         return
+      end
    end
    _G.active_keymap_layer = self
    self.active = true
