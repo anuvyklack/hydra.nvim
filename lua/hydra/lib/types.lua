@@ -56,7 +56,7 @@
 ---@field silent? boolean
 ---@field desc? string
 
----@class MetaAccessor
+---@class hydra.MetaAccessor
 
 ---@class hydra.EchoChunk Chunk for vim.api.nvim_echo function
 ---@field [1] string Text

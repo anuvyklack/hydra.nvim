@@ -132,14 +132,14 @@ function Layer:initialize(input)
    if self.config.on_exit then
 
       ---@param name string
-      ---@return MetaAccessor
+      ---@return hydra.MetaAccessor
       local function disable_meta_accessor(name)
          local function disable()
             util.warn(string.format(
                '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
                name))
          end
-         return self.options.make_meta_accessor(disable, disable)
+         return self.options:make_meta_accessor(disable, disable)
       end
 
       local env = vim.tbl_deep_extend('force', getfenv(), {
@@ -177,7 +177,7 @@ function Layer:initialize(input)
       for mode, keymaps in pairs(self.enter_keymaps) do
          for lhs, map in pairs(keymaps) do
             local rhs, opts = map[1], map[2] or {}
-            local keymap = self._make_keymap_function(mode, rhs, opts)
+            local keymap = self:_make_keymap_function(mode, rhs, opts)
 
             vim.keymap.set(mode, lhs, function()
                keymap()
@@ -196,7 +196,7 @@ function Layer:initialize(input)
    for mode, maps in pairs(self.layer_keymaps) do
       for lhs, map in pairs(maps) do
          local rhs, opts = map[1], map[2] or {}
-         local keymap = self._make_keymap_function(mode, rhs, opts)
+         local keymap = self:_make_keymap_function(mode, rhs, opts)
 
          self.layer_keymaps[mode][lhs] = {
             function()
@@ -218,7 +218,7 @@ function Layer:initialize(input)
       for mode, keymaps in pairs(exit_keymaps) do
          for lhs, map in pairs(keymaps) do
             local rhs, opts = map[1], map[2] or {}
-            local keymap = self._make_keymap_function(mode, rhs, opts)
+            local keymap = self:_make_keymap_function(mode, rhs, opts)
             self.layer_keymaps[mode] = self.layer_keymaps[mode] or {}
             self.layer_keymaps[mode][lhs] = {
                function()
@@ -321,7 +321,7 @@ end
 ---@param rhs string | function
 ---@param opts? KeymapOpts
 ---@return function
-function Layer._make_keymap_function(mode, rhs, opts)
+function Layer:_make_keymap_function(mode, rhs, opts)
    opts = opts or {}
    local nop = {
       ['<nop>'] = true,
@@ -343,22 +343,22 @@ function Layer._make_keymap_function(mode, rhs, opts)
          vim.fn.winrestview(win_view)
       end
 
-      local f = {} -- keys to feed
+      local keys
       if opts.expr then
          if type(rhs) == 'function' then
-            f.keys = rhs()
+            keys = rhs()
          elseif type(rhs) == 'string' then
-            f.keys = vim.api.nvim_eval(rhs)
+            keys = api.nvim_eval(rhs)
          end
       elseif type(rhs) == 'function' then
          rhs()
          return
       elseif type(rhs) == 'string' then
-         f.keys = rhs
+         keys = rhs
       end
-      f.keys = util.termcodes(f.keys)
-      f.mode = opts.remap and 'im' or 'in'
-      vim.api.nvim_feedkeys(f.keys, f.mode, true)
+      keys = termcodes(keys)
+      local fmode = opts.remap and 'im' or 'in'
+      api.nvim_feedkeys(keys, fmode, true)
    end
 end
 

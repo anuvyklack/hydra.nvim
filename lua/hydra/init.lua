@@ -218,14 +218,14 @@ function Hydra:initialize(input)
       if self.config.on_exit then
 
          ---@param name string
-         ---@return MetaAccessor
+         ---@return hydra.MetaAccessor
          local function disable_meta_accessor(name)
             local function disable()
                util.warn(string.format(
                   '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
                   name))
             end
-            return self.options.make_meta_accessor(disable, disable)
+            return self.options:make_meta_accessor(disable, disable)
          end
 
          local env = vim.tbl_deep_extend('force', getfenv(), {
