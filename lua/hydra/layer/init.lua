@@ -2,9 +2,9 @@ local class = require('hydra.lib.class')
 local options = require('hydra.lib.meta-accessor')
 local util = require('hydra.lib.util')
 local termcodes = util.termcodes
-
-local augroup_name = 'Layer'
-local augroup_id = vim.api.nvim_create_augroup(augroup_name, { clear = true })
+local api = vim.api
+local augroup = api.nvim_create_augroup('keymap-layer', { clear = true })
+local autocmd = api.nvim_create_autocmd
 
 ---Currently active layer
 _G.active_keymap_layer = nil
@@ -78,7 +78,7 @@ function Layer:initialize(input)
       self.config.timeout = vim.o.timeoutlen --[[@as integer]]
    end
    if self.config.buffer == true then
-      self.config.buffer = vim.api.nvim_get_current_buf()
+      self.config.buffer = api.nvim_get_current_buf()
    end
    if type(self.config.on_enter) == 'function' then
       self.config.on_enter = { self.config.on_enter }
@@ -250,18 +250,17 @@ function Layer:activate()
       end
    end
 
-   local bufnr = self.config.buffer or vim.api.nvim_get_current_buf()
+   local bufnr = self.config.buffer or api.nvim_get_current_buf()
    self:_setup_keymaps(bufnr)
 
    self:_timer()
 
    -- Apply Layer keybindings on every visited buffer while Layer is active.
    if not self.config.buffer then
-      vim.api.nvim_create_autocmd('BufEnter', {
-         group = augroup_id,
+      autocmd('BufEnter', { group = augroup,
          desc = 'setup Layer keymaps',
-         callback = function(input)
-            self:_setup_keymaps(input.buf)
+         callback = function(ctx) -- context
+            self:_setup_keymaps(ctx.buf)
          end
       })
    end
@@ -285,7 +284,7 @@ function Layer:exit()
    self:_restore_keymaps()
    self.options:restore()
 
-   vim.api.nvim_clear_autocmds({ group = augroup_id })
+   api.nvim_clear_autocmds({ group = augroup })
 
    self.active = false
    _G.active_keymap_layer = nil
@@ -336,10 +335,8 @@ function Layer:_make_keymap_function(mode, rhs, opts)
       if mode == 'o' then -- operator-pending mode
          local win_view = vim.fn.winsaveview()
          local operator = vim.v.operator
-         vim.api.nvim_feedkeys(util.termcodes('<Esc>'), 'n', false)
-         -- local m = opts.remap and 'xm' or 'xn'
-         -- vim.api.nvim_feedkeys(operator, m, false)
-         vim.api.nvim_feedkeys(operator, 'x', false)
+         api.nvim_feedkeys(termcodes('<Esc>'), 'n', false)
+         api.nvim_feedkeys(operator, 'x', false)
          vim.fn.winrestview(win_view)
       end
 
@@ -390,7 +387,7 @@ function Layer:_save_keymaps(bufnr)
 
    for mode, keymaps in pairs(self.layer_keymaps) do
       self.saved_keymaps[bufnr][mode] = {}
-      for _, map in ipairs(vim.api.nvim_buf_get_keymap(bufnr, mode)) do
+      for _, map in ipairs(api.nvim_buf_get_keymap(bufnr, mode)) do
          map.lhs = termcodes(map.lhs)
          if keymaps[map.lhs] then
             self.saved_keymaps[bufnr][mode][map.lhs] = {
@@ -415,10 +412,10 @@ function Layer:_restore_keymaps()
    for mode, keymaps in pairs(self.layer_keymaps) do
       for lhs, _ in pairs(keymaps) do
          for bufnr, _ in pairs(self.saved_keymaps) do
-            if vim.api.nvim_buf_is_valid(bufnr) then
+            if api.nvim_buf_is_valid(bufnr) then
                local map = self.saved_keymaps[bufnr][mode][lhs]
                if map then
-                  vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, map.rhs, {
+                  api.nvim_buf_set_keymap(bufnr, mode, lhs, map.rhs, {
                      expr = map.expr,
                      callback = map.callback,
                      noremap = map.noremap,
