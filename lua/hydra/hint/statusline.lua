@@ -72,6 +72,6 @@ end
 
 --------------------------------------------------------------------------------
 
-M.intStatusLine = HintStatusLine
+M.HintStatusLine = HintStatusLine
 M.HintStatusLineMute = HintStatusLineMute
 return M
