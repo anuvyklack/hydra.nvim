@@ -34,18 +34,18 @@ function HintStatusLine:_make_statusline()
          insert(statusline, desc)
       end
    end
-   statusline = table.concat(statusline)
+   statusline = table.concat(statusline) ---@diagnostic disable-line
    self.statusline = statusline:gsub(', $', '')
 end
 
 function HintStatusLine:show()
    if not self.statusline then self:_make_statusline() end
 
-   local statusline = { ' ', self.statusline }
+   local statusline = { ' ', self.statusline } ---@type string[]
    if self.config.show_name then
       table.insert(statusline, 2, (self.hydra_name or 'HYDRA')..': ')
    end
-   statusline = table.concat(statusline)
+   statusline = table.concat(statusline) ---@diagnostic disable-line
 
    local wo = self.meta_accessors.wo
    wo.statusline = statusline
@@ -53,7 +53,8 @@ end
 
 --------------------------------------------------------------------------------
 
----@class HydraHintStatusLineMute : hydra.hint.StatusLine
+---Statusline hint that won't be shown. It is used in "hydra.statusline" module.
+---@class hydra.hint.StatusLineMute : hydra.hint.StatusLine
 ---@field config nil
 local HintStatusLineMute = class(HintStatusLine)
 
@@ -61,13 +62,13 @@ function HintStatusLineMute:initialize(...)
    HintStatusLine.initialize(self, ...)
 end
 
----@param return_value boolean Return statusline string or not?
+---@param do_return? boolean Do return statusline hint string?
 ---@return string?
-function HintStatusLineMute:show(return_value)
-   if not return_value then return end
-
-   if not self.statusline then self:_make_statusline() end
-   return self.statusline
+function HintStatusLineMute:show(do_return)
+   if do_return then
+      if not self.statusline then self:_make_statusline() end
+      return self.statusline
+   end
 end
 
 --------------------------------------------------------------------------------
