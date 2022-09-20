@@ -278,8 +278,11 @@ function Hydra:_setup_hydra_keymaps()
             keys = rhs
          end
          keys = termcodes(keys)
-         mode = opts.remap and 'mx' or 'nx'
-         vim.api.nvim_feedkeys(keys, mode, true)
+         mode = opts.remap and 'm' or 'n'
+         if not opts.exit then
+            mode = mode..'x'
+         end
+         api.nvim_feedkeys(keys, mode, false)
       end
 
       -- Define enter mapping
