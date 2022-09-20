@@ -318,7 +318,7 @@ end
 ---the keymap content will be executed.
 ---@param mode string
 ---@param rhs string | function
----@param opts? KeymapOpts
+---@param opts? hydra.NvimKeymapOpts
 ---@return function
 function Layer:_make_keymap_function(mode, rhs, opts)
    opts = opts or {}

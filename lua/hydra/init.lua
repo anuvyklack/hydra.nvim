@@ -375,7 +375,7 @@ function Hydra:_setup_pink_hydra()
          local rhs = map[1] or '<Nop>'
          local opts = map[2] or {} ---@type hydra.HeadOpts
 
-         ---@type KeymapOpts
+         ---@type hydra.NvimKeymapOpts
          local o = {
             desc = opts.desc,
             nowait = opts.nowait,

@@ -48,7 +48,7 @@
 ---@field remap? boolean
 ---@field desc? string
 
----@class KeymapOpts
+---@class hydra.NvimKeymapOpts
 ---@field buffer? integer | true
 ---@field expr? boolean
 ---@field remap? boolean
