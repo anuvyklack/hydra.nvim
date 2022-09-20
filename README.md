@@ -177,7 +177,7 @@ Each of the fields of this table is described in details below.
 The name of the hydra. Not necessary, used only in auto-generated hint.
 
 ### `mode`
-`string | string[]`  
+`string | string[]`\
 default: `"n"`
 
 Mode or modes in which this hydra will exist. Same format as `vim.keymap.set()` accepts.
@@ -201,8 +201,9 @@ customized for each head particularly.  Below is a list of all options.
 ---
 
 #### `exit`
-`boolean`  
-default: `true`
+`boolean`\
+default: `true`\
+parent table: `config`
 
 The `exit` option (heads can override it) defines what will happen after executing head's
 command:
@@ -212,8 +213,9 @@ command:
 - `exit = true` means that the hydra state will stop.
 
 #### `foreign_keys`
-`"warn" | "run" | nil`  
-default: `nil`
+`"warn" | "run" | nil`\
+default: `nil`\
+parent table: `config`
 
 The `foreign_keys` option belongs to the body and decides what to do when a key is pressed
 that doesn't belong to any head:
@@ -225,8 +227,9 @@ that doesn't belong to any head:
 - `foreign_keys = "run"` will not stop the hydra state, and try to run the foreign key.
 
 #### `color`
-`"red" | "amaranth" | "teal" | "pink"`  
-default: `"red"`
+`"red" | "amaranth" | "teal" | "pink"`\
+default: `"red"`\
+parent table: `config`
 
 The `color` option is a shortcut for both `exit` and `foreign_keys` options and aggregates
 them in the following way:
@@ -296,14 +299,16 @@ Pink hydra is of a different nature. It is a [key-layer](https://github.com/anuv
 inside, so all keys except overwritten are work as usual. Even `[count]` prefixes.
 
 #### `buffer`
-`true | number`
+`true | number`\
+parent table: `config`
 
 Define hydra only for particular buffer. If `true` — the current buffer will be used.
 
 #### `invoke_on_body`
 
-`boolean`  
-default: `false`
+`boolean`\
+default: `false`\
+parent table: `config`
 
 By default, to invoke the hydra you need to press in sequence keys corresponds to `body` +
 any non-private `head` (about private heads see later).
@@ -312,6 +317,7 @@ This option allows you to summon hydra by pressing only the `body` keys.
 <!-- When `true` invoke hydra when only `body` keys have been pressed. -->
 
 #### `on_enter` and `on_exit`
+parent table: `config`
 
 Functions that will be called on enter and on exit hydra.
 
@@ -338,11 +344,13 @@ config = {
 ```
 
 #### `on_key`
+parent table: `config`
 
 Function that will be called **after** every hydra head.
 
 #### `timeout`
 `boolean | number`
+parent table: `config`
 
 The `timeout` option set a timer after which the hydra will be automatically
 disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help timeoutlen`)
@@ -354,6 +362,7 @@ disabled. Calling any head will refresh the timer. (see `:help timeout`, `:help 
 
 #### `hint`
 `table | false`
+parent table: `config`
 
 If `false` — doesn't show hint. Or a table with settings for manually- or auto-generated
 hint.
@@ -367,7 +376,7 @@ hint.
     - `"statusline"` — show auto-generated hint in the statusline.  If hint is passed,
       then this value will be ignored and `"window"` will be used.
 
-  - **`position`**   `string`   (default: `"bottom"`)  
+  - **`position`**   `string`   (default: `"bottom"`)\
     (valid when `type` is `"window"`)
 
     Set the position of the hint. Should be one from the next table:
@@ -380,21 +389,21 @@ hint.
      bottom-left |  bottom  | bottom-right
     ```
 
-  - **`offset`**  `number`   (default: `0`)  
+  - **`offset`**  `number`   (default: `0`)\
     (valid when `type` is `"window"`)
 
     The offset from the nearest editor border.
 
-  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)  
+  - **`border`**   `"single" | "double" | "rounded" | "solid" | "shadow" | "none" | string[]`  (default: `"none"`)\
     (valid when `type` is `"window"`)
 
     The border of the hint window. See `:help nvim_open_win()`
 
-  - **`show_name`**   `boolean`   (default: `true`)  
+  - **`show_name`**   `boolean`   (default: `true`)
 
     Show hydras name or `HYDRA:` label at the beginning of an auto-generated hint.
 
-  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua))  
+  - **`funcs`**   `table<string, fun():string>`   ([built-in functions](https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua))
 
     Table where keys are function names and values are functions them self. Each
     function should return string. This functions can be required from `hint` with
@@ -562,10 +571,10 @@ require('hydra.keymap-util')
   ```
   cmd(vsplit)  ->  "<Cmd>vsplit<CR>"
   ```
-  **param:**  `command` : `string`  
+  **param:**  `command` : `string`\
   **return:**  `string`
 
-- `pcmd(try_cmd, catch?, catch_cmd?)`  
+- `pcmd(try_cmd, catch?, catch_cmd?)`
 
   Protected `cmd`. Examples explain better:
   ```
@@ -580,7 +589,7 @@ require('hydra.keymap-util')
   ```
   See: `:help exception-handling`
 
-  **params:**  
+  **params:**
 
   * `try_cmd` : `string`
   * `catch` : `string` (optional) — String of the form `E` + some digits, like `E12` or `E444`.

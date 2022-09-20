@@ -68,16 +68,16 @@ DESCRIPTION FOR POETS                                *hydra-description_for_poet
 Once you summon the Hydra through the prefixed binding (the body + any one head),
 all heads can be called in succession with only a short extension.
 
-The Hydra is vanquished once Hercules, any binding that isn't the Hydra's
-head, arrives.  Note that Hercules, besides vanquishing the Hydra, will still
-serve his original purpose, calling his proper command.  This makes the Hydra
-very seamless.
+The Hydra is vanquished once Hercules, any binding that isn't the Hydra's head,
+arrives.  Note that Hercules, besides vanquishing the Hydra, will still serve
+his original purpose, calling his proper command.  This makes the Hydra very
+seamless.
 
 --------------------------------------------------------------------------------
 DESCRIPTION FOR PRAGMATICS                      *hydra-description_for_pragmatics*
 
-Imagine you want to change the size of your current window. Vim allows you to
-do it with `<C-w>+`, `<C-w>-`, `<C-w><`, `<C-w>>` bindings. So, you have to press
+Imagine you want to change the size of your current window. Vim allows you to do
+it with `<C-w>+`, `<C-w>-`, `<C-w><`, `<C-w>>` bindings. So, you have to press
 `<C-w>+<C-w>+<C-w>+<C-w><<C-w><<C-w><...` as many times as you need (I know about
 count prefixes, but I was never fun of them).  Hydra allows you to press `<C-w>`
 just once and then get access to any `<C-w>...` bindings without pressing the
@@ -85,8 +85,8 @@ prefix again: `<C-w>+++++--<<<<`.  Or buffer side scrolling: instead of
 `zlzlzlzlzlzl...` press `zlllllllllhhhl` to freely scroll buffer left and right.
 Any key other than bind to a hydra will stop hydra state and do what they should.
 
-Hydra also allows assigning a custom hint to such group of keybindings to
-allows you an easy glance at what you can do.
+Hydra also allows assigning a custom hint to such group of keybindings to allows
+you an easy glance at what you can do.
 >
 --------------------------------------------------------------------------------
 SAMPLE HYDRAS							   *hydra-samples*
@@ -117,61 +117,63 @@ need next plugins:
 - Gitsigns	https://github.com/lewis6991/gitsigns.nvim
 - Neogit	https://github.com/TimUntersberger/neogit
 >
-    local Hydra = require('hydra')
-    local gitsigns = require('gitsigns')
-    local hint = [[
-    _J_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
-    _K_: prev hunk   _u_: undo stage hunk   _p_: preview hunk   _B_: blame show full
-    ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
-    ^
-    ^ ^              _<Enter>_: Neogit              _q_: exit
-    ]]
-    Hydra({
-    hint = hint,
-    config = {
-      color = 'pink',
-      invoke_on_body = true,
-      hint = {
-         position = 'bottom',
-         border = 'rounded'
-      },
-      on_enter = function()
-         vim.bo.modifiable = false
-         gitsigns.toggle_signs(true)
-         gitsigns.toggle_linehl(true)
-      end,
-      on_exit = function()
-         gitsigns.toggle_signs(false)
-         gitsigns.toggle_linehl(false)
-         gitsigns.toggle_deleted(false)
-         vim.cmd 'echo' -- clear the echo area
-      end
-    },
-    mode = {'n','x'},
-    body = '<leader>g',
-    heads = {
-      { 'J', function()
-            if vim.wo.diff then return ']c' end
-            vim.schedule(function() gitsigns.next_hunk() end)
-            return '<Ignore>'
-         end, { expr = true } },
-      { 'K', function()
-            if vim.wo.diff then return '[c' end
-            vim.schedule(function() gitsigns.prev_hunk() end)
-            return '<Ignore>'
-         end, { expr = true } },
-      { 's', ':Gitsigns stage_hunk<CR>', { silent = true } },
-      { 'u', gitsigns.undo_stage_hunk },
-      { 'S', gitsigns.stage_buffer },
-      { 'p', gitsigns.preview_hunk },
-      { 'd', gitsigns.toggle_deleted, { nowait = true } },
-      { 'b', gitsigns.blame_line },
-      { 'B', function() gitsigns.blame_line{ full = true } end },
-      { '/', gitsigns.show, { exit = true } }, -- show the base of the file
-      { '<Enter>', '<cmd>Neogit<CR>', { exit = true } },
-      { 'q', nil, { exit = true, nowait = true } },
-    }
-    })
+ local Hydra = require('hydra')
+ local gitsigns = require('gitsigns')
+
+ local hint = [[
+ _J_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
+ _K_: prev hunk   _u_: undo stage hunk   _p_: preview hunk   _B_: blame show full
+ ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
+ ^
+ ^ ^              _<Enter>_: Neogit              _q_: exit
+ ]]
+
+ Hydra({
+ hint = hint,
+ config = {
+   color = 'pink',
+   invoke_on_body = true,
+   hint = {
+      position = 'bottom',
+      border = 'rounded'
+   },
+   on_enter = function()
+      vim.bo.modifiable = false
+      gitsigns.toggle_signs(true)
+      gitsigns.toggle_linehl(true)
+   end,
+   on_exit = function()
+      gitsigns.toggle_signs(false)
+      gitsigns.toggle_linehl(false)
+      gitsigns.toggle_deleted(false)
+      vim.cmd 'echo' -- clear the echo area
+   end
+ },
+ mode = {'n','x'},
+ body = '<leader>g',
+ heads = {
+   { 'J', function()
+         if vim.wo.diff then return ']c' end
+         vim.schedule(function() gitsigns.next_hunk() end)
+         return '<Ignore>'
+      end, { expr = true } },
+   { 'K', function()
+         if vim.wo.diff then return '[c' end
+         vim.schedule(function() gitsigns.prev_hunk() end)
+         return '<Ignore>'
+      end, { expr = true } },
+   { 's', ':Gitsigns stage_hunk<CR>', { silent = true } },
+   { 'u', gitsigns.undo_stage_hunk },
+   { 'S', gitsigns.stage_buffer },
+   { 'p', gitsigns.preview_hunk },
+   { 'd', gitsigns.toggle_deleted, { nowait = true } },
+   { 'b', gitsigns.blame_line },
+   { 'B', function() gitsigns.blame_line{ full = true } end },
+   { '/', gitsigns.show, { exit = true } }, -- show the base of the file
+   { '<Enter>', '<cmd>Neogit<CR>', { exit = true } },
+   { 'q', nil, { exit = true, nowait = true } },
+ }
+ })
 <
 
 MORE HYDRAS
@@ -212,8 +214,8 @@ mode			string | string[]
 body			string (optional)
 	To summon the hydra you need to press in sequence keys corresponds to
 	`body` + any `head`.  For example, if body is `z` and heads are: `a`, `b`, `c`, you
-	can invoke hydra with any of the `za`, `zb`, `zc` keybindings.
-	Hydra without body can only be summoned through `Hydra:activate()` method.
+	can invoke hydra with any of the `za`, `zb`, `zc` keybindings.  Hydra without
+	body can only be summoned through `Hydra:activate()` method.
 
 								  *hydra-config*
 config			table
@@ -224,8 +226,9 @@ config			table
 							     *hydra-config.exit*
 	exit			boolean
 				default: `false`
-		The `exit` option (heads can override it) defines what will
-		happen after executing head's command:
+				parent table: `config`
+		The `exit` option (heads can override it) defines what will happen
+		after executing head's command:
 
 		`exit = false`
 			means that the hydra state will continue you'll still
@@ -237,13 +240,14 @@ config			table
 						     *hydra-config.foreign_keys*
 	foreign_keys		`"warn"` | `"run"` | `nil`
 				default: `nil`
-		The `foreign_keys` option belongs to the body and decides what
-		to do when a key is pressed that doesn't belong to any head:
+				parent table: `config`
+		The `foreign_keys` option belongs to the body and decides what to
+		do when a key is pressed that doesn't belong to any head:
 
 		`foreign_keys = nil`
-			means that the hydra state will stop and the foreign
-			key will do whatever it was supposed to do if there
-			was no hydra state.
+			means that the hydra state will stop and the foreign key
+			will do whatever it was supposed to do if there was no
+			hydra state.
 
 		`foreign_keys = "warn"`
 			will not stop the hydra state, but instead will issue
@@ -253,8 +257,9 @@ config			table
 			will not stop the hydra state, and try to run the
 			foreign key.
 							    *hydra-config.color*
-	color		`"red"` | `"amaranth"` | `"teal"` | `"pink"`
+	color			`"red"` | `"amaranth"` | `"teal"` | `"pink"`
 				default: `"red"`
+				parent table: `config`
 		The `color` option is a shortcut for both `exit` and `foreign_keys`
 		options and aggregates them in the following way:
 >
@@ -270,32 +275,32 @@ config			table
 		hydra keys that you're about to press: the keys will be
 		highlighted with the appropriate color.
 
-		Note: The `exit` and `foreign_keys` options are higher priority
-		than `color` option and can't be overridden by it.  I.e, if
-		manually set values of `exit` and `foreign_keys` options contradict
-		the color option value, then exactly thees values will be taken
-		into account and for `color` option the matching value will be
+		Note: The `exit` and `foreign_keys` options are higher priority than
+		`color` option and can't be overridden by it.  I.e, if manually
+		set values of `exit` and `foreign_keys` options contradict the color
+		option value, then exactly thees values will be taken into
+		account and for `color` option the matching value will be
 		automatically set
 
 								  *hydra-colors*
 		More about colors concept~
 
-		Each hydra head has a basic associated color, red or blue,
-		that determines whether or not the hydra will continue after
-		the head is called:
+		Each hydra head has a basic associated color, red or blue, that
+		determines whether or not the hydra will continue after the head
+		is called:
 
 		- red head will execute the command and continue the state
 		- blue head will execute the command and stop the state
 
-		They may have a reddish or a bluish face that isn't exactly
-		red or blue, but that's what they are underneath.
+		They may have a reddish or a bluish face that isn't exactly red
+		or blue, but that's what they are underneath.
 
 		Overall, the hydra body can have one of five variants of the
-		basic colors: amaranth, teal, pink, red, blue.  They
-		(according to basic color) determines the default behavior of
-		all the heads; and determines what happens when a key that is
-		not associated to a head is pressed. The following table
-		summarizes the effects of the different colors.
+		basic colors: amaranth, teal, pink, red, blue.  They (according
+		to basic color) determines the default behavior of all the
+		heads; and determines what happens when a key that is not
+		associated to a head is pressed. The following table summarizes
+		the effects of the different colors.
 >
 	| Body Color | Basic color | Executing NON-HEAD    | Executing HEAD |
 	|------------|-------------|-----------------------|----------------|
@@ -323,9 +328,9 @@ config			table
 							 *hydra-blue* *hydra-teal*
 		Blue and teal colors	~
 
-		A blue hydra has little sense in Vim since it works exactly
-		like standard Vim multi-key keybinding with addition you can
-		add a custom hint to it.
+		A blue hydra has little sense in Vim since it works exactly like
+		standard Vim multi-key keybinding with addition you can add
+		a custom hint to it.
 
 		A teal hydra working the same way, except it blocks all other
 		keys which are not hydra heads, what can be useful.
@@ -340,12 +345,14 @@ config			table
 
 							   *hydra-config.buffer*
 	buffer			`true` | number
+				parent table: `config`
 		Define hydra only for particular buffer.  If `true` — the current
 		buffer will be used.
 
 						   *hydra-config.invoke_on_body*
 	invoke_on_body		boolean
 				default: `false`
+				parent table: `config`
 		By default, to invoke the hydra you need to press in sequence
 		keys corresponds to `body` + any non-private `head` (about private
 		heads see later).  This option allows you to summon hydra by
@@ -354,6 +361,7 @@ config			table
 				    *hydra-config.on_enter* *hydra-config.on_exit*
 	on_enter
 	on_exit			function
+				parent table: `config`
 		Functions that will be called on enter and on exit hydra.
 
 							  *hydra-meta-accessors*
@@ -365,9 +373,9 @@ config			table
 		are redefined to work the way you think they should.  If you
 		want some option value to be temporary changed while Hydra is
 		active, you need just set it with one of this meta-accessor in
-		the `on_enter` function.  And that's it. No need to set it
-		back in `on_exit` function. All other will be done automatically
-		in the backstage.
+		the `on_enter` function.  And that's it. No need to set it back in
+		`on_exit` function. All other will be done automatically in the
+		backstage.
 >
 		config = {
 		   on_enter = function()
@@ -383,14 +391,16 @@ config			table
 <
 							   *hydra-config.on_key*
 	on_key			function
+				parent table: `config`
 		Function that will be called after every hydra head.
 
 							  *hydra-config.timeout*
 	timeout			boolean | number
 				default: `false`
+				parent table: `config`
 		The `timeout` option set a timer after which the hydra will be
-		automatically disabled. Calling any head will refresh the
-		timer (see |timeout| and |timeoutlen)|.
+		automatically disabled. Calling any head will refresh the timer
+		(see |timeout| and |timeoutlen)|.
 
 		`timeout = true`
 			enable timer and set its to `'timeoutlen'` option value;
@@ -404,12 +414,14 @@ config			table
 
 							     *hydra-config.hint*
 	hint			table | `false`
+				parent table: `config`
 		If `false` — doesn't show hint, or a table with settings for
 		manually- or auto-generated |hydra-hint|.
 
 		• type			`"window"` | `"cmdline"` | `"statusline"`
-					default: if |hydra-hint| passed => `"window"`
-						 else `"cmdline"`
+					default: if |hydra-hint| passed then
+					         `"window"` else `"cmdline"`
+					parent table: `config.hint`
 			• `"window"`
 				Show hint in a floating window.
 
@@ -424,6 +436,7 @@ config			table
 		• position		string
 					default: `"bottom"`
 					valid when `type` is `"window"`
+					parent table: `config.hint`
 			Set the position of the hint. Should be one from the
 			next table:
 >
@@ -436,6 +449,7 @@ config			table
 		• offset		number
 					default: `0`
 					valid when `type` is `"window"`
+					parent table: `config.hint`
 			The offset from the nearest editor border.
 
 		• border	`"single"` | `"double"` | `"rounded"` |
@@ -446,11 +460,13 @@ config			table
 
 		• show_name		boolean
 					default: `true`
+					parent table: `config.hint`
 			Show a hydras name or `HYDRA:` label at the beginning of
 			auto-generated hint.
 
 		• funcs			table<string, fun():string>
-					default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
+					default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua
+					parent table: `config.hint`
 			Table where keys are function names and values are
 			functions them self. Each function should return string.
 			This functions can be required from `hint` with
@@ -462,70 +478,70 @@ heads			table[]
 >
 	    { {lhs}, {rhs}, {opts} }
 <
-	which is pretty-much compares to the signature of the
-	|vim.keymap.set()| function.
-
+	which is pretty-much compares to the signature of the |vim.keymap.set()|
+	function.
 								*hydra-head.lhs*
 	{lhs}			string
 		The {lhs} (left-hand-side) of the mapping, i.e the keys you
 		press to call an action.
-
 								*hydra-head.rhs*
 	{rhs}			string | function | `nil`
-		Right-hand-side of the mapping.  Can be `nil` which means just
-		do nothing, but if you also want to pass {opts} table, you
-		need to pass `nil` explicitly.
-
+		Right-hand-side of the mapping.  Can be `nil` which means just do
+		nothing, but if you also want to pass {opts} table, you need to
+		pass `nil` explicitly.
 							       *hydra-head.opts*
 	{opts}			table
 		A table with head options to tune its behavior.
 
 							    *hydra-head.private*
 		private			boolean
+					parent table: {opts}
 			When the hydra hides (not active), the private head
 			does not bounce outside.  I.e., the private head is
 			unreachable outside of the hydra state.
 
 							       *hydra-head.exit*
 		exit			boolean
+					parent table: {opts}
 			Stop the hydra state after executing a command
 			corresponds to such head.
 
 			Note: All exit heads are also private.
 
-			Note: If no `exit` head is specified, the `<Esc>` key will be
-			set by default.
+			Note: If no `exit` head is specified, the `<Esc>` key will
+			be set by default.
 
-			Note: Remind that `rhs` can be `nil`, so the pure escape head
-			looks like this:
->
+			Note: Remind that `rhs` can be `nil`, so the pure escape
+			head looks like this: >
 			    { '<Esc>', nil, { exit = true } }
 <
 							     *hydra-head.on_key*
 		on_key			boolean
+					parent table: {opts}
 			If `false` |hydra-config.on_key| function won't be executed
 			after this head.
-
 							       *hydra-head.desc*
 		desc			string | `false`
-			The description that will be shown in the
-			auto-generated part of the hint.  If `false` won't be
-			show in the hint window
+					parent table: {opts}
+			The description that will be shown in the auto-generated
+			part of the hint.  If `false` won't be show in the hint
+			window.
 
 					     *hydra-head.expr* *hydra-head.silent*
 		expr
 		silent			boolean
+					parent table: {opts}
 			Built-in map arguments. See:
 			- |:map-<expr>|
 			- |:map-<silent>|
-
 							     *hydra-head.nowait*
 		nowait			boolean
+					parent table: {opts}
 			Only relevant for `pink` hydra. For all others will be
 			skipped. The `pink` hydra is a layer
 			https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer
-			inside, and Layer binds its keymaps buffer local,
-			which makes flag `nowait` available. See |:map-<nowait>|
+			inside, and Layer binds its keymaps buffer local, which
+			makes flag `nowait` available. See |:map-<nowait>|
 
 			This allows, for example bind exit key:
 >
@@ -543,6 +559,7 @@ heads			table[]
 
 							       *hydra-head.mode*
 		mode			string | string[]
+					parent table: {opts}
 			Overwrite `mode` field for this particular head.  Only
 			relevant for `pink` hydra, for all others will be ignored.
 
@@ -550,24 +567,23 @@ heads			table[]
 hint			multiline string
 	You can create any hint you wish.
 
-	To highlight a key, just wrap it in underscores. Note that the key
-	must belong to one of the heads.  The key will be highlighted with the
-	color that is appropriate to the behavior of the key, i.e.  if the key
-	will make the hydra exit, the color will be blue.
+	To highlight a key, just wrap it in underscores. Note that the key must
+	belong to one of the heads.  The key will be highlighted with the color
+	that is appropriate to the behavior of the key, i.e.  if the key will
+	make the hydra exit, the color will be blue.
 
 	To insert an empty character, use `^` char. It won't be rendered.
 	The only use of it is to have your code aligned as nicely as the result.
 
 	You can also create a Lua functions which returns a string and place it
-	in `config.hint.funcs` (see |hydra-config.hint|) table under some
-	key which will be used as a function name. Than you can require this
-	function from the |hint| wrap its name (key in the table) with `%{...}`.
-	The result of the function will be inserted in that place in the hint
-	when it will be shown. And later this function will be called every time
-	when hydra head will be pressed and the hint will be updated with the
-	function result string. Some functions are already built-in, you can
-	find them in next file:
-	https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim_options.lua
+	in `config.hint.funcs` (see |hydra-config.hint|) table under some key which
+	will be used as a function name. Than you can require this function from
+	the |hint| wrap its name (key in the table) with `%{...}`.  The result of
+	the function will be inserted in that place in the hint when it will be
+	shown. And later this function will be called every time when hydra head
+	will be pressed and the hint will be updated with the function result
+	string. Some functions are already built-in, you can find them in next
+	file: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua
 	You may submit or request some others which you think may be useful.
 	The using of this feature is shown here:
 	https://github.com/anuvyklack/hydra.nvim/wiki/Vim-Options
@@ -578,8 +594,8 @@ hint			multiline string
 	will be skipped.
 
 	Every head that won't be found in the manually created hint, will be
-	automatically added at the bottom of the hint window according to
-	rules of auto generated hint.
+	automatically added at the bottom of the hint window according to rules
+	of auto generated hint.
 
 --------------------------------------------------------------------------------
 PUBLIC METHODS							 *hydra-methods*
@@ -594,14 +610,14 @@ HIGHLIGHT						       *hydra-highlight*
 
 Hydra defines next highlight groups with their defaults:
 
-`HydraRed`        #ff5733
-`HydraBlue`       #5ebcf6
-`HydraAmaranth`   #ff1757
-`HydraTeal`       #00a1a1
-`HydraPink`       #ff55de
+HydraRed	#ff5733
+HydraBlue	#5ebcf6
+HydraAmaranth	#ff1757
+HydraTeal	#00a1a1
+HydraPink	#ff55de
 
-`HydraHint`	link NormalFloat
-		Defines the fore- and background of the hint window.
+HydraHint	linked to |hl-NormalFloat|.  Defines the fore- and background of
+		the hint window.
 
 --------------------------------------------------------------------------------
 KEYMAP UTILITY FUNCTIONS				     *hydra-keymap_util*
@@ -612,13 +628,11 @@ Utility functions to use in keymaps. Can be required from the next table:
 <
 
 cmd({command})		fun(string): string
-		Get a string and wrap it in `<Cmd>`, `<CR>`.  Example:
->
+		Get a string and wrap it in `<Cmd>`, `<CR>`.  Example: >
 		    cmd(vsplit)  ->  "<Cmd>vsplit<CR>"
 
-
 pcmd({try_cmd}, {catch}?, {catch_cmd}?)
-				fun(string, string?, string?): string
+			fun(string, string?, string?): string
 		Protected `cmd`. Examples explain better:
 >
     pcmd("wincmd k", "E11", "close")
@@ -633,14 +647,15 @@ pcmd({try_cmd}, {catch}?, {catch_cmd}?)
 		See: |exception-handling|
 
 		Parameters:~
-			{try_cmd}	string
-			{catch}		string (optional)
-				String of the form `E` + some digits, like `E12` or `E444`.
-			{catch_cmd}	string (optional)
+		    {try_cmd}	    string
+
+		    {catch}	    string (optional)
+			    String of the form `E` + some digits, like `E12` or `E444`.
+
+		    {catch_cmd}	    string (optional)
 
 		Return:~
-			string
-
+		    string
 
 --------------------------------------------------------------------------------
 STATUSLINE						      *hydra-statusline*
@@ -648,13 +663,13 @@ STATUSLINE						      *hydra-statusline*
 In the statusline module `require('hydra.statusline')` there are functions that
 can help you to integrate Hydra in your statusline:
 
-is_active()	returns `true` if there is an active hydra;
+is_active()	Returns `true` if there is an active hydra;
 
-get_name()	get the name of an active hydra if it has it;
+get_name()	Get the name of an active hydra if it has it;
 
-get_color()	get the color of an active hydra;
+get_color()	Get the color of an active hydra;
 
-get_hint()	get an active hydra's statusline hint. Return not `nil` only when
+get_hint()	Get an active hydra's statusline hint. Return not `nil` only when
 		|hydra-config.hint| is set to `false.`
 
 --------------------------------------------------------------------------------
@@ -665,4 +680,4 @@ But supported in pink hydra since it is a layer:
 https://github.com/anuvyklack/hydra.nvim/tree/master/lua/hydra/layer
 
 --------------------------------------------------------------------------------
- vim:tw=80:isk=!-~,^*,^\|,^\":ts=8:noet:ft=help:norl:
+ vim:ft=help:tw=80:isk=!-~,^*,^\|,^\":ts=8:noet:norl:
