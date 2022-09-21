@@ -558,6 +558,7 @@ HydraBorder  link  FloatBorder
 ```
 
 `HydraHint` defines the fore- and background of the hint window.
+`HydraBorder` defines the fore- and background of the border.
 
 ## Keymap utility functions
 
