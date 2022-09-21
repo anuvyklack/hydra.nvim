@@ -70,6 +70,11 @@ function Buffer:initialize(bufnr)
    })
 end
 
+---@return boolean
+function Buffer:is_loaded()
+   return api.nvim_buf_is_loaded(self.id)
+end
+
 ---@param name string
 function Buffer:set_option(name, value)
    return api.nvim_buf_set_option(self.id, name, value)

@@ -103,7 +103,9 @@ function HintAutoWindow:_make_win_config()
 end
 
 function HintAutoWindow:show()
-   if not self.buf then self:_make_buffer() end
+   if not self.buffer or not self.buffer:is_loaded() then
+      self:_make_buffer()
+   end
    if not self.win_config then self:_make_win_config() end
 
    vim.o.eventignore = 'all' -- turn off autocommands
