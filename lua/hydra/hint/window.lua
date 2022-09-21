@@ -115,7 +115,7 @@ function HintAutoWindow:show()
    local win = Window(winid)
    self.win = win
 
-   win.wo.winhighlight ='NormalFloat:HydraHint'
+   win.wo.winhighlight ='NormalFloat:HydraHint,FloatBorder:HydraBorder'
    win.wo.conceallevel = 3
    win.wo.foldenable = false
    win.wo.wrap = false

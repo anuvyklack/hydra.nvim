@@ -548,12 +548,13 @@ at the bottom of the hint window according to rules of auto generated hint.
 Hydra defines next highlight groups with their defaults:
 
 ```
-HydraRed         #FF5733
-HydraBlue        #5EBCF6
-HydraAmaranth    #ff1757
-HydraTeal        #00a1a1
-HydraPink        #ff55de
-HydraHint  link  NormalFloat
+HydraRed           #FF5733
+HydraBlue          #5EBCF6
+HydraAmaranth      #ff1757
+HydraTeal          #00a1a1
+HydraPink          #ff55de
+HydraHint    link  NormalFloat
+HydraBorder  link  FloatBorder
 ```
 
 `HydraHint` defines the fore- and background of the hint window.
