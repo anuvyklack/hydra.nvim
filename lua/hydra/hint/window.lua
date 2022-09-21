@@ -6,6 +6,8 @@ local Hint = require('hydra.hint.hint')
 local Window = api_wrappers.Window
 local Buffer = api_wrappers.Buffer
 local vim_options = require('hydra.hint.vim-options')
+local strdisplaywidth = vim.fn.strdisplaywidth
+local namespace = api.nvim_create_namespace('hydra.hint.window')
 local augroup = api.nvim_create_augroup('hydra.hint', { clear = true })
 local M = {}
 
@@ -13,7 +15,7 @@ local M = {}
 
 ---@class hydra.hint.AutoWindow : hydra.Hint
 ---@field namespace integer
----@field buf hydra.api.Buffer | nil
+---@field buffer hydra.api.Buffer | nil
 ---@field win hydra.api.Window | nil
 ---@field update nil
 local HintAutoWindow = class(Hint)
@@ -40,7 +42,7 @@ end
 function HintAutoWindow:_make_buffer()
    ---@type hydra.api.Buffer
    local buffer = Buffer(api.nvim_create_buf(false, true))
-   self.buf = buffer
+   self.buffer = buffer
 
    local hint = { ' ' } ---@type string[]
 
@@ -62,11 +64,13 @@ function HintAutoWindow:_make_buffer()
          hint[#hint+1] = desc
       end
    end
+
    ---@diagnostic disable
    hint = table.concat(hint)
    hint = hint:gsub(', $', '')
    ---@diagnostic enable
-   buffer:set_lines(0, 1, false, { hint })
+
+   buffer:set_lines(0, 1, { hint })
 
    -- Add highlight to buffer
    local start, stop, head = 0, 0, nil
@@ -75,7 +79,7 @@ function HintAutoWindow:_make_buffer()
       if head and vim.startswith(head, [[\]]) then head = head:sub(2) end
       if start then
          local color = self.heads[head].color
-         buffer:add_highlight(self.namespace, 'Hydra'..color, 0, start, stop)
+         buffer:add_highlight(namespace, 'Hydra'..color, 0, start, stop)
       end
    end
 
@@ -104,8 +108,9 @@ function HintAutoWindow:show()
 
    vim.o.eventignore = 'all' -- turn off autocommands
 
-   local winid = api.nvim_open_win(self.buf.id, false, self.win_config)
-   local win = Window(winid) ---@type hydra.api.Window
+   local winid = api.nvim_open_win(self.buffer.id, false, self.win_config)
+   ---@type hydra.api.Window
+   local win = Window(winid)
    self.win = win
 
    win.wo.winhighlight ='NormalFloat:HydraHint'
@@ -136,7 +141,7 @@ end
 
 ---@class hydra.hint.ManualWindow : hydra.hint.AutoWindow
 ---@field hint string[]
----@field buf hydra.api.Buffer | nil
+---@field buffer hydra.api.Buffer | nil
 ---@field win_width integer
 ---@field need_to_update boolean
 local HintManualWindow = class(HintAutoWindow)
@@ -159,11 +164,11 @@ function HintManualWindow:initialize(hydra, hint)
 end
 
 function HintManualWindow:_make_buffer()
-   if self.buf then return end
+   local bufnr = api.nvim_create_buf(false, true)
 
-   local bufnr = vim.api.nvim_create_buf(false, true)
+   ---@type hydra.api.Buffer
    local buffer = Buffer(bufnr)
-   self.buf = buffer
+   self.buffer = buffer
 
    ---@type string[]
    local hint = vim.deepcopy(self.hint)
@@ -193,7 +198,7 @@ function HintManualWindow:_make_buffer()
          end
       end
 
-      local visible_line_len = vim.fn.strdisplaywidth(line:gsub('[_^]', '')) --[[@as integer]]
+      local visible_line_len = strdisplaywidth(line:gsub('[_^]', ''))
       if visible_line_len > self.win_width then
          self.win_width = visible_line_len
       end
@@ -202,7 +207,7 @@ function HintManualWindow:_make_buffer()
    self.win_height = #hint
 
    local line_count = buffer:line_count()
-   buffer:set_lines(0, line_count, false, hint)
+   buffer:set_lines(0, line_count, hint)
 
    for n, line in ipairs(hint) do
       local start, stop, head = 0, 0, nil
@@ -214,7 +219,7 @@ function HintManualWindow:_make_buffer()
                error(string.format('[Hydra] docsting error, head "%s" does not exist', head))
             end
             local color = heads[head].color
-            buffer:add_highlight(self.namespace, 'Hydra'..color, n-1, start, stop-1)
+            buffer:add_highlight(namespace, 'Hydra'..color, n-1, start, stop-1)
             heads[head] = nil
          end
       end
@@ -235,7 +240,7 @@ function HintManualWindow:_make_buffer()
          return heads[a].index < heads[b].index
       end)
 
-      local line = {}
+      local line = {} ---@type string[]
       for _, head in pairs(heads_lhs) do
          line[#line+1] = string.format('_%s_', head)
          -- line[#line+1] = string.format('[_%s_]', head)
@@ -247,20 +252,20 @@ function HintManualWindow:_make_buffer()
          end
          line[#line+1] = desc
       end
-      line = ' '..table.concat(line):gsub(', $', '')
+      line = ' '..table.concat(line):gsub(', $', '') ---@diagnostic disable-line
 
-      local len = vim.fn.strdisplaywidth(line:gsub('[_^]', '')) --[[@as integer]]
+      local len = strdisplaywidth(line:gsub('[_^]', ''))
       if len > self.win_width then self.win_width = len end
 
-      buffer:set_lines(-1, -1, false, { '', line })
+      buffer:set_lines(-1, -1, { '', line })
       self.win_height = self.win_height + 2
 
       local start, stop, head = 0, 0, nil
       while start do
-         start, stop, head = line:find('_(.-)_', stop + 1)
+         start, stop, head = line:find('_(.-)_', stop+1)
          if start then
             local color = self.heads[head].color
-            buffer:add_highlight(self.namespace, 'Hydra'..color, self.win_height - 1, start, stop - 1)
+            buffer:add_highlight(namespace, 'Hydra'..color, self.win_height-1, start, stop-1)
          end
       end
    end
@@ -324,11 +329,11 @@ function HintManualWindow:update()
 
    if not self.need_to_update then return end
 
-   local old_buffer = self.buf
-   self.buf = nil
+   local old_buffer = self.buffer
+   self.buffer = nil
    self:_make_buffer()
 
-   self.win:set_buf(self.buf)
+   self.win:set_buffer(self.buffer)
    if old_buffer then old_buffer:delete() end
 
    self:_make_win_config()
@@ -342,8 +347,8 @@ function HintManualWindow:close()
 
    if self.need_to_update then
       self.win_config = nil
-      self.buf:delete()
-      self.buf = nil
+      self.buffer:delete()
+      self.buffer = nil
    end
 end
 

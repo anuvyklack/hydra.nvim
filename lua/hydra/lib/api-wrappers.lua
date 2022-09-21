@@ -29,9 +29,9 @@ function Window:is_valid()
    return api.nvim_win_is_valid(self.id)
 end
 
----@param buf hydra.api.Buffer
-function Window:set_buf(buf)
-   vim.api.nvim_win_set_buf(self.id, buf.id)
+---@param buffer hydra.api.Buffer
+function Window:set_buffer(buffer)
+   vim.api.nvim_win_set_buf(self.id, buffer.id)
 end
 
 ---@param name string
@@ -83,12 +83,11 @@ end
 
 ---@param start integer First line index
 ---@param end_ integer Last line index, exclusive.
----@param strict_indexing boolean Whether out-of-bounds should be an error.
 ---@param lines string[] Array of lines to set.
-function Buffer:set_lines(start, end_, strict_indexing, lines)
-   api.nvim_buf_set_lines(self.id, start, end_, strict_indexing, lines)
+---@param strict_indexing? boolean Whether out-of-bounds should be an error.
+function Buffer:set_lines(start, end_, lines, strict_indexing)
+   api.nvim_buf_set_lines(self.id, start, end_, strict_indexing or false, lines)
 end
-
 
 ---@param ns_id integer Namespace to use or -1 for ungrouped highlight.
 ---@param hl_group string Name of the highlight group to use.
