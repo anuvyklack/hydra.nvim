@@ -278,10 +278,7 @@ function Hydra:_setup_hydra_keymaps()
             keys = rhs
          end
          keys = termcodes(keys)
-         mode = opts.remap and 'm' or 'n'
-         if not opts.exit then
-            mode = mode..'x'
-         end
+         mode = (opts.remap and 'm' or 'n')..(opts.exit and 'i' or 'x')
          api.nvim_feedkeys(keys, mode, false)
       end
 
