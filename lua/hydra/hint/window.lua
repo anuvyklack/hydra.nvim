@@ -1,17 +1,17 @@
 local class = require('hydra.lib.class')
 local api = vim.api
-local Hint = require('hydra.hint.hint')
+local autocmd = api.nvim_create_autocmd
 local api_wrappers = require('hydra.lib.api-wrappers')
+local Hint = require('hydra.hint.hint')
 local Window = api_wrappers.Window
 local Buffer = api_wrappers.Buffer
-local autocmd = api.nvim_create_autocmd
 local vim_options = require('hydra.hint.vim-options')
+local augroup = api.nvim_create_augroup('hydra.hint', { clear = true })
 local M = {}
 
 --------------------------------------------------------------------------------
 
 ---@class hydra.hint.AutoWindow : hydra.Hint
----@field augroup integer
 ---@field namespace integer
 ---@field buf hydra.api.Buffer | nil
 ---@field win hydra.api.Window | nil
@@ -25,18 +25,15 @@ function HintAutoWindow:initialize(...)
       self.config.position = vim.split(self.config.position, '-')
    end
 
-   self.augroup = api.nvim_create_augroup('hydra.hint', { clear = false })
-   self.namespace = api.nvim_create_namespace('hydra.hint.window')
-
-   autocmd('VimResized', { group = self.augroup,
-      callback = function() self.win_config = nil end,
+   autocmd('VimResized', { group = augroup,
       desc = 'update Hydra hint window position',
+      callback = function() self.win_config = nil end,
    })
 
-   autocmd('OptionSet', { group = self.augroup,
+   autocmd('OptionSet', { group = augroup,
       pattern = 'cmdheight',
-      callback = function() self.win_config = nil end,
       desc = 'update Hydra hint window position',
+      callback = function() self.win_config = nil end,
    })
 end
 
@@ -118,14 +115,12 @@ function HintAutoWindow:show()
 
    vim.o.eventignore = nil -- turn on autocommands
 
-   autocmd('TabEnter', { group = self.augroup,
-      callback = function()
-         if self.win:is_valid() then
-            self.win:close()
-         end
-         self:show()
+   autocmd('TabEnter', { group = augroup, callback = function()
+      if self.win:is_valid() then
+         self.win:close()
       end
-   })
+      self:show()
+   end })
 end
 
 function HintAutoWindow:close()
@@ -134,7 +129,7 @@ function HintAutoWindow:close()
    end
    self.win = nil
 
-   api.nvim_clear_autocmds({ group = self.augroup })
+   api.nvim_clear_autocmds({ group = augroup })
 end
 
 --------------------------------------------------------------------------------
