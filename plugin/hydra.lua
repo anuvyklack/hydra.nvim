@@ -9,6 +9,7 @@ hl('HydraTeal',     { fg = '#00a1a1', bold = true, default = true })
 hl('HydraPink',     { fg = '#ff55de', bold = true, default = true })
 
 hl('HydraHint', { link = 'NormalFloat', default = true })
+hl('HydraBorder', { link = 'FloatBorder', default = true })
 
 
 -- local ns_id = vim.api.nvim_create_namespace('hydra.plugin')
