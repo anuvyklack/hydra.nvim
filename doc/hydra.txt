@@ -616,8 +616,11 @@ HydraAmaranth	#ff1757
 HydraTeal	#00a1a1
 HydraPink	#ff55de
 
-HydraHint	linked to |hl-NormalFloat|.  Defines the fore- and background of
-		the hint window.
+HydraHint	linked to |hl-NormalFloat|
+		The fore- and background of the hint window.
+
+HydraBorder	linked to `FloatBorder`
+		The fore- and background of the hint window border.
 
 --------------------------------------------------------------------------------
 KEYMAP UTILITY FUNCTIONS				     *hydra-keymap_util*
