@@ -115,7 +115,7 @@ function HintAutoWindow:show()
    local win = Window(winid)
    self.win = win
 
-   win.wo.winhighlight ='NormalFloat:HydraHint,FloatBorder:HydraBorder'
+   win.wo.winhighlight = 'NormalFloat:HydraHint,FloatBorder:HydraBorder'
    win.wo.conceallevel = 3
    win.wo.foldenable = false
    win.wo.wrap = false
@@ -323,11 +323,11 @@ end
 
 function HintManualWindow:update()
    -- All this method is full of HACKs:
-   -- 1. If update buffer, the concealing falls,
-   --    so I have to create the new one and wipe the old one.
-   -- 2. config table for nvim_win_set_config API function can't containing
+   -- 1. If update buffer, the concealing falls, so I have to create the new one
+   --    and wipe the old one.
+   -- 2. "config" table for "nvim_win_set_config" API function can't containes
    --    "noautocmd" key, despite documentation says it is equal to the same
-   --    for nvim_open_win.
+   --    for "nvim_open_win".
 
    if not self.need_to_update then return end
 

@@ -118,7 +118,8 @@ function HintAutoCmdline:leave()
       }
    end
 
-   local message = vim.deepcopy(self.message) ---@type hydra.EchoChunk[]
+   ---@type hydra.EchoChunk[]
+   local message = vim.deepcopy(self.message)
    vim.list_extend(message, line)
 
    self.o.cmdheight = self.height + 1
@@ -153,14 +154,16 @@ function HintManualCmdline:initialize(hydra, hint)
 end
 
 function HintManualCmdline:_make_message()
-   local hint = vim.deepcopy(self.hint) ---@type string[]
+   ---@type string[]
+   local hint = vim.deepcopy(self.hint)
 
    ---@type table<string, hydra.HeadSpec>
    local heads = vim.deepcopy(self.heads)
 
    self.message = {}
 
-   local space, chunks, continue
+   local space, continue
+   local chunks ---@type hydra.EchoChunk[]
    for _, line in ipairs(hint) do
       ---Available screen width for echo message
       ---@type number
