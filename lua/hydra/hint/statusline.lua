@@ -15,7 +15,7 @@ end
 function HintStatusLine:_make_statusline()
    if self.statusline then return end
 
-   require('hydra.lib.highlight').create_statusline_hl_groups()
+   require('hydra.lib.highlight')
 
    local statusline = {}
    local insert = table.insert

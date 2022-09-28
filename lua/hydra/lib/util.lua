@@ -111,18 +111,6 @@ function util.deep_unsetmetatable(tbl)
    end
 end
 
----Create once callback
----@param callback function
----@return function
-function util.once(callback)
-   local done = false
-   return function(...)
-      if done then return end
-      done = true
-      callback(...)
-   end
-end
-
 ---@param func? function
 ---@param new_fn function
 ---@return function
