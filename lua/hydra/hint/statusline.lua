@@ -17,21 +17,17 @@ function HintStatusLine:_make_statusline()
 
    require('hydra.lib.highlight')
 
+   ---@type string[]
    local statusline = {}
-   local insert = table.insert
    local heads = self:_swap_head_with_index()
    for _, head in ipairs(heads) do
       if head.desc ~= false then
-         insert(statusline, string.format('%%#HydraStatusLine%s#', head.color))
-         insert(statusline, head.head)
-         insert(statusline, '%#StatusLine#')
-         local desc = head.desc
-         if desc then
-            desc = string.format(': %s, ', desc)
-         else
-            desc = ', '
-         end
-         insert(statusline, desc)
+         vim.list_extend(statusline, {
+            string.format('%%#HydraStatusLine%s#', head.color),
+            head.head,
+            '%#StatusLine#',
+            head.desc and string.format(': %s, ', head.desc) or ', '
+         })
       end
    end
    statusline = table.concat(statusline) ---@diagnostic disable-line
