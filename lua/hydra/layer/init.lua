@@ -428,7 +428,7 @@ function Layer:_restore_keymaps()
                      nowait = map.nowait
                   })
                else
-                  vim.keymap.del(mode, lhs, { buffer = bufnr })
+                  pcall(vim.keymap.del, mode, lhs, { buffer = bufnr })
                end
             end
          end
