@@ -26,6 +26,9 @@ end
 ---@param keys string
 ---@return string
 function util.termcodes(keys)
+   if vim.fn.has('nvim-0.7.0') then
+       return keys
+   end
    return vim.api.nvim_replace_termcodes(keys, true, true, true) --[[@as string]]
 end
 
