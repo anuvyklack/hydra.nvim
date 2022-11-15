@@ -16,8 +16,7 @@ function util.generate_id()
    return id
 end
 
----Shortcut to `vim.api.nvim_replace_termcodes`
----
+---Shortcut to `vim.api.nvim_replace_termcodes`.
 ---In the output of the `nvim_get_keymap` and `nvim_buf_get_keymap`
 ---functions some keycodes are replaced, for example: `<leader>` and
 ---some are not, like `<Tab>`.  So to avoid this incompatibility better
@@ -26,7 +25,7 @@ end
 ---@param keys string
 ---@return string
 function util.termcodes(keys)
-   return vim.api.nvim_replace_termcodes(keys, true, true, true) --[[@as string]]
+   return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
 ---@param foreign_keys hydra.foreign_keys
@@ -64,6 +63,8 @@ function util.get_config_from_color(color)
       return nil, true
    elseif color == 'red' then
       return nil, false
+   else
+      error('[Hydra] Wrong color!')
    end
 end
 
@@ -76,16 +77,33 @@ function mt.__index(self, subtbl)
    return self[subtbl]
 end
 
+---Return an empty table, in which any nested tables of any level will be
+---created on fly when they will be accessed.
+---Example:
+---```
+---    local t = util.unlimited_depth_table()
+---    t[one][two][three] = 'text'
+---```
+--- you will get
+---```
+---    {
+---       one = {
+---          two = {
+---             three = { 'text' }
+---          }
+---       }
+---    }
+---```
+---but not an error.
 function util.unlimited_depth_table()
    return setmetatable({}, mt)
 end
 
 ---Like `vim.tbl_get` but returns the raw value (got with `rawget` function,
----ignoring  all metatables on the way).
+---ignoring  all metatables on the way). See `:help vim.tbl_get`
 ---@param tbl table | nil
 ---@param ... any keys
 ---@return any
----@see :help vim.tbl_get
 function util.tbl_rawget(tbl, ...)
    if tbl == nil then return nil end
 
