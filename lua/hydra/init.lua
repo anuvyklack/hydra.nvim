@@ -209,7 +209,7 @@ function Hydra:initialize(input)
          -- original table.
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
-         }) --[[@as table]]
+         })
          env.vim.o  = self.options.o
          env.vim.go = self.options.go
          env.vim.bo = self.options.bo
@@ -232,7 +232,7 @@ function Hydra:initialize(input)
 
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
-         }) --[[@as table]]
+         })
          env.vim.o  = disable_meta_accessor('o')
          env.vim.go = disable_meta_accessor('go')
          env.vim.bo = disable_meta_accessor('bo')
