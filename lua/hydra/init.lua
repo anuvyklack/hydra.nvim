@@ -334,139 +334,62 @@ function Hydra:_setup_hydra_keymaps()
 end
 
 function Hydra:_setup_pink_hydra()
-   local Layer = require('hydra.layer')
-
-   local function create_layer_input_in_internal_form()
-      local layer = util.unlimited_depth_table()
-      layer.config = {
-         debug = self.config.debug,
-         buffer = self.config.buffer,
-         timeout = self.config.timeout,
-         on_key = function()
-            if self.hint.update then self.hint:update() end
+   local layer = { enter = {}, layer = {}, exit = {} }
+   layer.config = {
+      debug = self.config.debug,
+      buffer = self.config.buffer,
+      timeout = self.config.timeout,
+      on_key = function()
+         if self.hint.update then self.hint:update() end
+         if self.config.on_key then self.config.on_key() end
+      end,
+      on_enter = {
+         function()
+            _G.Hydra = self
+            self.hint:show()
          end,
-         on_enter = {
-            function()
-               _G.Hydra = self
-               self.hint:show()
-            end,
-            self.config.on_enter
-         },
-         on_exit = {
-            self.config.on_exit,
-            function()
-               self.hint:close()
-               self.options:restore()
-               vim.cmd 'echo'
-               _G.Hydra = nil
-            end
-         }
+         self.config.on_enter
+      },
+      on_exit = {
+         self.config.on_exit,
+         function()
+            self.hint:close()
+            self.options:restore()
+            vim.cmd 'echo'
+            _G.Hydra = nil
+         end
       }
+   }
 
-      self.mode = type(self.mode) == 'table' and self.mode or { self.mode }
-
-      if self.body then
-         self.body = termcodes(self.body)
-
-         if self.config.invoke_on_body then
-            for _, mode in ipairs(self.mode) do
-               layer.enter_keymaps[mode][self.body] = { '<Nop>', {} }
-            end
-         end
-      end
-
-      for head, map in pairs(self.heads) do
-         head = termcodes(head)
-         local rhs = map[1] or '<Nop>'
-         local opts = map[2] or {} ---@type hydra.HeadOpts
-
-         ---@type hydra.NvimKeymapOpts
-         local op = {
-            desc = opts.desc,
-            nowait = opts.nowait,
-            silent = opts.silent
-         }
-
-         for _, mode in ipairs(opts.mode or self.mode) do
-            if self.body
-               and not self.config.invoke_on_body
-               and not opts.exit
-               and not opts.private
-            then
-               layer.enter_keymaps[mode][self.body..head] = { rhs, op }
-            end
-
-            if opts.exit then
-               layer.exit_keymaps[mode][head] = { rhs, op }
-            else
-               layer.layer_keymaps[mode][head] = { rhs, op }
-            end
-         end
-      end
-
-      util.deep_unsetmetatable(layer)
-      return layer
+   if self.config.invoke_on_body then
+      layer.enter[1] = { self.mode, self.body }
    end
 
-   -- local function create_layer_input_in_public_form()
-   --    local layer = { enter = {}, layer = {}, exit = {} }
-   --    layer.config = {
-   --       debug = self.config.debug,
-   --       buffer = self.config.buffer,
-   --       timeout = self.config.timeout,
-   --       on_key = self.hint.update,
-   --       on_enter = {
-   --          function()
-   --             _G.Hydra = self
-   --             self.hint:show()
-   --          end,
-   --          self.config.on_enter
-   --       },
-   --       on_exit = {
-   --          self.config.on_exit,
-   --          function()
-   --             self.hint:close()
-   --             self.options:restore()
-   --             vim.cmd 'echo'
-   --             _G.Hydra = nil
-   --          end
-   --       }
-   --    }
-   --
-   --    if self.config.invoke_on_body then
-   --       layer.enter[1] = { self.mode, self.body }
-   --    end
-   --
-   --    for head, map in pairs(self.heads) do
-   --       head = termcodes(head)
-   --       local rhs  = map[1]
-   --       local opts = map[2] or {} ---@type hydra.HeadOpts
-   --
-   --       ---@type KeymapOpts
-   --       local o = {
-   --          desc = opts.desc,
-   --          nowait = opts.nowait,
-   --          silent = opts.silent
-   --       }
-   --
-   --       local mode = opts.mode or self.mode
-   --
-   --       if not self.config.invoke_on_body and not opts.exit and not opts.private then
-   --          table.insert(layer.enter, { mode, self.body..head, rhs, o })
-   --       end
-   --
-   --       if opts.exit then
-   --          table.insert(layer.exit, { mode, head, rhs, o })
-   --       else
-   --          table.insert(layer.layer, { mode, head, rhs, o })
-   --       end
-   --    end
-   --
-   --    return layer
-   -- end
+   for head, map in pairs(self.heads) do
+      -- head = termcodes(head)
+      local rhs  = map[1]
+      local opts = map[2] or {} ---@type hydra.HeadOpts
 
-   local layer = create_layer_input_in_internal_form()
-   -- local layer = create_layer_input_in_public_form()
+      ---@type hydra.NvimKeymapOpts
+      local o = {
+         desc = opts.desc,
+         nowait = opts.nowait,
+         silent = opts.silent
+      }
+
+      local mode = opts.mode or self.mode
+
+      if not self.config.invoke_on_body
+         and not opts.exit
+         and not opts.private
+      then
+         table.insert(layer.enter, { mode, self.body..head, rhs, o })
+      end
+
+      table.insert(opts.exit and layer.exit or layer.layer, { mode, head, rhs, o })
+   end
+
+   local Layer = require('hydra.layer')
 
    ---@type hydra.Layer
    self.layer = Layer(layer)
