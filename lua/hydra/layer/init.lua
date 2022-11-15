@@ -1,3 +1,40 @@
+--[[
+The Layer class accepts keymaps in the one form, but stores them internally in
+the another.  The `Layer:_normalize_input()` method is responsible for this. It
+allows utilize built-in Lua table properties, and simplifies such things as get
+desired normal mode keybinding without looping through the whole list every time.
+
+   +---------------------------------+-------------------------------------+
+   |              Input              |              Internal               |
+   +---------------------------------+-------------------------------------+
+   |                                 |                                     |
+   |     {mode, lhs, rhs, opts}      |    mode = { lhs = {rhs, opts} }     |
+   |                                 |                                     |
+   +---------------------------------+-------------------------------------+
+   |                                 |                                     |
+   |                                 |    enter_keymaps = {                |
+   |                                 |       n = {                         |
+   |     enter = {                   |          zl = {'zl', {}},           |
+   |        {'n', 'zl', 'zl'},       |          zh = {'zh', {}},           |
+   |        {'n', 'zh', 'zh'},       |          gz = {'<Nop>', {}}         |
+   |        {'n', 'gz'},             |       }                             |
+   |     },                          |    },                               |
+   |     layer = {                   |    layer_keymaps = {                |
+   |        {'n', 'l', 'zl'},        |       n = {                         |
+   |        {'n', 'h', 'zh'},        |          l = {'zl', {}},            |
+   |     },                          |          h = {'zh', {}}             |
+   |     exit = {                    |       }                             |
+   |        {'n', '<Esc>'},          |    },                               |
+   |        {'n', 'q'}               |    exit_keymaps = {                 |
+   |     }                           |       n = {                         |
+   |                                 |          '<Esc>' = {'<Nop>', {}},   |
+   |                                 |          q = {'<Nop>', {}}          |
+   |                                 |       }                             |
+   |                                 |    }                                |
+   |                                 |                                     |
+   +---------------------------------+-------------------------------------+
+--]]
+
 local class = require('hydra.lib.class')
 local options = require('hydra.lib.meta-accessor')
 local util = require('hydra.lib.util')
@@ -15,7 +52,7 @@ _G.active_keymap_layer = nil
 ---@field enter_keymaps table
 ---@field layer_keymaps table
 ---@field options hydra.MetaAccessor
----@field timer luv.Timer | nil
+---@field timer vim.loop.Timer | nil
 ---@field saved_keymaps table
 local Layer = class()
 
@@ -75,16 +112,16 @@ function Layer:initialize(input)
    self.id = util.generate_id() -- Unique ID for each Layer.
    self.config = input.config or {}
    if self.config.timeout == true then
-      self.config.timeout = vim.o.timeoutlen --[[@as integer]]
+      self.config.timeout = vim.o.timeoutlen
    end
    if self.config.buffer == true then
       self.config.buffer = api.nvim_get_current_buf()
    end
    if type(self.config.on_enter) == 'function' then
-      self.config.on_enter = { self.config.on_enter }
+      self.config.on_enter = { self.config.on_enter } ---@diagnostic disable-line
    end
    if type(self.config.on_exit) == 'function' then
-      self.config.on_exit = { self.config.on_exit }
+      self.config.on_exit = { self.config.on_exit } ---@diagnostic disable-line
    end
 
    self.options = options('hydra.layer_options') -- meta-accessors
