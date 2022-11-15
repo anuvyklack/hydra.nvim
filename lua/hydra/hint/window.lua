@@ -272,6 +272,7 @@ function HintManualWindow:_make_buffer()
       end
    end
 
+   buffer.bo.buftype = 'nofile'
    buffer.bo.filetype = 'hydra_hint'
    buffer.bo.modifiable = false
 end
