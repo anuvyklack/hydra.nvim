@@ -4,6 +4,7 @@
 
 ---@class hydra.Config
 ---@field debug boolean
+---@field desc string
 ---@field buffer? integer
 ---@field exit boolean
 ---@field foreign_keys hydra.foreign_keys

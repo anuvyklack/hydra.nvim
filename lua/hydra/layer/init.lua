@@ -58,6 +58,7 @@ local Layer = class()
 
 ---@class hydra.layer.Config
 ---@field debug? boolean
+---@field desc string
 ---@field buffer? integer
 ---@field timeout? integer
 ---@field on_key? function
@@ -105,7 +106,8 @@ function Layer:initialize(input)
          on_exit  = { input.config.on_exit,  { 'function', 'table' }, true },
          on_key   = { input.config.on_key,   { 'function', 'table' }, true },
          timeout  = { input.config.timeout,  { 'boolean', 'number' }, true },
-         buffer   = { input.config.buffer,   { 'boolean', 'number' }, true }
+         buffer   = { input.config.buffer,   { 'boolean', 'number' }, true },
+         decs     = { input.config.desc, 'string', true }
       })
    end
 
@@ -216,7 +218,9 @@ function Layer:initialize(input)
    if self.enter_keymaps then
       for mode, keymaps in pairs(self.enter_keymaps) do
          for lhs, map in pairs(keymaps) do
-            local rhs, opts = map[1], map[2] or {}
+            local rhs  = map[1]
+            local opts = map[2] or {}
+
             local keymap = self:_make_keymap_function(mode, rhs, opts)
 
             vim.keymap.set(mode, lhs, function()
@@ -226,7 +230,7 @@ function Layer:initialize(input)
                buffer = self.config.buffer,
                nowait = opts.nowait,
                silent = opts.silent,
-               desc = opts.desc
+               desc = opts.desc or self.config.desc
             })
          end
       end

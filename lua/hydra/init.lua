@@ -55,7 +55,8 @@ function Hydra:initialize(input)
             exit = { input.config.exit, 'boolean', true },
             timeout = { input.config.timeout, { 'boolean', 'number' }, true },
             buffer = { input.config.buffer, { 'boolean', 'number' }, true },
-            hint = { input.config.hint, { 'boolean', 'string', 'table' }, true }
+            hint = { input.config.hint, { 'boolean', 'string', 'table' }, true },
+            desc = { input.config.desc, 'string', true }
          })
          vim.validate({
             foreign_keys = { input.config.foreign_keys, function(foreign_keys)
@@ -103,6 +104,14 @@ function Hydra:initialize(input)
    self.body  = input.body
    self.options = options('hydra.options')
 
+   if not self.config.desc then
+      if self.name then
+         self.config.desc = '[Hydra] '..self.name
+      else
+         self.config.desc = '[Hydra]'
+      end
+   end
+
    -- make Hydra buffer-local
    if self.config.buffer and type(self.config.buffer) ~= 'number' then
       self.config.buffer = api.nvim_get_current_buf()
@@ -126,8 +135,9 @@ function Hydra:initialize(input)
    self.heads_spec = {}
    local has_exit_head = self.config.exit
    for index, head in ipairs(input.heads) do
-      local lhs, rhs, opts = head[1], head[2], head[3] or {}
-      ---@cast lhs string
+      local lhs  = head[1] --[[@as string]]
+      local rhs  = head[2]
+      local opts = head[3] or {}
 
       if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
          color = util.get_color_from_config(self.config.foreign_keys, opts.exit)
@@ -138,10 +148,6 @@ function Hydra:initialize(input)
          opts.exit = self.config.exit
          color = self.config.color
       end
-
-      -- if opts.exit and not rhs then
-      --    color = 'blue'
-      -- end
 
       if type(opts.mode) == 'string' then
          opts.mode = { opts.mode }
@@ -166,17 +172,12 @@ function Hydra:initialize(input)
          head = '<Esc>',
          index = vim.tbl_count(self.heads),
          color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue',
-         -- color = 'Blue',
          desc = 'exit'
       }
    end
 
    if self.config.hint and not self.config.hint.type then
-      if input.hint then
-         self.config.hint.type = 'window'
-      else
-         self.config.hint.type = 'cmdline'
-      end
+      self.config.hint.type = input.hint and 'window' or 'cmdline'
    end
    self.hint = hint(self, self.config.hint, input.hint)
 
@@ -255,7 +256,7 @@ function Hydra:_setup_hydra_keymaps()
          self:_enter()
          if self.config.on_key then self.config.on_key() end
          self:_wait()
-      end)
+      end, { desc = self.config.desc })
    end
 
    -- Define Hydra kyebindings.
@@ -336,6 +337,7 @@ function Hydra:_setup_pink_hydra()
    local layer = { enter = {}, layer = {}, exit = {} }
    layer.config = {
       debug = self.config.debug,
+      desc = self.config.desc,
       buffer = self.config.buffer,
       timeout = self.config.timeout,
       on_key = function()
