@@ -64,6 +64,7 @@ If you want to quickly understand the concept, you can watch
             * [Pink color](#pink-color)
         * [`buffer`](#buffer)
         * [`invoke_on_body`](#invoke_on_body)
+        * [`desc`](#desc)
         * [`on_enter` and `on_exit`](#on_enter-and-on_exit)
             * [meta-accessors](#meta-accessors)
         * [`on_key`](#on_key)
@@ -76,7 +77,7 @@ If you want to quickly understand the concept, you can watch
             * [`private`](#private)
             * [`exit`](#exit-1)
             * [`on_key`](#on_key-1)
-            * [`desc`](#desc)
+            * [`desc`](#desc-1)
             * [`expr`, `silent`](#expr-silent)
             * [`nowait`](#nowait)
             * [`mode`](#mode-1)
@@ -314,7 +315,14 @@ By default, to invoke the hydra you need to press in sequence keys corresponds t
 any non-private `head` (about private heads see later).
 This option allows you to summon hydra by pressing only the `body` keys.
 
-<!-- When `true` invoke hydra when only `body` keys have been pressed. -->
+#### `desc`
+
+`string`\
+default: `[Hydra]` + name \
+parent table: `config`
+
+If you set `invoke_on_body` option, then you can pass here the description for the hydra
+body key sequence.
 
 #### `on_enter` and `on_exit`
 parent table: `config`

@@ -34,6 +34,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
        • Pink color...................................................|hydra-pink|
     • buffer.................................................|hydra-config.buffer|
     • invoke_on_body.................................|hydra-config.invoke_on_body|
+    • desc.................................................... |hydra-config.desc|
     • on_enter and on_exit.................................|hydra-config.on_enter|
       • meta-accessors......................................|hydra-meta-accessors|
     • on_key.................................................|hydra-config.on_key|
@@ -357,6 +358,13 @@ config			table
 		keys corresponds to `body` + any non-private `head` (about private
 		heads see later).  This option allows you to summon hydra by
 		pressing only the `body` keys.
+
+							     *hydra-config.desc*
+	desc			string
+				default: `'[Hydra]'` + name
+				parent table: `config`
+		If you set `invoke_on_body` option, then you can pass here the
+		description for the hydra body key sequence.
 
 				    *hydra-config.on_enter* *hydra-config.on_exit*
 	on_enter
