@@ -1,4 +1,4 @@
-hydra.txt
+hydra.txt                                                                  *hydra*
 ================================================================================
 
  ██   ██ 🭖█🭀  🭋█🭡 █████🭍🬾  █████🭍🬾   🭋██🭀     ⠄⠄⣴⣶⣤⡤⠦⣤⣀⣤⠆⠄⠄⠄⠄⠄⣈⣭⣭⣿⣶⣿⣦⣼⣆⠄⠄⠄⠄⠄⠄⠄⠄
@@ -14,43 +14,43 @@ hydra.txt
  ██   ██    ██    ██████🭠  ██   🭖█🭀        🭖█🭀 ⠄⠄⠄⠄⠄⠻⣿⣿⣿⣿⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡟⢀⣀⣤⣾⡿⠃⠄⠄⠄⠄
 
 ================================================================================
-CONTENTS                                                                   *hydra*
+CONTENTS
 
 Hydra.nvim............................................................|hydra.nvim|
 Description for Poets................................|hydra-description_for_poets|
 Description for Pragmatics......................|hydra-description_for_pragmatics|
 Sample Hydras......................................................|hydra-samples|
 How to create hydra....................................|hydra-how_to_create_hydra|
-    `name`..............................................................|hydra-name|
-    `mode`..............................................................|hydra-mode|
-    `body`..............................................................|hydra-body|
-    `config`..........................................................|hydra-config|
-        `exit`...................................................|hydra-config.exit|
-        `foreign_keys`...................................|hydra-config.foreign_keys|
-        `color`.................................................|hydra-config.color|
-            More about colors concept...............................|hydra-colors|
-            Amaranth color........................................|hydra-amaranth|
-            Blue and teal colors......................................|hydra-blue|
-            Pink color................................................|hydra-pink|
-	`buffer`...............................................|hydra-config.buffer|
-        `invoke_on_body`...............................|hydra-config.invoke_on_body|
-        `on_enter` and `on_exit`...............................|hydra-config.on_enter|
-            meta-accessors..................................|hydra-meta-accessors|
-        `on_key`...............................................|hydra-config.on_key|
-        `timeout`.............................................|hydra-config.timeout|
-        `hint`...................................................|hydra-config.hint|
-    Hydra's heads....................................................|hydra-heads|
-        {lhs}..........................................................|hydra-lhs|
-        {rhs}..........................................................|hydra-rhs|
-        {opts}........................................................|hydra-opts|
-            `private`...........................................|hydra-head.private|
-            `exit`.................................................|hydra-head.exit|
-            `on_key`.............................................|hydra-head.on_key|
-            `desc`.................................................|hydra-head.desc|
-            `expr`, `silent`.........................................|hydra-head.expr|
-            `nowait`.............................................|hydra-head.nowait|
-            `mode`.................................................|hydra-head.mode|
-    `hint`..............................................................|hydra-hint|
+  • name..............................................................|hydra-name|
+  • mode..............................................................|hydra-mode|
+  • body..............................................................|hydra-body|
+  • config..........................................................|hydra-config|
+     • exit....................................................|hydra-config.exit|
+     • foreign_keys....................................|hydra-config.foreign_keys|
+     • color..................................................|hydra-config.color|
+       • More about colors concept..................................|hydra-colors|
+       • Amaranth color...........................................|hydra-amaranth|
+       • Blue and teal colors.........................................|hydra-blue|
+       • Pink color...................................................|hydra-pink|
+    • buffer.................................................|hydra-config.buffer|
+    • invoke_on_body.................................|hydra-config.invoke_on_body|
+    • on_enter and on_exit.................................|hydra-config.on_enter|
+      • meta-accessors......................................|hydra-meta-accessors|
+    • on_key.................................................|hydra-config.on_key|
+    • timeout...............................................|hydra-config.timeout|
+    • hint.....................................................|hydra-config.hint|
+  • Hydra's heads....................................................|hydra-heads|
+    • {lhs}............................................................|hydra-lhs|
+    • {rhs}............................................................|hydra-rhs|
+    • {opts}..........................................................|hydra-opts|
+      • private...............................................|hydra-head.private|
+      • exit.....................................................|hydra-head.exit|
+      • on_key.................................................|hydra-head.on_key|
+      • desc.....................................................|hydra-head.desc|
+      • expr, silent.............................................|hydra-head.expr|
+      • nowait.................................................|hydra-head.nowait|
+      • mode.....................................................|hydra-head.mode|
+  • hint..............................................................|hydra-hint|
 Public methods.....................................................|hydra-methods|
 Highlight........................................................|hydra-highlight|
 Keymap utility functions.......................................|hydra-keymap_util|
@@ -418,7 +418,7 @@ config			table
 		If `false` — doesn't show hint, or a table with settings for
 		manually- or auto-generated |hydra-hint|.
 
-		• type			`"window"` | `"cmdline"` | `"statusline"`
+		type			`"window"` | `"cmdline"` | `"statusline"`
 					default: if |hydra-hint| passed then
 					         `"window"` else `"cmdline"`
 					parent table: `config.hint`
@@ -433,7 +433,7 @@ config			table
 				If |hydra-hint| is passed — this value will be
 				ignored and `"window"` will be used.
 
-		• position		string
+		position		string
 					default: `"bottom"`
 					valid when `type` is `"window"`
 					parent table: `config.hint`
@@ -446,25 +446,25 @@ config			table
 			    -------------+----------+--------------
 			     bottom-left |  bottom  | bottom-right
 <
-		• offset		number
+		offset			number
 					default: `0`
 					valid when `type` is `"window"`
 					parent table: `config.hint`
 			The offset from the nearest editor border.
 
-		• border	`"single"` | `"double"` | `"rounded"` |
+		border		`"single"` | `"double"` | `"rounded"` |
 				`"solid"` | `"shadow"` | `"none"` | string[]
 					default: `"none"`
 					valid when `type` is `"window"`
 			The border of the hint window. See |nvim_open_win()|
 
-		• show_name		boolean
+		show_name		boolean
 					default: `true`
 					parent table: `config.hint`
 			Show a hydras name or `HYDRA:` label at the beginning of
 			auto-generated hint.
 
-		• funcs			table<string, fun():string>
+		funcs			table<string, fun():string>
 					default: https://github.com/anuvyklack/hydra.nvim/blob/master/lua/hydra/hint/vim-options.lua
 					parent table: `config.hint`
 			Table where keys are function names and values are
