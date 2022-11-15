@@ -3,8 +3,9 @@
 ## How key mappings stores inside
 
 The Layer accepts keymaps in the one form, but stores them internally in the another. 
-The `Layer:_normalize_input()` method is responsible for this.  Notice, that terminal
-codes are also escaped.  
+The `Layer:_normalize_input()` method is responsible for this.  It allows utilize built-in
+Lua table properties, and simplifies such things like get desired normal mode keybinding
+without looping through the whole list every time.
 
 ```
     -----------------------------+------------------------------------
@@ -30,15 +31,12 @@ codes are also escaped.
           {'n', '<Esc>'},        |      },
           {'n', 'q'}             |      exit_keymaps = {
        }                         |         n = {
-                                 |            ['\27'] = {'<Nop>', {}},
+                                 |            ['<Esc>'] = {'<Nop>', {}},
                                  |            q = {'<Nop>', {}}
                                  |         }
                                  |      }
                                  |
 ```
-
-It allows utilize built-in Lua table properties, and simplifies such things like get
-desired normal mode keybinding without looping through the whole list every time.
 
 ## Dealing with original key mappings
 
@@ -47,8 +45,8 @@ This, among other things, allows the use of the `<nowait>` keymap option.
 
 On activating, Layer sets its keymaps for the current buffer, and while active, for all
 visited buffers.  Original key mappings, overwritten by Layer, are putted into
-`self.saved_keymaps[bufnr]` table.  On deactivating Layer, the buffer local key
-bindings are restoring where they were for all buffers that are still "listed". 
+`self.saved_keymaps[bufnr]` table.  On deactivating Layer, the buffer local key bindings
+are restoring where they were for all buffers that are still "listed". 
 
 `self.saved_keymaps` table has the next structure:
 
@@ -58,7 +56,7 @@ bindings are restoring where they were for all buffers that are still "listed".
           n = { -- normal mode
              l = true,
              h = {...},
-             ['\27'] = true, -- <Esc>
+             ['<Esc>'] = true,
              q = true,
           }
        }
@@ -66,7 +64,7 @@ bindings are restoring where they were for all buffers that are still "listed".
           n = { -- normal mode
              l = true,
              h = {...},
-             ['\27'] = true, -- <Esc>
+             ['<Esc>'] = true,
              q = true,
           }
        }

@@ -158,6 +158,13 @@ function Layer:initialize(input)
    local exit_keymaps
    self.enter_keymaps, self.layer_keymaps, exit_keymaps =
       self:_normalize_input(input.enter, input.layer, input.exit)
+
+   self.esc_termcodes_layer_keymaps = {}
+   for mode, _ in pairs(self.layer_keymaps) do
+      self.esc_termcodes_layer_keymaps[mode] = {}
+      for lhs, _ in pairs(self.layer_keymaps[mode]) do
+         self.esc_termcodes_layer_keymaps[mode][termcodes(lhs)] = lhs
+      end
    end
 
    -- Setup <Esc> key to exit the Layer if no one exit key has been passed.
@@ -352,9 +359,8 @@ function Layer:_make_keymap_function(mode, rhs, opts)
       elseif type(rhs) == 'string' then
          keys = rhs
       end
-      keys = termcodes(keys)
       local fmode = opts.remap and 'im' or 'in'
-      api.nvim_feedkeys(keys, fmode, true)
+      api.nvim_feedkeys(termcodes(keys), fmode, true)
    end
 end
 
@@ -384,12 +390,13 @@ function Layer:_save_keymaps(bufnr)
    assert(not self.saved_keymaps[bufnr], 'Layer:_save_keymaps() called twice for same buffer')
    self.saved_keymaps[bufnr] = {}
 
-   for mode, keymaps in pairs(self.layer_keymaps) do
+   for mode, esc_termcodes_keymaps in pairs(self.esc_termcodes_layer_keymaps)
+   do
       self.saved_keymaps[bufnr][mode] = {}
       for _, map in ipairs(api.nvim_buf_get_keymap(bufnr, mode)) do
-         map.lhs = termcodes(map.lhs)
-         if keymaps[map.lhs] then
-            self.saved_keymaps[bufnr][mode][map.lhs] = {
+         local lhs = esc_termcodes_keymaps[termcodes(map.lhs)]
+         if lhs then
+            self.saved_keymaps[bufnr][mode][lhs] = {
                rhs = map.rhs or '',
                expr = map.expr == 1,
                callback = map.callback,
