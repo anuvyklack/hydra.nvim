@@ -92,19 +92,20 @@ function Layer:initialize(input)
       for _, keymap in ipairs(input.exit) do
          local opts = keymap[4] or {}
          vim.validate({
-            expr = { opts.expr, 'boolean', true },
+              expr = { opts.expr,   'boolean', true },
             silent = { opts.silent, 'boolean', true },
             nowait = { opts.nowait, 'boolean', true },
-            desc = { opts.desc, 'string', true },
+              desc = { opts.desc,   'string',  true },
          })
       end
    end
    if input.config then
       vim.validate({
          on_enter = { input.config.on_enter, { 'function', 'table' }, true },
-         on_exit = { input.config.on_exit, { 'function', 'table' }, true },
-         timeout = { input.config.timeout, { 'boolean', 'number' }, true },
-         buffer = { input.config.buffer, { 'boolean', 'number' }, true }
+         on_exit  = { input.config.on_exit,  { 'function', 'table' }, true },
+         on_key   = { input.config.on_key,   { 'function', 'table' }, true },
+         timeout  = { input.config.timeout,  { 'boolean', 'number' }, true },
+         buffer   = { input.config.buffer,   { 'boolean', 'number' }, true }
       })
    end
 
@@ -339,8 +340,11 @@ function Layer:_normalize_input(enter, layer, exit)
       if mappings then
          local k = util.unlimited_depth_table()
          for _, map in ipairs(mappings) do
-            local mode, lhs, rhs, opts = map[1], map[2], map[3] or '<Nop>', map[4] or {}
-            lhs = termcodes(lhs)
+            local mode = map[1]
+            local lhs  = map[2]
+            local rhs  = map[3] or '<Nop>'
+            local opts = map[4] or {}
+
             if type(mode) == 'table' then
                for _, m in ipairs(mode) do
                   k[m][lhs] = { rhs, opts }
