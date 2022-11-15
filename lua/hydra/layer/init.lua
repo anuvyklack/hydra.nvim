@@ -156,13 +156,8 @@ function Layer:initialize(input)
    end
 
    local exit_keymaps
-   if not input.layer_keymaps then
-      self.enter_keymaps, self.layer_keymaps, exit_keymaps =
-         self:_normalize_input(input.enter, input.layer, input.exit)
-   else -- input was passed already in the internal form.
-      self.enter_keymaps = input.enter_keymaps
-      self.layer_keymaps = input.layer_keymaps
-      exit_keymaps  = input.exit_keymaps
+   self.enter_keymaps, self.layer_keymaps, exit_keymaps =
+      self:_normalize_input(input.enter, input.layer, input.exit)
    end
 
    -- Setup <Esc> key to exit the Layer if no one exit key has been passed.
