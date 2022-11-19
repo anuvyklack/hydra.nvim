@@ -27,12 +27,12 @@ function HintAutoWindow:initialize(...)
       self.config.position = vim.split(self.config.position, '-')
    end
 
-   autocmd('VimResized', { group = augroup,
+   autocmd('VimResized', {
       desc = 'update Hydra hint window position',
       callback = function() self.win_config = nil end,
    })
 
-   autocmd('OptionSet', { group = augroup,
+   autocmd('OptionSet', {
       pattern = 'cmdheight',
       desc = 'update Hydra hint window position',
       callback = function() self.win_config = nil end,
