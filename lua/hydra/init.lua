@@ -139,6 +139,10 @@ function Hydra:initialize(input)
       local rhs  = head[2]
       local opts = head[3] or {}
 
+      if opts.exit_before then
+         opts.exit = true
+      end
+
       if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
          color = util.get_color_from_config(self.config.foreign_keys, opts.exit)
          if opts.exit and not has_exit_head then
@@ -301,10 +305,13 @@ function Hydra:_setup_hydra_keymaps()
       end
 
       -- Define mapping
-      if opts.exit then -- blue head
-         self:_set_keymap(self.plug_wait..head, function()
-            self:exit()
-            keymap()
+      if opts.exit_before then -- blue head
+         self:_set_keymap(self.plug_wait .. head, function()
+            self:exit(); keymap()
+         end, opts)
+      elseif opts.exit then -- blue head
+         self:_set_keymap(self.plug_wait .. head, function()
+            keymap(); self:exit()
          end, opts)
       else -- red head
          self:_set_keymap(self.plug_wait .. head, function()

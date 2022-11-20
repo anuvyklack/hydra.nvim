@@ -218,19 +218,18 @@ function Layer:initialize(input)
       for mode, keymaps in pairs(exit_keymaps) do
          for lhs, map in pairs(keymaps) do
             local rhs, opts = map[1], map[2] or {}
+
             local keymap = self:_make_keymap_function(mode, rhs, opts)
+            local rhs_fun = opts.exit_before
+                            and function() self:exit(); keymap() end
+                            or  function() keymap(); self:exit() end
+
             self.layer_keymaps[mode] = self.layer_keymaps[mode] or {}
-            self.layer_keymaps[mode][lhs] = {
-               function()
-                  self:exit()
-                  keymap()
-               end,
-               {
-                  nowait = opts.nowait,
-                  silent = opts.silent,
-                  desc = opts.desc
-               }
-            }
+            self.layer_keymaps[mode][lhs] = { rhs_fun, {
+               nowait = opts.nowait,
+               silent = opts.silent,
+               desc = opts.desc
+            }}
          end
       end
    end

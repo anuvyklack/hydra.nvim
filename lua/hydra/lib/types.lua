@@ -41,6 +41,7 @@
 ---@class hydra.HeadOpts
 ---@field public private? boolean
 ---@field exit? boolean
+---@field exit_before? boolean
 ---@field on_key? boolean
 ---@field mode? string[]
 ---@field silent? boolean

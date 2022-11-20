@@ -76,6 +76,7 @@ If you want to quickly understand the concept, you can watch
         * [`opts`](#opts)
             * [`private`](#private)
             * [`exit`](#exit-1)
+            * [`exit_before`](#exit_before)
             * [`on_key`](#on_key-1)
             * [`desc`](#desc-1)
             * [`expr`, `silent`](#expr-silent)
@@ -463,6 +464,12 @@ Stop the hydra state after executing a command corresponds to such head.
 ```lua
 { '<Esc>', nil, { exit = true } }
 ```
+
+##### `exit_before`
+`boolean`
+
+Like the previous option, stops hydra state but BEFORE executing a command corresponds to
+head.
 
 ##### `on_key`
 `boolean`

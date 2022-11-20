@@ -46,6 +46,7 @@ How to create hydra....................................|hydra-how_to_create_hydr
     • {opts}..........................................................|hydra-opts|
       • private...............................................|hydra-head.private|
       • exit.....................................................|hydra-head.exit|
+      • exit_before.......................................|hydra-head.exit_before|
       • on_key.................................................|hydra-head.on_key|
       • desc.....................................................|hydra-head.desc|
       • expr, silent.............................................|hydra-head.expr|
@@ -523,6 +524,12 @@ heads			table[]
 			head looks like this: >
 			    { '<Esc>', nil, { exit = true } }
 <
+							*hydra-head.exit_before*
+		exit_before		boolean
+					parent table: {opts}
+			Like the previous option, stops hydra state, but BEFORE
+			executing a command corresponds to head.
+
 							     *hydra-head.on_key*
 		on_key			boolean
 					parent table: {opts}
