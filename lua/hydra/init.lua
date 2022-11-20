@@ -397,9 +397,11 @@ function Hydra:_setup_pink_hydra()
 
       ---@type hydra.NvimKeymapOpts
       local o = {
-         desc = opts.desc,
+         expr   = opts.expr,
          nowait = opts.nowait,
-         silent = opts.silent
+         silent = opts.silent,
+         desc   = opts.desc,
+         exit_before = opts.exit_before
       }
 
       local mode = opts.mode or self.mode
