@@ -271,12 +271,12 @@ function Hydra:_setup_hydra_keymaps()
 
       local function keymap()
          if not rhs then return end
-         local keys, mode ---@type string
+         local keys
          if opts.expr then
             if type(rhs) == 'function' then
                keys = rhs()
             elseif type(rhs) == 'string' then
-               keys = api.nvim_eval(rhs) --[[@as string]]
+               keys = api.nvim_eval(rhs)
             end
          elseif type(rhs) == 'function' then
             rhs()
@@ -284,11 +284,11 @@ function Hydra:_setup_hydra_keymaps()
          elseif type(rhs) == 'string' then
             keys = rhs
          end
-         mode = opts.remap and 'm' or 'n'
+         local fmode = opts.remap and 'm' or 'n'
          if not opts.exit then
-            mode = mode..'x'
+            fmode = fmode .. 'x'
          end
-         api.nvim_feedkeys(termcodes(keys), mode, false)
+         api.nvim_feedkeys(termcodes(keys), fmode, false)
       end
 
       -- Define enter mapping
