@@ -311,7 +311,7 @@ end
 function Layer:_normalize_input(enter, layer, exit)
    local r = {}
    for i, mappings in ipairs({ enter, layer, exit }) do
-      if mappings then
+      if mappings and not vim.tbl_isempty(mappings) then
          local k = util.unlimited_depth_table()
          for _, map in ipairs(mappings) do
             local mode = map[1]

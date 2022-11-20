@@ -386,7 +386,7 @@ function Hydra:_setup_pink_hydra()
       }
    }
 
-   if self.config.invoke_on_body then
+   if self.config.invoke_on_body and self.body then
       layer.enter[1] = { self.mode, self.body }
    end
 
@@ -406,7 +406,7 @@ function Hydra:_setup_pink_hydra()
 
       local mode = opts.mode or self.mode
 
-      if not self.config.invoke_on_body
+      if self.body and not self.config.invoke_on_body
          and not opts.exit
          and not opts.private
       then
