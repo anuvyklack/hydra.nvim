@@ -225,25 +225,40 @@ function Hydra:initialize(input)
          setfenv(self.config.on_enter, env)
       end
       if self.config.on_exit then
-
          ---@param name string
-         ---@return hydra.MetaAccessor
-         local function disable_meta_accessor(name)
-            local function disable()
-               util.warn(string.format(
-                  '"vim.%s" meta-accessor is disabled inside config.on_exit() function',
-                  name))
-            end
-            return self.options:make_meta_accessor(disable, disable)
+         local function show_disable_message(name)
+            util.warn(string.format(
+               '[Hydra] "vim.%s" meta-accessor is disabled inside config.on_exit() function',
+               name))
          end
 
          local env = vim.tbl_deep_extend('force', getfenv(), {
             vim = { o = {}, go = {}, bo = {}, wo = {} }
          })
-         env.vim.o  = disable_meta_accessor('o')
-         env.vim.go = disable_meta_accessor('go')
-         env.vim.bo = disable_meta_accessor('bo')
-         env.vim.wo = disable_meta_accessor('wo')
+         env.vim.o  = self.options:make_meta_accessor(
+            function(opt)
+               return api.nvim_get_option_value(opt, {})
+            end,
+            function() show_disable_message('o') end
+         )
+         env.vim.go = self.options:make_meta_accessor(
+            function(opt)
+               return api.nvim_get_option_value(opt, { scope = 'global' })
+            end,
+            function() show_disable_message('go') end
+         )
+         env.vim.bo = self.options:make_meta_accessor(
+            function(opt)
+               return api.nvim_buf_get_option(0, opt)
+            end,
+            function() show_disable_message('bo') end
+         )
+         env.vim.wo = self.options:make_meta_accessor(
+            function(opt)
+               return api.nvim_win_get_option(0, opt)
+            end,
+            function() show_disable_message('wo') end
+         )
 
          setfenv(self.config.on_exit, env)
       end

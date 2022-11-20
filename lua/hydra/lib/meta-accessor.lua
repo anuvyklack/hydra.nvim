@@ -56,8 +56,6 @@ function ma:initialize(augroup)
    self.bo = self:make_meta_accessor(
       ---@param opt string
       function(opt)
-         -- assert(type(opt) ~= 'number',
-         --    '[Hydra] "vim.bo[bufnr]" meta-aссessor in config.on_enter() function is forbiden, use "vim.bo" instead')
          return api.nvim_buf_get_option(0, opt)
       end,
 
@@ -76,8 +74,6 @@ function ma:initialize(augroup)
    self.wo = self:make_meta_accessor(
       ---@param opt string
       function(opt)
-         -- assert(type(opt) ~= 'number',
-         --    '[Hydra] "vim.wo[winnr]" meta-aссessor in config.on_enter() function is forbiden, use "vim.wo" instead')
          return api.nvim_win_get_option(0, opt)
       end,
 
