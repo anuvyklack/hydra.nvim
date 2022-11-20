@@ -17,7 +17,7 @@ _G.Hydra = nil
 ---@field mode string | string[]
 ---@field body? string
 ---@field heads table<string, hydra.Head>
----@field heads_spec table<string, hydra.HeadSpec>
+---@field heads_spec table<string, hydra.HeadSpec> Used in hint class.
 ---@field options hydra.MetaAccessor
 ---@field plug_wait string
 local Hydra = class()
@@ -98,10 +98,10 @@ function Hydra:initialize(input)
    end
 
    self.id = util.generate_id() -- Unique ID for each Hydra.
-   self.name  = input.name
+   self.name = input.name
    self.config = util.megre_config(default_config, input.config or {})
-   self.mode  = input.mode or 'n'
-   self.body  = input.body
+   self.mode = input.mode or 'n'
+   self.body = input.body
    self.options = options('hydra.options')
 
    if not self.config.desc then
@@ -154,10 +154,10 @@ function Hydra:initialize(input)
       end
 
       self.heads_spec[lhs] = {
-         head = lhs,
+         head  = lhs,
          index = index,
          color = color:gsub("^%l", string.upper), -- capitalize first letter
-         desc = opts.desc
+         desc  = opts.desc
       }
 
       if type(opts.desc) ~= 'string' then opts.desc = nil end
@@ -167,7 +167,7 @@ function Hydra:initialize(input)
       self.heads[lhs] = { rhs, opts }
    end
    if not has_exit_head then
-      self.heads['<Esc>'] = { nil, { exit = true }}
+      self.heads['<Esc>'] = { nil, { exit = true } }
       self.heads_spec['<Esc>'] = {
          head = '<Esc>',
          index = vim.tbl_count(self.heads),
@@ -242,7 +242,7 @@ function Hydra:initialize(input)
          setfenv(self.config.on_exit, env)
       end
       self:_setup_hydra_keymaps()
-   else  -- color == 'pink'
+   else -- color == 'pink'
       self:_setup_pink_hydra()
    end
 end
@@ -290,7 +290,7 @@ function Hydra:_setup_hydra_keymaps()
          and not opts.exit
          and not opts.private
       then
-         self:_set_keymap(self.body..head, function()
+         self:_set_keymap(self.body .. head, function()
             self:_enter()
             keymap()
             if opts.on_key ~= false and self.config.on_key then
@@ -307,7 +307,7 @@ function Hydra:_setup_hydra_keymaps()
             keymap()
          end, opts)
       else -- red head
-         self:_set_keymap(self.plug_wait..head, function()
+         self:_set_keymap(self.plug_wait .. head, function()
             keymap()
             if opts.on_key ~= false and self.config.on_key then
                self.config.on_key()
@@ -321,9 +321,9 @@ function Hydra:_setup_hydra_keymaps()
       -- Special keys such as <C-u> are escaped with < and >, i.e.,
       -- key sequences doesn't directly contain any escape sequences.
       local keys = vim.fn.split(head, [[\(<[^<>]\+>\|.\)\zs]])
-      for i = #keys-1, 1, -1 do
+      for i = #keys - 1, 1, -1 do
          local first_n_keys = table.concat(vim.list_slice(keys, 1, i))
-         self:_set_keymap(self.plug_wait..first_n_keys, function()
+         self:_set_keymap(self.plug_wait .. first_n_keys, function()
             local leave = self:_leave()
             if leave then
                api.nvim_feedkeys(termcodes(first_n_keys), 'ti', false)
@@ -384,7 +384,7 @@ function Hydra:_setup_pink_hydra()
          and not opts.exit
          and not opts.private
       then
-         table.insert(layer.enter, { mode, self.body..head, rhs, o })
+         table.insert(layer.enter, { mode, self.body .. head, rhs, o })
       end
 
       table.insert(opts.exit and layer.exit or layer.layer, { mode, head, rhs, o })
@@ -417,7 +417,7 @@ function Hydra:_enter()
    else
       o.timeout = false
    end
-   o.ttimeout = not self.options.original.o.timeout and true
+   o.ttimeout = not self.options.original.o.timeout
                 or self.options.original.o.ttimeout
 
    if self.config.on_enter then self.config.on_enter() end
