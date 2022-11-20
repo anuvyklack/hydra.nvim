@@ -79,21 +79,23 @@ function Hydra:initialize(input)
             end, 'Hydra: color value could be one of: red, blue, amaranth, teal, pink' }
          })
       end
-      for _, map in ipairs(input.heads) do
+      for _, head in ipairs(input.heads) do
+         vim.validate({ head = { head, 'table' } })
+         local lhs, rhs, opts = head[1], head[2], head[3]
          vim.validate({
-            head = { map, function(kmap)
-               local lhs, rhs, opts = kmap[1], kmap[2], kmap[3]
-               if type(kmap) ~= 'table'
-                  or type(lhs) ~= 'string'
-                  or (rhs and type(rhs) ~= 'string' and type(rhs) ~= 'function')
-                  or (opts and (type(opts) ~= 'table' or opts.desc == true))
-               then
-                  return false
-               else
-                  return true
-               end
-            end, 'Hydra: wrong head type'}
+            lhs  = { lhs, 'string' },
+            rhs  = { rhs, { 'string', 'function' }, true },
+            opts = { opts, 'table', true },
          })
+         if opts then
+            vim.validate({
+               ['head.desc'] = { opts.desc, function(d)
+                  return (d == nil) or (type(d) == 'string') or (d == false)
+               end, 'string or false' },
+               ['head.exit'] = { opts.exit, 'boolean', true },
+               ['head.exit_before'] = { opts.exit_before, 'boolean', true },
+            })
+         end
       end
    end
 
