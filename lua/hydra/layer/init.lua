@@ -67,50 +67,6 @@ local Layer = class()
 
 ---@param input table
 function Layer:initialize(input)
-   if input.enter then
-      for _, keymap in ipairs(input.enter) do
-         local opts = keymap[4] or {}
-         vim.validate({
-              expr = { opts.expr,   'boolean', true },
-            silent = { opts.silent, 'boolean', true },
-            nowait = { opts.nowait, 'boolean', true },
-              desc = { opts.desc,   'string',  true },
-         })
-      end
-   end
-   if input.layer then
-      for _, keymap in ipairs(input.layer) do
-         local opts = keymap[4] or {}
-         vim.validate({
-              expr = { opts.expr,   'boolean', true },
-            silent = { opts.silent, 'boolean', true },
-            nowait = { opts.nowait, 'boolean', true },
-              desc = { opts.desc,   'string',  true },
-         })
-      end
-   end
-   if input.exit then
-      for _, keymap in ipairs(input.exit) do
-         local opts = keymap[4] or {}
-         vim.validate({
-              expr = { opts.expr,   'boolean', true },
-            silent = { opts.silent, 'boolean', true },
-            nowait = { opts.nowait, 'boolean', true },
-              desc = { opts.desc,   'string',  true },
-         })
-      end
-   end
-   if input.config then
-      vim.validate({
-         on_enter = { input.config.on_enter, { 'function', 'table' }, true },
-         on_exit  = { input.config.on_exit,  { 'function', 'table' }, true },
-         on_key   = { input.config.on_key,   { 'function', 'table' }, true },
-         timeout  = { input.config.timeout,  { 'boolean', 'number' }, true },
-         buffer   = { input.config.buffer,   { 'boolean', 'number' }, true },
-         decs     = { input.config.desc, 'string', true }
-      })
-   end
-
    self.active = false
    self.id = util.generate_id() -- Unique ID for each Layer.
    self.config = input.config or {}
