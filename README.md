@@ -204,7 +204,7 @@ customized for each head particularly.  Below is a list of all options.
 
 #### `exit`
 `boolean`\
-default: `true`\
+default: `false`\
 parent table: `config`
 
 The `exit` option (heads can override it) defines what will happen after executing head's
