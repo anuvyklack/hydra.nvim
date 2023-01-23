@@ -41,8 +41,15 @@ function HintStatusLine:show()
    end
    statusline = table.concat(statusline) ---@diagnostic disable-line
 
-   local wo = self.meta_accessors.wo
-   wo.statusline = statusline
+   self.original_statusline = vim.wo.statusline
+   vim.wo.statusline = statusline
+end
+
+function HintStatusLine:close()
+   if self.original_statusline then
+      vim.wo.statusline = self.original_statusline
+      self.original_statusline = nil
+   end
 end
 
 --------------------------------------------------------------------------------
