@@ -50,7 +50,7 @@ function HintAutoWindow:_make_buffer()
       hint[#hint+1] = (self.hydra_name or 'HYDRA')..': '
    end
 
-   local heads = self:_swap_head_with_index()
+   local heads = self:_get_heads_in_sequential_form()
    for _, head in ipairs(heads) do
       if head.desc ~= false then
          hint[#hint+1] = string.format('_%s_', head.head)

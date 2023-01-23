@@ -17,7 +17,7 @@ function HintStatusLine:_make_statusline()
 
    ---@type string[]
    local statusline = {}
-   local heads = self:_swap_head_with_index()
+   local heads = self:_get_heads_in_sequential_form()
    for _, head in ipairs(heads) do
       if head.desc ~= false then
          vim.list_extend(statusline, {

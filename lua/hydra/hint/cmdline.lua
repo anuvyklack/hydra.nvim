@@ -31,20 +31,16 @@ function HintAutoCmdline:_make_message()
       space = space - strdisplaywidth(hint[#hint][1])
    end
 
-   local heads = self:_swap_head_with_index()
+   local heads = self:_get_heads_in_sequential_form()
    for _, head_spec in ipairs(heads) do
       local desc = head_spec.desc
       if desc ~= false then
-         continue, space = self:_add_chunk(hint, space, { head_spec.head, 'Hydra'..head_spec.color })
-         if not continue then break end
+         space = self:_add_chunk(hint, space, { head_spec.head, 'Hydra'..head_spec.color })
+         if not space then break end
 
-         if desc then
-            desc = string.format(': %s, ', desc)
-         else
-            desc = ', '
-         end
-         continue, space = self:_add_chunk(hint, space, { desc })
-         if not continue then break end
+         space = self:_add_chunk(hint, space, { desc and ': '..desc..', '
+                                                      or ', ' })
+         if not space then break end
       end
    end
    hint[#hint][1] = hint[#hint][1]:gsub(', $', '')
