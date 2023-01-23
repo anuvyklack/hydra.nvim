@@ -101,37 +101,46 @@ function Hydra:initialize(input)
 
    self.id = util.generate_id() -- Unique ID for each Hydra.
    self.name = input.name
-   self.config = util.megre_config(default_config, input.config or {})
    self.mode = input.mode or 'n'
    self.body = input.body
+   self.heads = {}
    self.options = options('hydra.options')
+   self.plug_wait = string.format('<Plug>(Hydra%d_wait)', self.id)
+   self.config = util.megre_config(default_config, input.config or {})
 
-   if not self.config.desc then
-      if self.name then
-         self.config.desc = '[Hydra] '..self.name
-      else
-         self.config.desc = '[Hydra]'
+   do
+      if not self.config.desc then
+         if self.name then
+            self.config.desc = '[Hydra] '..self.name
+         else
+            self.config.desc = '[Hydra]'
+         end
+      end
+
+      -- make Hydra buffer-local
+      if self.config.buffer and type(self.config.buffer) ~= 'number' then
+         self.config.buffer = api.nvim_get_current_buf()
+      end
+
+      -- Bring 'foreign_keys', 'exit' and 'color' options into line.
+      -- `Color` has higher precedence. If passed `color` not equal to
+      -- one derived from passed `foreign-keys` and `exit` options, then
+      -- override them.
+      if self.config.color ~= util.get_color_from_config(self.config.foreign_keys,
+                                                         self.config.exit)
+      then
+         self.config.foreign_keys, self.config.exit =
+            util.get_config_from_color(self.config.color)
+      end
+
+      if not self.body or self.config.exit then
+         self.config.invoke_on_body = true
+      end
+
+      if self.config.hint and not self.config.hint.type then
+         self.config.hint.type = input.hint and 'window' or 'cmdline'
       end
    end
-
-   -- make Hydra buffer-local
-   if self.config.buffer and type(self.config.buffer) ~= 'number' then
-      self.config.buffer = api.nvim_get_current_buf()
-   end
-
-   -- Bring 'foreign_keys', 'exit' and 'color' options into line.
-   local color = util.get_color_from_config(self.config.foreign_keys, self.config.exit)
-   if color ~= 'red' and color ~= self.config.color then
-      self.config.color = color
-   elseif color ~= self.config.color then
-      self.config.foreign_keys, self.config.exit = util.get_config_from_color(self.config.color)
-   end
-
-   if not self.body or self.config.exit then
-      self.config.invoke_on_body = true
-   end
-
-   self.plug_wait = string.format('<Plug>(Hydra%d_wait)', self.id)
 
    local heads_spec = {}
    local has_exit_head = self.config.exit
@@ -144,13 +153,10 @@ function Hydra:initialize(input)
          opts.exit = true
       end
 
-      if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
+      local color
+      if opts.exit ~= nil then
          color = util.get_color_from_config(self.config.foreign_keys, opts.exit)
-         if opts.exit and not has_exit_head then
-            has_exit_head = true
-         end
       else
-         opts.exit = self.config.exit
          color = self.config.color
       end
 
@@ -161,6 +167,14 @@ function Hydra:initialize(input)
          desc  = opts.desc
       }
 
+      if opts.exit ~= nil then -- User explicitly passed `exit` parameter to the head
+         if opts.exit and not has_exit_head then
+            has_exit_head = true
+         end
+      else
+         opts.exit = self.config.exit
+      end
+      if type(opts.mode) == 'string' then opts.mode = { opts.mode } end
       if type(opts.desc) ~= 'string' then opts.desc = nil end
 
       ---@cast rhs string | function | nil
@@ -406,7 +420,8 @@ function Hydra:_setup_pink_hydra()
 
       local mode = opts.mode or self.mode
 
-      if self.body and not self.config.invoke_on_body
+      if self.body
+         and not self.config.invoke_on_body
          and not opts.exit
          and not opts.private
       then
