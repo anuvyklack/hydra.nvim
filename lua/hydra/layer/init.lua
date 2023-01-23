@@ -425,7 +425,7 @@ function Layer:_save_keymaps(bufnr)
    end
 end
 
----Restore original keymaps and options overwritten by Layer
+---Restore original keymaps overwritten by Layer.
 function Layer:_restore_keymaps()
    if not self.active then return end
 

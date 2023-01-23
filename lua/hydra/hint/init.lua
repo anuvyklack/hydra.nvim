@@ -11,9 +11,6 @@ local HintManualWindow = window.HintManualWindow
 local HintStatusLine = statusline.HintStatusLine
 local HintStatusLineMute = statusline.HintStatusLineMute
 
----@param hydra Hydra
----@param config hydra.hint.Config | false
----@param hint? string
 ---@return hydra.Hint
 local function make_hint(input)
    local config = input.config

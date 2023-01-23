@@ -307,13 +307,13 @@ function HintManualWindow:_make_win_config()
    end
 
    if pos[2] == 'left' then
-      anchor = anchor..'w'
+      anchor = anchor..'W'
       self.win_config.col = offset
    elseif pos[2] == 'right' then
       anchor = anchor..'E'
       self.win_config.col = vim.o.columns - offset
    else -- center
-      anchor = anchor..'w'
+      anchor = anchor..'W'
       self.win_config.col = math.floor((vim.o.columns - self.win_width) / 2)
    end
 
