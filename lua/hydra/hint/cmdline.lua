@@ -1,5 +1,5 @@
 local class = require('hydra.lib.class')
-local Hint = require('hydra.hint.hint')
+local BaseHint = require('hydra.hint.basehint')
 local util = require('hydra.lib.util')
 local strdisplaywidth = vim.fn.strdisplaywidth
 local nvim_echo = vim.api.nvim_echo
@@ -10,12 +10,10 @@ local M = {}
 
 ---@class hydra.hint.AutoCmdline : hydra.Hint
 ---@field message hydra.EchoChunk[]
-local HintAutoCmdline = class(Hint)
+local HintAutoCmdline = class(BaseHint)
 
----@param hydra Hydra
-function HintAutoCmdline:initialize(hydra)
-   Hint.initialize(self, hydra)
-   self.o = hydra.options.o
+function HintAutoCmdline:initialize(input)
+   BaseHint.initialize(self, input)
    self.height = 1
 end
 
@@ -136,17 +134,15 @@ end
 ---@field need_to_update boolean
 local HintManualCmdline = class(HintAutoCmdline)
 
----@param hydra Hydra
----@param hint string
-function HintManualCmdline:initialize(hydra, hint)
-   HintAutoCmdline.initialize(self, hydra)
+function HintManualCmdline:initialize(input)
+   HintAutoCmdline.initialize(self, input)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {
       __index = vim_options
    })
 
-   self.hint = vim.split(hint, '\n')
+   self.hint = vim.split(self.hint, '\n')
    -- Remove last empty string.
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil

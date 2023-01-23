@@ -1,5 +1,5 @@
 local class = require('hydra.lib.class')
-local hint = require('hydra.hint')
+local make_hint = require('hydra.hint')
 local options = require('hydra.lib.meta-accessor')
 local util = require('hydra.lib.util')
 local termcodes = util.termcodes
@@ -133,8 +133,7 @@ function Hydra:initialize(input)
 
    self.plug_wait = string.format('<Plug>(Hydra%d_wait)', self.id)
 
-   self.heads = {};
-   self.heads_spec = {}
+   local heads_spec = {}
    local has_exit_head = self.config.exit
    for index, head in ipairs(input.heads) do
       local lhs  = head[1] --[[@as string]]
@@ -155,11 +154,7 @@ function Hydra:initialize(input)
          color = self.config.color
       end
 
-      if type(opts.mode) == 'string' then
-         opts.mode = { opts.mode }
-      end
-
-      self.heads_spec[lhs] = {
+      heads_spec[lhs] = {
          head  = lhs,
          index = index,
          color = color:gsub("^%l", string.upper), -- capitalize first letter
@@ -174,7 +169,7 @@ function Hydra:initialize(input)
    end
    if not has_exit_head then
       self.heads['<Esc>'] = { nil, { exit = true } }
-      self.heads_spec['<Esc>'] = {
+      heads_spec['<Esc>'] = {
          head = '<Esc>',
          index = vim.tbl_count(self.heads),
          color = self.config.foreign_keys == 'warn' and 'Teal' or 'Blue',
@@ -182,10 +177,15 @@ function Hydra:initialize(input)
       }
    end
 
-   if self.config.hint and not self.config.hint.type then
-      self.config.hint.type = input.hint and 'window' or 'cmdline'
-   end
-   self.hint = hint(self, self.config.hint, input.hint)
+   -- self.hint = hint(self, self.config.hint, input.hint)
+   self.hint = make_hint({
+      name = self.name,
+      color = self.config.color,
+      hint = input.hint,
+      heads = heads_spec,
+      config = self.config.hint,
+      debug = self.config.debug
+   })
 
    if self.config.color ~= 'pink' then
       -- HACK: I replace in the backstage the `vim.bo` table called inside

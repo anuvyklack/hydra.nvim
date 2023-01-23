@@ -1,15 +1,13 @@
 local class = require('hydra.lib.class')
-local Hint = require('hydra.hint.hint')
+local BaseHint = require('hydra.hint.basehint')
 local M = {}
 
 ---@class hydra.hint.StatusLine : hydra.Hint
 ---@field update nil
-local HintStatusLine = class(Hint)
+local HintStatusLine = class(BaseHint)
 
----@param hydra Hydra
-function HintStatusLine:initialize(hydra)
-   Hint.initialize(self, hydra)
-   self.meta_accessors = hydra.options
+function HintStatusLine:initialize(input)
+   BaseHint.initialize(self, input)
 end
 
 function HintStatusLine:_make_statusline()
@@ -54,8 +52,8 @@ end
 ---@field config nil
 local HintStatusLineMute = class(HintStatusLine)
 
-function HintStatusLineMute:initialize(...)
-   HintStatusLine.initialize(self, ...)
+function HintStatusLineMute:initialize(input)
+   HintStatusLine.initialize(self, input)
 end
 
 ---@param do_return? boolean Do return statusline hint string?
