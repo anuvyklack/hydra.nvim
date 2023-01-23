@@ -508,13 +508,12 @@ end
 ---@param rhs function
 ---@param opts? hydra.HeadOpts
 function Hydra:_set_keymap(lhs, rhs, opts)
-   local op = {} ---@type hydra.NvimKeymapOpts
-   op.buffer = self.config.buffer
-   if opts then
-      op.desc = opts.desc
-      op.silent = opts.silent
-   end
-   vim.keymap.set(self.mode, lhs, rhs, op)
+   opts = opts or {}
+   vim.keymap.set(self.mode, lhs, rhs, {
+      buffer = self.config.buffer,
+      desc = opts.desc,
+      silent = opts.silent
+   })
 end
 
 function Hydra:debug(...)
