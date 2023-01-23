@@ -241,7 +241,7 @@ function HintManualWindow:_make_buffer()
       end)
 
       local line = {} ---@type string[]
-      for _, head in pairs(heads_lhs) do
+      for _, head in ipairs(heads_lhs) do
          line[#line+1] = string.format('_%s_', head)
          -- line[#line+1] = string.format('[_%s_]', head)
          local desc = self.heads[head].desc
