@@ -2,7 +2,7 @@ local class = require('hydra.lib.class')
 local api = vim.api
 local autocmd = api.nvim_create_autocmd
 local api_wrappers = require('hydra.lib.api-wrappers')
-local Hint = require('hydra.hint.hint')
+local BaseHint = require('hydra.hint.basehint')
 local Window = api_wrappers.Window
 local Buffer = api_wrappers.Buffer
 local vim_options = require('hydra.hint.vim-options')
@@ -18,10 +18,10 @@ local M = {}
 ---@field buffer hydra.api.Buffer | nil
 ---@field win hydra.api.Window | nil
 ---@field update nil
-local HintAutoWindow = class(Hint)
+local HintAutoWindow = class(BaseHint)
 
-function HintAutoWindow:initialize(...)
-   Hint.initialize(self, ...)
+function HintAutoWindow:initialize(input)
+   BaseHint.initialize(self, input)
 
    if type(self.config.position) == 'string' then
       self.config.position = vim.split(self.config.position, '-')
@@ -50,7 +50,7 @@ function HintAutoWindow:_make_buffer()
       hint[#hint+1] = (self.hydra_name or 'HYDRA')..': '
    end
 
-   local heads = self:_swap_head_with_index()
+   local heads = self:_get_heads_in_sequential_form()
    for _, head in ipairs(heads) do
       if head.desc ~= false then
          hint[#hint+1] = string.format('_%s_', head.head)
@@ -148,17 +148,15 @@ end
 ---@field need_to_update boolean
 local HintManualWindow = class(HintAutoWindow)
 
----@param hydra Hydra
----@param hint string
-function HintManualWindow:initialize(hydra, hint)
-   HintAutoWindow.initialize(self, hydra)
+function HintManualWindow:initialize(input)
+   HintAutoWindow.initialize(self, input)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {
       __index = vim_options
    })
 
-   self.hint = vim.split(hint, '\n')
+   self.hint = vim.split(self.hint, '\n')
    -- Remove last empty string.
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil
@@ -243,7 +241,7 @@ function HintManualWindow:_make_buffer()
       end)
 
       local line = {} ---@type string[]
-      for _, head in pairs(heads_lhs) do
+      for _, head in ipairs(heads_lhs) do
          line[#line+1] = string.format('_%s_', head)
          -- line[#line+1] = string.format('[_%s_]', head)
          local desc = self.heads[head].desc
@@ -309,13 +307,13 @@ function HintManualWindow:_make_win_config()
    end
 
    if pos[2] == 'left' then
-      anchor = anchor..'w'
+      anchor = anchor..'W'
       self.win_config.col = offset
    elseif pos[2] == 'right' then
       anchor = anchor..'E'
       self.win_config.col = vim.o.columns - offset
    else -- center
-      anchor = anchor..'w'
+      anchor = anchor..'W'
       self.win_config.col = math.floor((vim.o.columns - self.win_width) / 2)
    end
 

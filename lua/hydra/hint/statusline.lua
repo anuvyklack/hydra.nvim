@@ -1,15 +1,13 @@
 local class = require('hydra.lib.class')
-local Hint = require('hydra.hint.hint')
+local BaseHint = require('hydra.hint.basehint')
 local M = {}
 
 ---@class hydra.hint.StatusLine : hydra.Hint
 ---@field update nil
-local HintStatusLine = class(Hint)
+local HintStatusLine = class(BaseHint)
 
----@param hydra Hydra
-function HintStatusLine:initialize(hydra)
-   Hint.initialize(self, hydra)
-   self.meta_accessors = hydra.options
+function HintStatusLine:initialize(input)
+   BaseHint.initialize(self, input)
 end
 
 function HintStatusLine:_make_statusline()
@@ -19,7 +17,7 @@ function HintStatusLine:_make_statusline()
 
    ---@type string[]
    local statusline = {}
-   local heads = self:_swap_head_with_index()
+   local heads = self:_get_heads_in_sequential_form()
    for _, head in ipairs(heads) do
       if head.desc ~= false then
          vim.list_extend(statusline, {
@@ -43,8 +41,15 @@ function HintStatusLine:show()
    end
    statusline = table.concat(statusline) ---@diagnostic disable-line
 
-   local wo = self.meta_accessors.wo
-   wo.statusline = statusline
+   self.original_statusline = vim.wo.statusline
+   vim.wo.statusline = statusline
+end
+
+function HintStatusLine:close()
+   if self.original_statusline then
+      vim.wo.statusline = self.original_statusline
+      self.original_statusline = nil
+   end
 end
 
 --------------------------------------------------------------------------------
@@ -54,8 +59,8 @@ end
 ---@field config nil
 local HintStatusLineMute = class(HintStatusLine)
 
-function HintStatusLineMute:initialize(...)
-   HintStatusLine.initialize(self, ...)
+function HintStatusLineMute:initialize(input)
+   HintStatusLine.initialize(self, input)
 end
 
 ---@param do_return? boolean Do return statusline hint string?

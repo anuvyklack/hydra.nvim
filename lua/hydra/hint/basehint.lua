@@ -8,35 +8,37 @@ local class = require('hydra.lib.class')
 ---@field close function
 ---@field update function | nil
 ---@field _debug boolean
-local Hint = class()
+local BaseHint = class()
 
----@param hydra Hydra
-function Hint:initialize(hydra)
-   self.hydra_name = hydra.name
-   self.hydra_color = hydra.config.color
-   self.heads = hydra.heads_spec
-   if hydra.config.hint then
-      self.config = hydra.config.hint --[[@as hydra.hint.Config]]
-   end
-   self._debug = hydra.config.debug
+function BaseHint:initialize(input)
+   self.hydra_name = input.name
+   self.hydra_color = input.color
+   self.hint = input.hint
+   self.heads = input.heads
+   self.config = input.config --[[@as hydra.hint.Config]]
+   self._debug = input.debug
 end
 
-function Hint:leave()
+function BaseHint:_get_leave_msg()
    if self.hydra_color == 'amaranth' then
       -- 'An Amaranth Hydra can only exit through a blue head'
-      vim.api.nvim_echo({
+      return {
          {'An '},
          {'Amaranth', 'HydraAmaranth'},
          {' Hydra can only exit through a blue head'}
-      }, false, {})
+      }
    elseif self.hydra_color == 'teal' then
       -- 'A Teal Hydra can only exit through one of its heads'
-      vim.api.nvim_echo({
+      return {
          {'A '},
          {'Teal', 'HydraTeal'},
          {' Hydra can only exit through one of its heads'}
-      }, false, {})
+      }
    end
+end
+
+function BaseHint:leave()
+   vim.api.nvim_echo(self:_get_leave_msg(), false, {})
 end
 
 ---In `self.heads` table for every head makes the next:
@@ -50,21 +52,21 @@ end
 ---}                     }
 ---```
 ---@return table<integer, hydra.HeadSpec>
-function Hint:_swap_head_with_index()
+function BaseHint:_get_heads_in_sequential_form()
    local new = {}
-   for _, properties in pairs(self.heads) do
-      new[properties.index] = properties
+   for _, spec in pairs(self.heads) do
+      new[spec.index] = spec
    end
    return new
 end
 
-function Hint:debug(...)
+function BaseHint:debug(...)
    if self._debug then
       vim.pretty_print(...)
    end
 end
 
 ---Virtual method
-function Hint:close() end
+function BaseHint:close() end
 
-return Hint
+return BaseHint

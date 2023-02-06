@@ -31,7 +31,7 @@ end
 
 ---@param buffer hydra.api.Buffer
 function Window:set_buffer(buffer)
-   vim.api.nvim_win_set_buf(self.id, buffer.id)
+   api.nvim_win_set_buf(self.id, buffer.id)
 end
 
 ---@param name string
@@ -41,13 +41,13 @@ end
 
 ---@param force? boolean
 function Window:close(force)
-   vim.api.nvim_win_close(self.id, force or false)
+   api.nvim_win_close(self.id, force or false)
 end
 
 ---Set float window config
 ---@param config table
 function Window:set_config(config)
-   vim.api.nvim_win_set_config(self.id, config)
+   api.nvim_win_set_config(self.id, config)
 end
 
 --------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ end
 ---Returns the number of lines in the given buffer.
 ---@return integer
 function Buffer:line_count()
-   return vim.api.nvim_buf_line_count(self.id)
+   return api.nvim_buf_line_count(self.id)
 end
 
 ---@param start integer First line index
@@ -106,7 +106,7 @@ end
 ---@param opts? table
 function Buffer:delete(opts)
    local opts = opts or {}
-   vim.api.nvim_buf_delete(self.id, opts)
+   api.nvim_buf_delete(self.id, opts)
 end
 
 --------------------------------------------------------------------------------

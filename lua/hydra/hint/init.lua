@@ -11,23 +11,22 @@ local HintManualWindow = window.HintManualWindow
 local HintStatusLine = statusline.HintStatusLine
 local HintStatusLineMute = statusline.HintStatusLineMute
 
----@param hydra Hydra
----@param config hydra.hint.Config | false
----@param hint? string
 ---@return hydra.Hint
-local function make_hint(hydra, config, hint)
+local function make_hint(input)
+   local config = input.config
+   local hint = input.hint
    if config == false then
-      return HintStatusLineMute(hydra)
+      return HintStatusLineMute(input)
    elseif hint and config.type == 'window' then
-      return HintManualWindow(hydra, hint)
+      return HintManualWindow(input)
    elseif hint then
-      return HintManualCmdline(hydra, hint)
+      return HintManualCmdline(input)
    elseif config.type == 'cmdline' then
-      return HintAutoCmdline(hydra)
+      return HintAutoCmdline(input)
    elseif config.type == 'statusline' then
-      return HintStatusLine(hydra)
+      return HintStatusLine(input)
    elseif config.type == 'window' then
-      return HintAutoWindow(hydra)
+      return HintAutoWindow(input)
    end
    error('Wrong hint type')
 end

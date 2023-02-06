@@ -170,12 +170,17 @@ function Layer:initialize(input)
    self.enter_keymaps, self.layer_keymaps, exit_keymaps =
       self:_normalize_input(input.enter, input.layer, input.exit)
 
-   self.esc_termcodes_layer_keymaps = {}
-   for mode, _ in pairs(self.layer_keymaps) do
-      self.esc_termcodes_layer_keymaps[mode] = {}
-      for lhs, _ in pairs(self.layer_keymaps[mode]) do
-         self.esc_termcodes_layer_keymaps[mode][termcodes(lhs)] = lhs
+   do
+      local k = {}
+      for _, keymaps in ipairs({self.layer_keymaps, exit_keymaps}) do
+         for mode, _ in pairs(keymaps) do
+            k[mode] = k[mode] or {}
+            for lhs, _ in pairs(keymaps[mode]) do
+               k[mode][termcodes(lhs)] = lhs
+            end
+         end
       end
+      self.esc_termcodes_layer_keymaps = k
    end
 
    -- Setup <Esc> key to exit the Layer if no one exit key has been passed.
@@ -425,7 +430,7 @@ function Layer:_save_keymaps(bufnr)
    end
 end
 
----Restore original keymaps and options overwritten by Layer
+---Restore original keymaps overwritten by Layer.
 function Layer:_restore_keymaps()
    if not self.active then return end
 

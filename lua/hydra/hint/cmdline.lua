@@ -1,5 +1,5 @@
 local class = require('hydra.lib.class')
-local Hint = require('hydra.hint.hint')
+local BaseHint = require('hydra.hint.basehint')
 local util = require('hydra.lib.util')
 local strdisplaywidth = vim.fn.strdisplaywidth
 local nvim_echo = vim.api.nvim_echo
@@ -10,18 +10,16 @@ local M = {}
 
 ---@class hydra.hint.AutoCmdline : hydra.Hint
 ---@field message hydra.EchoChunk[]
-local HintAutoCmdline = class(Hint)
+local HintAutoCmdline = class(BaseHint)
 
----@param hydra Hydra
-function HintAutoCmdline:initialize(hydra)
-   Hint.initialize(self, hydra)
-   self.o = hydra.options.o
+function HintAutoCmdline:initialize(input)
+   BaseHint.initialize(self, input)
    self.height = 1
 end
 
 function HintAutoCmdline:_make_message()
    ---Available screen width for echo message
-   ---@type integer
+   ---@type integer | false
    local space = vim.v.echospace - 1
 
    local hint = { {' '} } ---@type  hydra.EchoChunk[]
@@ -33,20 +31,16 @@ function HintAutoCmdline:_make_message()
       space = space - strdisplaywidth(hint[#hint][1])
    end
 
-   local heads = self:_swap_head_with_index()
+   local heads = self:_get_heads_in_sequential_form()
    for _, head_spec in ipairs(heads) do
       local desc = head_spec.desc
       if desc ~= false then
-         continue, space = self:_add_chunk(hint, space, { head_spec.head, 'Hydra'..head_spec.color })
-         if not continue then break end
+         space = self:_add_chunk(hint, space, { head_spec.head, 'Hydra'..head_spec.color })
+         if not space then break end
 
-         if desc then
-            desc = string.format(': %s, ', desc)
-         else
-            desc = ', '
-         end
-         continue, space = self:_add_chunk(hint, space, { desc })
-         if not continue then break end
+         space = self:_add_chunk(hint, space, { desc and ': '..desc..', '
+                                                      or ', ' })
+         if not space then break end
       end
    end
    hint[#hint][1] = hint[#hint][1]:gsub(', $', '')
@@ -57,13 +51,12 @@ end
 ---@param msg hydra.EchoChunk[]
 ---@param space integer
 ---@param chunk hydra.EchoChunk
----@return boolean continue Can we continue after adding this chunk?
----@return number space Available space in echo area after adding this chunk.
+---@return number|false space Available space in echo area after adding this chunk or `false` if no space remain.
 function HintAutoCmdline:_add_chunk(msg, space, chunk)
    local new_space = space - strdisplaywidth(chunk[1])
    if new_space > 0 then
       msg[#msg+1] = chunk
-      return true, new_space
+      return new_space
    else
       local text, hl = chunk[1], chunk[2]
       text = util.split_string(text) ---@diagnostic disable-line
@@ -84,15 +77,18 @@ function HintAutoCmdline:_add_chunk(msg, space, chunk)
       end
       new_text = table.concat(new_text) ---@diagnostic disable-line
       msg[#msg+1] = { new_text, hl }
-      return false, space
+      return false
    end
 end
 
 function HintAutoCmdline:show()
    -- 'shortmess' 'shm'	string	(Vim default "filnxtToOF", Vi default: "S")
    if not self.message then self:_make_message() end
-   if self.o.cmdheight < self.height then
-      self.o.cmdheight = self.height
+   if vim.o.cmdheight < self.height then
+      if not self.cmdheight then
+         self.cmdheight = vim.o.cmdheight
+      end
+      vim.o.cmdheight = self.height
    end
    vim.cmd 'redraw'
    nvim_echo(self.message, false, {})
@@ -101,30 +97,17 @@ end
 HintAutoCmdline.update = HintAutoCmdline.show
 
 function HintAutoCmdline:leave()
-   local line ---@type hydra.EchoChunk[]
-   if self.hydra_color == 'amaranth' then
-      -- 'An Amaranth Hydra can only exit through a blue head'
-      line = {
-         {'\n'}, {' An '},
-         {'Amaranth', 'HydraAmaranth'},
-         {' Hydra can only exit through a blue head'}
-      }
-   elseif self.hydra_color == 'teal' then
-      -- 'A Teal Hydra can only exit through one of its heads'
-      line = {
-         {'\n'}, {' A '},
-         {'Teal', 'HydraTeal'},
-         {' Hydra can only exit through one of its heads'}
-      }
-   end
-
-   ---@type hydra.EchoChunk[]
-   local message = vim.deepcopy(self.message)
-   vim.list_extend(message, line)
-
-   self.o.cmdheight = self.height + 1
+   vim.o.cmdheight = self.height + 1
    vim.cmd 'redraw'
-   nvim_echo(message, false, {})
+   nvim_echo({unpack(self.message), unpack(self:_get_leave_msg())},
+             false, {})
+end
+
+function HintAutoCmdline:close()
+   if self.cmdheight then
+      vim.o.cmdheight = self.cmdheight
+      self.cmdheight = nil
+   end
 end
 
 --------------------------------------------------------------------------------
@@ -136,17 +119,15 @@ end
 ---@field need_to_update boolean
 local HintManualCmdline = class(HintAutoCmdline)
 
----@param hydra Hydra
----@param hint string
-function HintManualCmdline:initialize(hydra, hint)
-   HintAutoCmdline.initialize(self, hydra)
+function HintManualCmdline:initialize(input)
+   HintAutoCmdline.initialize(self, input)
    self.need_to_update = false
 
    self.config.funcs = setmetatable(self.config.funcs or {}, {
       __index = vim_options
    })
 
-   self.hint = vim.split(hint, '\n')
+   self.hint = vim.split(self.hint, '\n')
    -- Remove last empty string.
    if self.hint and self.hint[#self.hint] == '' then
       self.hint[#self.hint] = nil
@@ -214,10 +195,8 @@ function HintManualCmdline:_make_message()
       table.insert(chunks, { line })
 
       for _, chunk in ipairs(chunks) do
-         continue, space = self:_add_chunk(self.message, space, chunk)
-         if not continue then
-            break
-         end
+         space = self:_add_chunk(self.message, space, chunk)
+         if not space then break end
       end
 
       table.insert(self.message, {'\n'})
@@ -244,17 +223,13 @@ function HintManualCmdline:_make_message()
       local line = {}
       for _, head in pairs(heads_lhs) do
          local head_spec = self.heads[head]
-         continue, space = self:_add_chunk(line, space, { head_spec.head, 'Hydra'..head_spec.color })
-         if not continue then break end
+         space = self:_add_chunk(line, space, { head_spec.head, 'Hydra'..head_spec.color })
+         if not space then break end
 
          local desc = head_spec.desc
-         if desc then
-            desc = string.format(': %s, ', desc)
-         else
-            desc = ', '
-         end
-         continue, space = self:_add_chunk(line, space, { desc })
-         if not continue then break end
+         space = self:_add_chunk(hint, space, { desc and ': '..desc..', '
+                                                      or ', ' })
+         if not space then break end
       end
       line[#line][1] = line[#line][1]:gsub(', $', '')
       vim.list_extend(self.message, line)
