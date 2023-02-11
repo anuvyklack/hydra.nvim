@@ -3,7 +3,13 @@ local api = vim.api
 local function get_hl(name)
    ---@type boolean
    local rgb = api.nvim_get_option('termguicolors')
-   return api.nvim_get_hl_by_name(name, rgb)
+   local result = {}
+   for key, value in pairs(api.nvim_get_hl_by_name(name, rgb)) do
+      if type(key) == 'string' then
+         result[key] = value
+      end
+   end
+   return result
 end
 
 local name, settings
