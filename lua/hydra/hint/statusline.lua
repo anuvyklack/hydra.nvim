@@ -42,12 +42,15 @@ function HintStatusLine:show()
    statusline = table.concat(statusline) ---@diagnostic disable-line
 
    self.original_statusline = vim.wo.statusline
+   self.winid = vim.api.nvim_get_current_win()
    vim.wo.statusline = statusline
 end
 
 function HintStatusLine:close()
    if self.original_statusline then
-      vim.wo.statusline = self.original_statusline
+      if vim.tbl_contains(vim.api.nvim_list_wins(), self.winid) then
+         vim.wo[self.winid].statusline = self.original_statusline
+      end
       self.original_statusline = nil
    end
 end
