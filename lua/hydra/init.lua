@@ -30,6 +30,9 @@ local default_config = {
    color = 'red',
    timeout = false,
    invoke_on_body = false,
+   on_enter = function()
+     vim.o.lazyredraw = false
+   end,
    hint = {
       show_name = true,
       position = { 'bottom' },
