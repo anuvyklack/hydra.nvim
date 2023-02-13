@@ -352,6 +352,9 @@ config = {
 }
 ```
 
+The default config uses `on_enter` to set `vim.o.lazyredraw = false`, since
+`lazyredraw` can interfere with the redering of some hints.
+
 #### `on_key`
 parent table: `config`
 
