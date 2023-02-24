@@ -26,7 +26,7 @@ calling his proper command.  This makes the Hydra very seamless.
 Imagine you want to change the size of your current window. Vim allows you to do it with
 `<C-w>+`, `<C-w>-`, `<C-w><`, `<C-w>>` bindings. So, you have to press
 `<C-w>+<C-w>+<C-w>+<C-w><<C-w><<C-w><...` as many times as you need
-(I know about count prefixes, but I was never fun of them).
+(I know about count prefixes, but I was never fond of them).
 Hydra allows you to press `<C-w>` just once and then get access to any `<C-w>...` bindings
 without pressing the prefix again: `<C-w>+++++--<<<<`.
 Or buffer side scrolling: instead of `zlzlzlzlzlzl...` press `zlllllllllhhhl` to freely
