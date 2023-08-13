@@ -77,5 +77,14 @@ M.cux = function()
    end
 end
 
+M.conceal = function()
+   if vim.o.conceallevel > 0 then
+      return '[x]'
+   else
+      return '[ ]'
+   end
+end
+M.con = M.conceal
+
 return M
 
