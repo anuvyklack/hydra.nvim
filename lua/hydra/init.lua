@@ -27,6 +27,7 @@ local default_config = {
    debug = false,
    exit = false,
    foreign_keys = nil,
+   prepend_body_to_foreign_keys = false,
    color = 'red',
    timeout = false,
    invoke_on_body = false,
@@ -53,6 +54,7 @@ function Hydra:initialize(input)
             on_enter = { input.config.on_enter, 'function', true },
             on_exit = { input.config.on_exit, 'function', true },
             exit = { input.config.exit, 'boolean', true },
+            prepend_body_to_foreign_keys = { input.config.prepend_body_to_foreign_keys, 'boolean', true },
             timeout = { input.config.timeout, { 'boolean', 'number' }, true },
             buffer = { input.config.buffer, { 'boolean', 'number' }, true },
             hint = { input.config.hint, { 'boolean', 'string', 'table' }, true },
@@ -499,6 +501,9 @@ function Hydra:_leave()
       self:_wait()
       return false
    else
+      if self.config.prepend_body_to_foreign_keys and vim.fn.getchar(1) ~= 0 then
+         api.nvim_feedkeys(termcodes(self.body), 'nix', false)
+      end
       self:exit()
       return true
    end

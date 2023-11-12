@@ -57,6 +57,7 @@ If you want to quickly understand the concept, you can watch
     * [`config`](#config)
         * [`exit`](#exit)
         * [`foreign_keys`](#foreign_keys)
+        * [`prepend_body_to_foreign_keys`](#prepend_body_to_foreign_keys)
         * [`color`](#color)
             * [More about colors concept](#more-about-colors-concept)
             * [Amaranth color](#amaranth-color)
@@ -227,6 +228,23 @@ that doesn't belong to any head:
 - `foreign_keys = "warn"` will not stop the hydra state, but instead will issue a warning
   without running the foreign key.
 - `foreign_keys = "run"` will not stop the hydra state, and try to run the foreign key.
+
+#### `prepend_body_to_foreign_keys`
+`boolean`\
+default: `false`\
+parent table: `config`
+
+This option is only relevant when `foreign_keys` is set to `nil` or `run`.
+
+- `prepend_body_to_foreign_keys = false` (the default) will pass the foreign key so it
+  will do whatever it is supposed to do.
+- `prepend_body_to_foreign_keys = true` will add the body key(s) before the foreign key.
+
+The main use is to make kepmaps with the same leading body, but defined outside of this
+Hydra, reachable. For example, if you have a Hydra with the body `CTRL-W` and 4 heads
+`h`, `j`, `k`, `l`, and nothing else, then, with `prepend_body_to_foreign_keys = false`,
+when you press `v`, Hydra will pass `v` to nvim for process; on the other hand, with
+`prepend_body_to_foreign_keys = true`, Hydra will send `CTRL-W_v`.
 
 #### `color`
 `"red" | "amaranth" | "teal" | "pink"`\
