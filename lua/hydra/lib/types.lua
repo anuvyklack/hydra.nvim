@@ -8,6 +8,7 @@
 ---@field buffer? integer
 ---@field exit boolean
 ---@field foreign_keys hydra.foreign_keys
+---@field prepend_body_to_foreign_keys boolean
 ---@field color hydra.color
 ---@field on_enter? function  Before entering hydra
 ---@field on_exit? function   After leaving hydra
